@@ -107,14 +107,14 @@
   .legacy-export{text-align:right;margin:-28px 0 18px;}
   .legacy-export button{border:0;background:transparent;color:#0b79b7;cursor:pointer;font-size:12px;}
   .legacy-table-wrap{overflow-x:auto;overflow-y:hidden;margin-bottom:16px;padding-bottom:3px;}
-  table.legacy-vote{border-collapse:separate;border-spacing:0 3px;width:max-content;min-width:100%;font-size:12px;table-layout:auto;}
-  table.legacy-vote th,table.legacy-vote td{padding:5px 7px;text-align:center;background:#dedede;border-right:3px solid #fff;min-width:82px;width:82px;max-width:82px;white-space:normal;overflow-wrap:anywhere;vertical-align:middle;}
-  table.legacy-vote th:first-child,table.legacy-vote td:first-child{position:sticky;left:0;z-index:3;text-align:left;min-width:240px;width:240px;max-width:240px;}
+  table.legacy-vote{border-collapse:separate;border-spacing:0 3px;font-size:12px;table-layout:fixed;max-width:none;}
+  table.legacy-vote th,table.legacy-vote td{padding:5px 7px;text-align:center;background:#dedede;border-right:3px solid #fff;white-space:normal;overflow:hidden;vertical-align:middle;}
+  table.legacy-vote th:first-child,table.legacy-vote td:first-child{position:sticky;left:0;z-index:3;text-align:left;}
   table.legacy-vote thead th{font-weight:700;background:#dedede;color:#111;}
   table.legacy-vote thead th:first-child{z-index:5;}
-  table.legacy-vote .month-row th{background:#dedede;text-align:left;font-size:12px;min-width:0;width:auto;max-width:none;white-space:nowrap;}
-  table.legacy-vote .month-row th:first-child{min-width:240px;width:240px;max-width:240px;}
-  table.legacy-vote .date-row th{text-align:center;white-space:nowrap;}
+  table.legacy-vote .month-row th{background:#dedede;text-align:left;font-size:12px;white-space:nowrap;overflow:hidden;}
+  
+  table.legacy-vote .date-row th{text-align:center;white-space:nowrap;overflow:hidden;}
   table.legacy-vote .time-row td{background:#efefef;}
   table.legacy-vote .name-input-row td{background:#dedede;}
   table.legacy-vote .name-input-row input{max-width:180px;padding:4px 6px;font-size:11px;}
@@ -460,6 +460,11 @@
     const monthGroups=[];
     opts.forEach((o,i)=>{const d=new Date(o.date+'T00:00');const key=d.getFullYear()+'-'+d.getMonth();let g=monthGroups.find(x=>x.key===key);if(!g){g={key,label:monthNames[d.getMonth()]+' '+d.getFullYear(),items:[]};monthGroups.push(g);}g.items.push({o,i,d});});
     const cols=opts.length;
+    const nameColWidth=240;
+    const optionColWidth=86;
+    const tableWidth=nameColWidth+(cols*optionColWidth);
+    const voteTableStyle=`width:${tableWidth}px;min-width:${tableWidth}px`;
+    const voteColgroup=`<colgroup><col style="width:${nameColWidth}px">${opts.map(()=>`<col style="width:${optionColWidth}px">`).join('')}</colgroup>`;
     const monthRow=monthGroups.map(g=>`<th colspan="${g.items.length}">${g.label}</th>`).join('');
     const dateHeads=opts.map(o=>{const d=new Date(o.date+'T00:00');return `<th>${DOW[d.getDay()]}. ${d.getDate()}</th>`;}).join('');
     const timeCells=opts.map(o=>`<td>${o.time?esc(o.time.replace('–','→')):'ganztägig'}</td>`).join('');
@@ -476,7 +481,7 @@
       <div class="legacy-export"><button type="button" id="csvExport">CSV Export</button></div>
       ${ownerActions}${closed}
       <div style="font-weight:700;font-size:12px;margin-bottom:2px">Termin Auswahl:</div>
-      <div class="legacy-table-wrap"><table class="legacy-vote">
+      <div class="legacy-table-wrap"><table class="legacy-vote" style="${voteTableStyle}">${voteColgroup}
         <thead><tr class="month-row"><th></th>${monthRow}</tr><tr class="date-row"><th></th>${dateHeads}</tr></thead>
         <tbody>
           <tr class="time-row"><td>${(poll.responses||[]).length} Teilnehmer</td>${timeCells}</tr>
@@ -484,7 +489,7 @@
           ${poll.closed?'':`<tr class="name-input-row"><td><input type="text" id="voterName" placeholder="Name"></td>${opts.map((o,i)=>`<td><input type="checkbox" class="legacy-check" data-i="${i}">${poll.allowMaybe?`<br><button type="button" class="legacy-maybe" data-i="${i}">vielleicht</button>`:''}</td>`).join('')}</tr>`}
         </tbody>
       </table>${poll.closed?'':`<div class="legacy-savebar"><button type="button" class="legacy-save" id="submitVote">Speichern</button></div>`}</div>
-      <div class="legacy-table-wrap"><table class="legacy-vote"><tbody><tr class="sum-row"><td><b>Insgesamt</b></td>${sumCells}</tr></tbody></table></div>
+      <div class="legacy-table-wrap"><table class="legacy-vote" style="${voteTableStyle}">${voteColgroup}<tbody><tr class="sum-row"><td><b>Insgesamt</b></td>${sumCells}</tr></tbody></table></div>
       <details class="legacy-accordion" open><summary>Link zur Abstimmung</summary><div class="content"><div class="share-box"><input type="text" id="shareUrl" value="${shareUrl}" readonly><button type="button" class="btn btn-primary btn-sm" id="copyLink">Link kopieren</button></div><p style="margin:10px 0 0"><a href="mailto:?subject=${encodeURIComponent('Termin-Abstimmung: '+poll.title)}&body=${encodeURIComponent('Link zur Abstimmung:\n'+shareUrl)}">Link per E-Mail versenden</a></p></div></details>
       ${isOwner?`<details class="legacy-accordion"><summary>Termin fixieren</summary><div class="content"><div class="hint">Die Umfrage kann über die Schaltfläche oberhalb geschlossen werden. Die aktuell höchste Zahl an Ja-Stimmen ist in der Summenzeile sichtbar.</div></div></details>`:''}
       ${comments}
