@@ -106,13 +106,15 @@
   .legacy-meta strong{display:inline-block;min-width:42px;}
   .legacy-export{text-align:right;margin:-28px 0 18px;}
   .legacy-export button{border:0;background:transparent;color:#0b79b7;cursor:pointer;font-size:12px;}
-  .legacy-table-wrap{overflow-x:auto;margin-bottom:16px;}
-  table.legacy-vote{border-collapse:separate;border-spacing:0 3px;width:100%;min-width:640px;font-size:12px;table-layout:fixed;}
-  table.legacy-vote th,table.legacy-vote td{padding:5px 7px;text-align:center;background:#dedede;border-right:3px solid #fff;}
-  table.legacy-vote th:first-child,table.legacy-vote td:first-child{text-align:left;width:45%;}
+  .legacy-table-wrap{overflow-x:auto;overflow-y:hidden;margin-bottom:16px;padding-bottom:3px;}
+  table.legacy-vote{border-collapse:separate;border-spacing:0 3px;width:max-content;min-width:100%;font-size:12px;table-layout:auto;}
+  table.legacy-vote th,table.legacy-vote td{padding:5px 7px;text-align:center;background:#dedede;border-right:3px solid #fff;min-width:82px;width:82px;max-width:82px;white-space:normal;overflow-wrap:anywhere;vertical-align:middle;}
+  table.legacy-vote th:first-child,table.legacy-vote td:first-child{position:sticky;left:0;z-index:3;text-align:left;min-width:240px;width:240px;max-width:240px;}
   table.legacy-vote thead th{font-weight:700;background:#dedede;color:#111;}
-  table.legacy-vote .month-row th{background:#dedede;text-align:left;font-size:12px;}
-  table.legacy-vote .date-row th{text-align:center;}
+  table.legacy-vote thead th:first-child{z-index:5;}
+  table.legacy-vote .month-row th{background:#dedede;text-align:left;font-size:12px;min-width:0;width:auto;max-width:none;white-space:nowrap;}
+  table.legacy-vote .month-row th:first-child{min-width:240px;width:240px;max-width:240px;}
+  table.legacy-vote .date-row th{text-align:center;white-space:nowrap;}
   table.legacy-vote .time-row td{background:#efefef;}
   table.legacy-vote .name-input-row td{background:#dedede;}
   table.legacy-vote .name-input-row input{max-width:180px;padding:4px 6px;font-size:11px;}
