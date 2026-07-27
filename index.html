@@ -118,7 +118,12 @@
   function iso(d){ return d.toISOString().slice(0,10); }
   function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   function pollIdFromHash(){ const m=(location.hash||'').match(/poll=([a-z0-9]+)/i); return m?m[1]:null; }
+  function editKeyFromHash(){ const m=(location.hash||'').match(/key=([a-z0-9]+)/i); return m?m[1]:null; }
   function makeId(){ return Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4); }
+  function makeEditKey(){ // langer Zufallsschluessel, aehnlich dem authkey des DFN-Dienstes
+    const a=new Uint8Array(24); (crypto.getRandomValues?crypto.getRandomValues(a):a.forEach((_,i)=>a[i]=Math.random()*256));
+    return Array.from(a,b=>('0'+b.toString(16)).slice(-2)).join('');
+  }
 
   // ===== SUPABASE HELFER =====
   async function loadPoll(id){
@@ -150,7 +155,8 @@
           <div class="field" style="margin-bottom:0"><span class="lbl">Ort <span class="req">*</span></span><input type="text" id="location" placeholder="Adresse, Raumnummer, virtuell"></div>
           <div class="field" style="margin-bottom:0"><span class="lbl">Wer lädt ein <span class="req">*</span></span><input type="text" id="host" value="Gast"></div>
         </div>
-        <div class="field" style="margin-top:18px;margin-bottom:0"><span class="lbl">Beschreibung</span><textarea id="desc" placeholder="Einladungstext, Tagesordnung …"></textarea></div>
+        <div class="field" style="margin-top:18px"><span class="lbl">Deine E-Mail-Adresse</span><input type="email" id="email" placeholder="fuer den Bearbeitungslink (optional)"><div class="hint">Wird nur genutzt, um dir den Bearbeitungslink anzuzeigen, und nirgends veroeffentlicht.</div></div>
+        <div class="field" style="margin-bottom:0"><span class="lbl">Beschreibung</span><textarea id="desc" placeholder="Einladungstext, Tagesordnung …"></textarea></div>
       </div>
       <div class="panel"><h2>Zeitraum &amp; Wochentage</h2>
         <div class="row">
@@ -270,7 +276,10 @@
       if(!current.length){toast('Es wurden noch keine Termine erzeugt.');return;}
       const btn=ev.target;btn.disabled=true;btn.textContent='Speichert …';
       const poll={
-        id:makeId(),title,location,
+        id:makeId(),
+        editKey:makeEditKey(),
+        ownerEmail:document.getElementById('email').value.trim(),
+        title,location,
         host:document.getElementById('host').value.trim()||'Gast',
         desc:document.getElementById('desc').value.trim(),
         options:current.map(r=>({date:r.date,dateLabel:r.dateLabel,wd:r.wd,time:r.time})),
@@ -280,8 +289,7 @@
         responses:[],comments:[],created:Date.now()
       };
       if(await insertPoll(poll)){
-        location_setHash('poll='+poll.id);
-        renderVote(poll,true);window.scrollTo(0,0);
+        renderCreated(poll);window.scrollTo(0,0);
       } else { btn.disabled=false;btn.textContent='Abstimmung erstellen'; }
     });
   }
@@ -289,9 +297,39 @@
   function location_setHash(h){ history.replaceState(null,'', '#'+h); }
 
   // ===================================================================
+  //  BESTAETIGUNGSSEITE — beide Links nach dem Erstellen
+  // ===================================================================
+  function renderCreated(poll){
+    const base=location.href.split('#')[0];
+    const voteUrl=base+'#poll='+poll.id;
+    const editUrl=base+'#poll='+poll.id+'&key='+poll.editKey;
+    const emailNote = poll.ownerEmail
+      ? `<div class="hint">Notiere dir den Bearbeitungslink gut. Aus Sicherheitsgruenden wird er nur hier angezeigt (diese Seite verschickt keine E-Mails — siehe Hinweis unten).</div>`
+      : `<div class="hint">Du hast keine E-Mail angegeben. Notiere dir den Bearbeitungslink unbedingt — ohne ihn kannst du die Umfrage spaeter nicht mehr aendern.</div>`;
+    app.innerHTML=`
+      <h1>Umfrage erstellt</h1>
+      <div class="notice"><b>${esc(poll.title)}</b> wurde gespeichert. Unten findest du beide Links.</div>
+      <div class="panel"><h2>Oeffentlicher Link — zum Verschicken</h2>
+        <div class="hint" style="margin-bottom:8px">Diesen Link schickst du an alle Teilnehmenden. Damit koennen sie abstimmen und die Antworten sehen.</div>
+        <div class="share-box"><input type="text" id="voteUrl" value="${voteUrl}" readonly><button type="button" class="btn btn-primary btn-sm" id="copyVote" style="flex:0 0 auto">Kopieren</button></div>
+      </div>
+      <div class="panel"><h2>Bearbeitungslink — nur fuer dich</h2>
+        <div class="hint err" style="padding:10px 12px;border-radius:3px;margin-bottom:8px"><b>Geheim halten!</b> Wer diesen Link hat, kann die Umfrage aendern und schliessen. Nicht mitverschicken.</div>
+        <div class="share-box"><input type="text" id="editUrl" value="${editUrl}" readonly><button type="button" class="btn btn-light btn-sm" id="copyEdit" style="flex:0 0 auto">Kopieren</button></div>
+        ${emailNote}
+      </div>
+      <button type="button" class="btn btn-primary" id="goVote" style="font-size:15px;padding:11px 26px">Zur Umfrage &rarr;</button>
+    `;
+    document.getElementById('copyVote').addEventListener('click',()=>copyField('voteUrl'));
+    document.getElementById('copyEdit').addEventListener('click',()=>copyField('editUrl'));
+    document.getElementById('goVote').addEventListener('click',()=>{location_setHash('poll='+poll.id+'&key='+poll.editKey);renderVote(poll,false,true);window.scrollTo(0,0);});
+  }
+  function copyField(id){const inp=document.getElementById(id);inp.select();navigator.clipboard?.writeText(inp.value).then(()=>toast('Kopiert!'),()=>{document.execCommand('copy');toast('Kopiert!');});}
+
+  // ===================================================================
   //  ANSICHT 2 — ABSTIMMEN / ERGEBNIS
   // ===================================================================
-  function renderVote(poll, justCreated){
+  function renderVote(poll, justCreated, isOwner){
     const opts=poll.options;
     const shareUrl=location.href.split('#')[0]+'#poll='+poll.id;
     const rows=poll.responses.map(resp=>{
@@ -311,13 +349,20 @@
           <button type="button" class="btn btn-light btn-sm" id="addComment" style="flex:0 0 auto">Senden</button>
         </div>
       </div>`:'';
+    const ownerBar = isOwner ? `
+      <div class="notice" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <span><b>Besitzer-Ansicht.</b> Du bearbeitest diese Umfrage. Der Bearbeitungslink ist geheim.</span>
+        <button type="button" class="btn ${poll.closed?'btn-primary':'btn-light'} btn-sm" id="toggleClosed" style="flex:0 0 auto">${poll.closed?'Umfrage wieder oeffnen':'Umfrage schliessen'}</button>
+      </div>` : '';
+    const closedBanner = poll.closed ? `<div class="notice err"><b>Diese Umfrage ist geschlossen.</b> Es koennen keine neuen Antworten mehr abgegeben werden.</div>` : '';
     app.innerHTML=`
       <h1>${esc(poll.title)}</h1>
       <div class="meta-line"><b>Ort:</b> ${esc(poll.location)} &nbsp;·&nbsp; <b>Einladung:</b> ${esc(poll.host)} ${poll.desc?'<br>'+esc(poll.desc):''}</div>
-      ${justCreated?`<div class="notice"><b>Umfrage erstellt!</b> Teile den folgenden Link, damit andere abstimmen können.</div>`:''}
+      ${ownerBar}
+      ${closedBanner}
       <div class="toolbar">
         <span class="pill">${poll.responses.length} Teilnehmer</span>
-        <div class="share-box"><input type="text" id="shareUrl" value="${shareUrl}" readonly><button type="button" class="btn btn-primary btn-sm" id="copyLink" style="flex:0 0 auto">Link kopieren</button></div>
+        <div class="share-box"><input type="text" id="shareUrl" value="${shareUrl}" readonly><button type="button" class="btn btn-primary btn-sm" id="copyLink" style="flex:0 0 auto">Oeffentlichen Link kopieren</button></div>
         <button type="button" class="btn btn-light btn-sm" id="reload" style="flex:0 0 auto">Aktualisieren</button>
         <button type="button" class="btn btn-light btn-sm" id="newPoll" style="flex:0 0 auto">Neue Umfrage</button>
       </div>
@@ -331,40 +376,54 @@
           <span><span class="swatch"></span> Nein / leer</span>
           <span class="best" style="padding:1px 6px;border-radius:3px">bester Termin</span>
         </div>
-        <div style="margin-top:16px"><div id="voteInputs"></div>
+        <div style="margin-top:16px"${poll.closed?' class="hidden"':''}><div id="voteInputs"></div>
           <button type="button" class="btn btn-primary" id="submitVote" style="margin-top:14px">Antwort abschicken</button>
         </div>
       </div>
       ${commentsHtml}
     `;
     const vi=document.getElementById('voteInputs');
-    vi.innerHTML=`<span class="lbl">An welchen Terminen kannst du?</span>
-      <div class="vote-scroll"><table class="vote"><thead><tr>${headCells}</tr></thead><tbody><tr id="myVoteRow">${
-        opts.map((o,i)=>`<td><input type="checkbox" class="vote-check" data-i="${i}">${poll.allowMaybe?`<br><button type="button" class="maybe-btn" data-i="${i}">vielleicht</button>`:''}</td>`).join('')
-      }</tr></tbody></table></div>`;
-    vi.querySelectorAll('.maybe-btn').forEach(b=>b.addEventListener('click',()=>{
-      const i=b.dataset.i;const cb=vi.querySelector(`.vote-check[data-i="${i}"]`);b.classList.toggle('active');if(b.classList.contains('active'))cb.checked=false;
-    }));
-    vi.querySelectorAll('.vote-check').forEach(cb=>cb.addEventListener('change',()=>{
-      if(cb.checked){const i=cb.dataset.i;const mb=vi.querySelector(`.maybe-btn[data-i="${i}"]`);if(mb)mb.classList.remove('active');}
-      if(poll.oneOption&&cb.checked){vi.querySelectorAll('.vote-check').forEach(o=>{if(o!==cb)o.checked=false;});}
-    }));
+    if(vi && !poll.closed){
+      vi.innerHTML=`<span class="lbl">An welchen Terminen kannst du?</span>
+        <div class="vote-scroll"><table class="vote"><thead><tr>${headCells}</tr></thead><tbody><tr id="myVoteRow">${
+          opts.map((o,i)=>`<td><input type="checkbox" class="vote-check" data-i="${i}">${poll.allowMaybe?`<br><button type="button" class="maybe-btn" data-i="${i}">vielleicht</button>`:''}</td>`).join('')
+        }</tr></tbody></table></div>`;
+      vi.querySelectorAll('.maybe-btn').forEach(b=>b.addEventListener('click',()=>{
+        const i=b.dataset.i;const cb=vi.querySelector(`.vote-check[data-i="${i}"]`);b.classList.toggle('active');if(b.classList.contains('active'))cb.checked=false;
+      }));
+      vi.querySelectorAll('.vote-check').forEach(cb=>cb.addEventListener('change',()=>{
+        if(cb.checked){const i=cb.dataset.i;const mb=vi.querySelector(`.maybe-btn[data-i="${i}"]`);if(mb)mb.classList.remove('active');}
+        if(poll.oneOption&&cb.checked){vi.querySelectorAll('.vote-check').forEach(o=>{if(o!==cb)o.checked=false;});}
+      }));
+    }
     document.getElementById('copyLink').addEventListener('click',()=>{
       const inp=document.getElementById('shareUrl');inp.select();
       navigator.clipboard?.writeText(inp.value).then(()=>toast('Link kopiert!'),()=>{document.execCommand('copy');toast('Link kopiert!');});
     });
-    document.getElementById('reload').addEventListener('click',async()=>{const f=await loadPoll(poll.id);if(f){renderVote(f,false);toast('Aktualisiert.');}});
+    document.getElementById('reload').addEventListener('click',async()=>{const f=await loadPoll(poll.id);if(f){renderVote(f,false,isOwner);toast('Aktualisiert.');}});
     document.getElementById('newPoll').addEventListener('click',()=>{location_setHash('');renderCreate();window.scrollTo(0,0);});
-    document.getElementById('submitVote').addEventListener('click',async(ev)=>{
+    if(isOwner){
+      const tc=document.getElementById('toggleClosed');
+      if(tc) tc.addEventListener('click',async(ev)=>{
+        const btn=ev.target;btn.disabled=true;
+        const fresh=await loadPoll(poll.id)||poll;
+        fresh.closed=!fresh.closed;
+        if(await updatePoll(fresh)){toast(fresh.closed?'Umfrage geschlossen.':'Umfrage geoeffnet.');renderVote(fresh,false,true);window.scrollTo(0,0);}
+        else btn.disabled=false;
+      });
+    }
+    const submitBtn=document.getElementById('submitVote');
+    if(submitBtn) submitBtn.addEventListener('click',async(ev)=>{
       const name=document.getElementById('voterName').value.trim();
       if(!name){toast('Bitte deinen Namen eingeben.');return;}
       const btn=ev.target;btn.disabled=true;btn.textContent='Sendet …';
       const votes=opts.map((o,i)=>{const cb=vi.querySelector(`.vote-check[data-i="${i}"]`);const mb=vi.querySelector(`.maybe-btn[data-i="${i}"]`);if(cb&&cb.checked)return'yes';if(mb&&mb.classList.contains('active'))return'maybe';return null;});
       const fresh=await loadPoll(poll.id)||poll;
+      if(fresh.closed){toast('Diese Umfrage ist geschlossen.');renderVote(fresh,false,isOwner);return;}
       const ix=fresh.responses.findIndex(r=>r.name.toLowerCase()===name.toLowerCase());
       const entry={name,votes,ts:Date.now()};
       if(ix>=0)fresh.responses[ix]=entry;else fresh.responses.push(entry);
-      if(await updatePoll(fresh)){toast('Antwort gespeichert!');renderVote(fresh,false);window.scrollTo(0,0);}
+      if(await updatePoll(fresh)){toast('Antwort gespeichert!');renderVote(fresh,false,isOwner);window.scrollTo(0,0);}
       else{btn.disabled=false;btn.textContent='Antwort abschicken';}
     });
     if(poll.allowComment){
@@ -372,7 +431,7 @@
         const n=document.getElementById('cName').value.trim(),t=document.getElementById('cText').value.trim();
         if(!n||!t){toast('Name und Kommentar bitte ausfüllen.');return;}
         const fresh=await loadPoll(poll.id)||poll;fresh.comments.push({name:n,text:t,ts:Date.now()});
-        if(await updatePoll(fresh))renderVote(fresh,false);
+        if(await updatePoll(fresh))renderVote(fresh,false,isOwner);
       });
     }
   }
@@ -382,7 +441,12 @@
     const id=pollIdFromHash();
     if(id){
       const poll=await loadPoll(id);
-      if(poll){renderVote(poll,false);return;}
+      if(poll){
+        const key=editKeyFromHash();
+        const isOwner = !!(key && poll.editKey && key===poll.editKey);
+        renderVote(poll,false,isOwner);
+        return;
+      }
       toast('Umfrage nicht gefunden – neue erstellen.');
     }
     renderCreate();
