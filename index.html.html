@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DFN-Terminplaner · Terminabstimmung</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --blue:#0a5c8a;--blue-dark:#08405f;--blue-light:#3a7fa8;--blue-pale:#e8f1f7;
+    --ink:#333333;--ink-soft:#666666;--line:#cfd8dd;--line-soft:#e4e9ec;--paper:#ffffff;--canvas:#f4f6f7;--footer:#2b2b2b;
+    --req:#c0392b;--yes:#3f8f4f;--yes-bg:#e5f3e8;--maybe:#c99a2e;--maybe-bg:#faf2dd;--no-bg:#f6f2f2;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--canvas);color:var(--ink);font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:1.5;}
+  a{color:var(--blue);}
+  header.site{background:#fff;border-bottom:1px solid var(--line);}
+  header.site .wrap{max-width:1000px;margin:0 auto;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;}
+  .brand{font-size:30px;font-weight:300;color:var(--blue);letter-spacing:-.5px;}
+  .brand b{font-weight:700;} .brand .dfn{color:#b9d4e6;font-weight:800;margin-left:2px;}
+  .topnav{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);font-weight:600;display:flex;gap:22px;}
+  @media(max-width:640px){.topnav{display:none;}}
+  main{max-width:1000px;margin:0 auto;padding:26px 24px 60px;}
+  h1{font-size:22px;font-weight:600;color:var(--ink);margin:0 0 22px;}
+  .lbl{font-weight:700;font-size:13px;display:block;margin:0 0 5px;} .req{color:var(--req);}
+  .hint{color:var(--ink-soft);font-size:12px;margin-top:4px;}
+  input[type=text],input[type=email],input[type=date],input[type=time],input[type=number],textarea,select{font:inherit;color:var(--ink);border:1px solid var(--line);background:#fff;padding:7px 9px;border-radius:3px;width:100%;}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-pale);}
+  textarea{resize:vertical;min-height:90px;}
+  .field{margin-bottom:18px;} .row{display:flex;gap:14px;flex-wrap:wrap;} .row>*{flex:1 1 150px;}
+  .btn{font:inherit;font-weight:600;border:none;border-radius:3px;cursor:pointer;padding:9px 16px;}
+  .btn-primary{background:var(--blue);color:#fff;} .btn-primary:hover{background:var(--blue-dark);}
+  .btn-light{background:#fff;color:var(--blue);border:1px solid var(--blue);} .btn-light:hover{background:var(--blue-pale);}
+  .btn-sm{padding:6px 11px;font-size:12.5px;} .btn[disabled]{opacity:.5;cursor:default;}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:4px;padding:20px;margin-bottom:20px;}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue-dark);margin:0 0 16px;border-bottom:2px solid var(--blue-pale);padding-bottom:8px;}
+  .weekdays{display:flex;gap:5px;flex-wrap:wrap;}
+  .weekdays button{flex:1 1 auto;min-width:44px;padding:8px 4px;border:1px solid var(--line);background:#fff;border-radius:3px;cursor:pointer;font:inherit;font-size:13px;color:var(--ink-soft);}
+  .weekdays button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600;}
+  fieldset{border:1px solid var(--line-soft);border-radius:3px;padding:14px;margin:0 0 14px;}
+  legend{font-weight:700;font-size:12.5px;padding:0 6px;}
+  .radio-row{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px;}
+  .radio-row label{display:flex;align-items:center;gap:6px;cursor:pointer;}
+  .slotline{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+  .slotline input[type=time]{flex:0 1 118px;} .slotline .dash{color:var(--ink-soft);}
+  .slotline .rm{border:none;background:none;color:var(--req);cursor:pointer;font-size:18px;padding:2px 6px;}
+  .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 20px;}
+  @media(max-width:560px){.options-grid{grid-template-columns:1fr;}}
+  .opt{display:flex;gap:8px;align-items:flex-start;} .opt input{margin-top:3px;}
+  table.mini{width:100%;border-collapse:collapse;font-size:13px;}
+  table.mini th{background:var(--blue-dark);color:#fff;text-align:left;padding:7px 9px;position:sticky;top:0;}
+  table.mini td{padding:6px 9px;border-bottom:1px solid var(--line-soft);}
+  table.mini tr:nth-child(even) td{background:#f8fafb;}
+  .scroll{max-height:320px;overflow:auto;border:1px solid var(--line-soft);border-radius:3px;}
+  .rm-slot{border:none;background:none;color:var(--req);cursor:pointer;font-size:15px;}
+  .empty{padding:26px;text-align:center;color:var(--ink-soft);}
+  .meta-line{color:var(--ink-soft);font-size:13px;margin:-8px 0 20px;} .meta-line b{color:var(--ink);font-weight:600;}
+  .vote-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:4px;}
+  table.vote{border-collapse:collapse;width:100%;font-size:13px;min-width:520px;}
+  table.vote th,table.vote td{border:1px solid var(--line-soft);padding:8px 10px;text-align:center;}
+  table.vote thead th{background:var(--blue-dark);color:#fff;font-weight:600;white-space:nowrap;}
+  table.vote thead th .wd{display:block;font-weight:400;opacity:.85;font-size:11px;}
+  table.vote th.name-col,table.vote td.name-col{text-align:left;white-space:nowrap;position:sticky;left:0;background:#fff;z-index:2;font-weight:600;}
+  table.vote thead th.name-col{background:var(--blue-dark);}
+  table.vote tbody tr:nth-child(even) td{background:#f8fafb;}
+  table.vote tbody tr:nth-child(even) td.name-col{background:#f8fafb;}
+  .cell-yes{background:var(--yes-bg)!important;color:var(--yes);font-weight:700;}
+  .cell-maybe{background:var(--maybe-bg)!important;color:var(--maybe);font-weight:700;}
+  .tally td{font-weight:700;background:var(--blue-pale)!important;}
+  .tally td.name-col{background:var(--blue-pale)!important;color:var(--blue-dark);}
+  .best{box-shadow:inset 0 0 0 2px var(--yes);}
+  .vote-check{width:20px;height:20px;cursor:pointer;accent-color:var(--blue);}
+  .maybe-btn{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:3px;padding:1px 5px;cursor:pointer;color:var(--ink-soft);margin-top:3px;background:#fff;}
+  .maybe-btn.active{background:var(--maybe);color:#fff;border-color:var(--maybe);}
+  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px;}
+  .share-box{display:flex;gap:8px;align-items:center;flex:1 1 320px;}
+  .share-box input{font-family:monospace;font-size:12px;}
+  .pill{display:inline-block;background:var(--blue-pale);color:var(--blue-dark);border-radius:20px;padding:3px 11px;font-size:12px;font-weight:600;}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(18px);background:#222;color:#fff;padding:11px 18px;border-radius:4px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .notice{background:var(--blue-pale);border-left:4px solid var(--blue);padding:11px 14px;border-radius:3px;font-size:13px;color:var(--blue-dark);margin-bottom:20px;}
+  .err{background:#fbecec;border-left:4px solid var(--req);color:#8a2a2a;}
+  .legend-key{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-top:12px;}
+  .legend-key span{display:flex;align-items:center;gap:6px;}
+  .swatch{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid var(--line);}
+  footer.site{background:var(--footer);color:#cfd8dd;}
+  footer.site .wrap{max-width:1000px;margin:0 auto;padding:16px 24px;display:flex;gap:22px;flex-wrap:wrap;font-size:12.5px;}
+  footer.site a{color:#cfd8dd;text-decoration:none;} footer.site a:hover{color:#fff;}
+  .hidden{display:none!important;} .loading{padding:60px;text-align:center;color:var(--ink-soft);}
+</style>
+</head>
+<body>
+<header class="site">
+  <div class="wrap">
+    <span class="brand"><b>termin</b>planer<span class="dfn">DFN</span></span>
+    <nav class="topnav"><span>Hinzufügen ▾</span><span>Einloggen ▾</span><span>Sprachen ▾</span></nav>
+  </div>
+</header>
+<main><div id="app"><div class="loading">Lädt …</div></div></main>
+<footer class="site"><div class="wrap">
+  <a href="#">Anleitung</a><a href="#">FAQ</a><a href="#">Nutzungsbedingungen</a>
+  <a href="#">Datenschutz</a><a href="#">Impressum</a><a href="#">Barrierefreiheit</a><a href="#">Kontakt</a>
+</div></footer>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  // ===== SUPABASE KONFIGURATION =====
+  const SUPABASE_URL = 'https://jnvpyttgzdcfdppaijxb.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_EJioAkDBkTm1MXRItJolbw_MRmkwfx-';
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const TABLE = 'polls';
+
+  const app = document.getElementById('app');
+  const DOW = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+  let toastTimer;
+  function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3200); }
+  function iso(d){ return d.toISOString().slice(0,10); }
+  function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  function pollIdFromHash(){ const m=(location.hash||'').match(/poll=([a-z0-9]+)/i); return m?m[1]:null; }
+  function makeId(){ return Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4); }
+
+  // ===== SUPABASE HELFER =====
+  async function loadPoll(id){
+    const { data, error } = await sb.from(TABLE).select('data').eq('id', id).maybeSingle();
+    if(error){ console.error(error); toast('Fehler beim Laden.'); return null; }
+    return data ? data.data : null;
+  }
+  async function insertPoll(poll){
+    const { error } = await sb.from(TABLE).insert({ id: poll.id, data: poll });
+    if(error){ console.error(error); toast('Speichern fehlgeschlagen: '+error.message); return false; }
+    return true;
+  }
+  async function updatePoll(poll){
+    const { error } = await sb.from(TABLE).update({ data: poll }).eq('id', poll.id);
+    if(error){ console.error(error); toast('Speichern fehlgeschlagen: '+error.message); return false; }
+    return true;
+  }
+
+  // ===================================================================
+  //  ANSICHT 1 — ERSTELLEN
+  // ===================================================================
+  function renderCreate(){
+    app.innerHTML = `
+      <h1>Termin-Abstimmung erstellen</h1>
+      <div class="notice">Datumsbereich, Wochentage und Zeitslots wählen — die Termine werden automatisch erzeugt. Nach dem Speichern erhältst du einen Link zum Teilen, über den alle abstimmen können.</div>
+      <div class="panel"><h2>Eckdaten</h2>
+        <div class="field"><span class="lbl">Abstimmungstitel <span class="req">*</span></span><input type="text" id="title" placeholder="z. B. Projekt-Kickoff Q3"></div>
+        <div class="row">
+          <div class="field" style="margin-bottom:0"><span class="lbl">Ort <span class="req">*</span></span><input type="text" id="location" placeholder="Adresse, Raumnummer, virtuell"></div>
+          <div class="field" style="margin-bottom:0"><span class="lbl">Wer lädt ein <span class="req">*</span></span><input type="text" id="host" value="Gast"></div>
+        </div>
+        <div class="field" style="margin-top:18px;margin-bottom:0"><span class="lbl">Beschreibung</span><textarea id="desc" placeholder="Einladungstext, Tagesordnung …"></textarea></div>
+      </div>
+      <div class="panel"><h2>Zeitraum &amp; Wochentage</h2>
+        <div class="row">
+          <div class="field"><span class="lbl">Von Datum <span class="req">*</span></span><input type="date" id="dateFrom"></div>
+          <div class="field"><span class="lbl">Bis Datum <span class="req">*</span></span><input type="date" id="dateTo"></div>
+        </div>
+        <div class="field" style="margin-bottom:0"><span class="lbl">Wochentage einbeziehen</span>
+          <div class="weekdays" id="weekdays">
+            <button type="button" data-d="1" aria-pressed="true">Mo</button><button type="button" data-d="2" aria-pressed="true">Di</button>
+            <button type="button" data-d="3" aria-pressed="true">Mi</button><button type="button" data-d="4" aria-pressed="true">Do</button>
+            <button type="button" data-d="5" aria-pressed="true">Fr</button><button type="button" data-d="6" aria-pressed="false">Sa</button>
+            <button type="button" data-d="0" aria-pressed="false">So</button>
+          </div>
+          <div class="hint">Nur angeklickte Wochentage werden als Termine erzeugt.</div>
+        </div>
+      </div>
+      <div class="panel"><h2>Zeitslots</h2>
+        <div class="radio-row">
+          <label><input type="radio" name="slotmode" value="manual" checked> Feste Uhrzeiten</label>
+          <label><input type="radio" name="slotmode" value="interval"> Automatisch im Raster</label>
+          <label><input type="radio" name="slotmode" value="allday"> Ganztägig</label>
+        </div>
+        <fieldset id="fsManual"><legend>Feste Uhrzeiten pro Tag</legend>
+          <div id="slotList"></div>
+          <button type="button" class="btn btn-light btn-sm" id="addSlot">+ Zeitslot hinzufügen</button>
+          <div class="hint">Endzeit optional — leer lassen für „nur Startzeit".</div>
+        </fieldset>
+        <fieldset id="fsInterval" class="hidden"><legend>Automatisches Raster</legend>
+          <div class="row">
+            <div class="field" style="margin-bottom:0"><span class="lbl">Tag beginnt</span><input type="time" id="ivStart" value="09:00"></div>
+            <div class="field" style="margin-bottom:0"><span class="lbl">Tag endet</span><input type="time" id="ivEnd" value="17:00"></div>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <div class="field" style="margin-bottom:0"><span class="lbl">Slot-Dauer (Min.)</span><input type="number" id="ivDur" value="60" min="5" step="5"></div>
+            <div class="field" style="margin-bottom:0"><span class="lbl">Pause dazwischen (Min.)</span><input type="number" id="ivGap" value="0" min="0" step="5"></div>
+          </div>
+          <div class="hint">Beispiel: 09:00–17:00, 60 Min, 0 Pause → 09:00–10:00, 10:00–11:00 …</div>
+        </fieldset>
+        <fieldset id="fsAllday" class="hidden"><legend>Ganztägig</legend><div class="hint">Jeder ausgewählte Tag wird als ganztägiger Termin ohne Uhrzeit erzeugt.</div></fieldset>
+        <div style="margin-top:16px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
+            <span class="lbl" style="margin:0">Vorschau</span><span class="hint"><b id="cnt">0</b> Termine</span>
+          </div>
+          <div class="scroll">
+            <table class="mini" id="previewTable"><thead><tr><th style="width:52%">Datum</th><th>Zeit</th><th style="width:34px"></th></tr></thead><tbody id="previewBody"></tbody></table>
+            <div class="empty" id="emptyState">Noch keine Termine.</div>
+          </div>
+        </div>
+      </div>
+      <div class="panel"><h2>Optionale Einstellungen</h2>
+        <div class="options-grid">
+          <label class="opt"><input type="checkbox" id="optMaybe" checked> <span>„Vielleicht"-Option anbieten</span></label>
+          <label class="opt"><input type="checkbox" id="optOne"> <span>Nur ein Termin pro Teilnehmer wählbar</span></label>
+          <label class="opt"><input type="checkbox" id="optComment"> <span>Kommentare erlauben</span></label>
+        </div>
+      </div>
+      <button type="button" class="btn btn-primary" id="save" style="font-size:15px;padding:11px 26px">Abstimmung erstellen</button>
+    `;
+    const today=new Date(),plus7=new Date();plus7.setDate(today.getDate()+7);
+    document.getElementById('dateFrom').value=iso(today);
+    document.getElementById('dateTo').value=iso(plus7);
+    const slotList=document.getElementById('slotList');
+    function addSlotRow(s="",e=""){
+      const d=document.createElement('div');d.className='slotline';
+      d.innerHTML=`<input type="time" class="s-start" value="${s}"><span class="dash">–</span><input type="time" class="s-end" value="${e}"><button type="button" class="rm">×</button>`;
+      d.querySelector('.rm').addEventListener('click',()=>{d.remove();preview();});
+      d.querySelectorAll('input').forEach(i=>i.addEventListener('input',preview));
+      slotList.appendChild(d);
+    }
+    addSlotRow("09:00","10:00");
+    document.getElementById('addSlot').addEventListener('click',()=>{addSlotRow();preview();});
+    document.querySelectorAll('input[name=slotmode]').forEach(r=>r.addEventListener('change',()=>{
+      const m=document.querySelector('input[name=slotmode]:checked').value;
+      document.getElementById('fsManual').classList.toggle('hidden',m!=='manual');
+      document.getElementById('fsInterval').classList.toggle('hidden',m!=='interval');
+      document.getElementById('fsAllday').classList.toggle('hidden',m!=='allday');
+      preview();
+    }));
+    document.getElementById('weekdays').addEventListener('click',e=>{
+      const b=e.target.closest('button');if(!b)return;
+      b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');preview();
+    });
+    ['dateFrom','dateTo','ivStart','ivEnd','ivDur','ivGap'].forEach(id=>document.getElementById(id).addEventListener('input',preview));
+    let current=[];const removed=new Set();
+    function toMin(v){if(!v)return null;const[h,m]=v.split(':').map(Number);return h*60+m;}
+    function fmt(x){return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');}
+    function getSlots(){
+      const m=document.querySelector('input[name=slotmode]:checked').value;
+      if(m==='allday')return[""];
+      if(m==='manual'){const out=[];slotList.querySelectorAll('.slotline').forEach(l=>{const s=l.querySelector('.s-start').value,e=l.querySelector('.s-end').value;if(s)out.push(e?s+'–'+e:s);});return out;}
+      const st=toMin(document.getElementById('ivStart').value),en=toMin(document.getElementById('ivEnd').value),du=parseInt(document.getElementById('ivDur').value)||0,ga=parseInt(document.getElementById('ivGap').value)||0;
+      const out=[];if(st==null||en==null||du<=0||en<=st)return out;let t=st;while(t+du<=en){out.push(fmt(t)+'–'+fmt(t+du));t+=du+ga;}return out;
+    }
+    function getDays(){
+      const f=document.getElementById('dateFrom').value,to=document.getElementById('dateTo').value;if(!f||!to)return[];
+      const act=new Set();document.getElementById('weekdays').querySelectorAll('button[aria-pressed=true]').forEach(b=>act.add(+b.dataset.d));
+      const days=[];let d=new Date(f+'T00:00'),end=new Date(to+'T00:00'),g=0;
+      while(d<=end&&g<1000){if(act.has(d.getDay()))days.push(new Date(d));d.setDate(d.getDate()+1);g++;}return days;
+    }
+    function labelDate(d){return DOW[d.getDay()]+', '+String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();}
+    function preview(){
+      const days=getDays(),slots=getSlots();current=[];
+      days.forEach(d=>slots.forEach(s=>{const key=iso(d)+'|'+s;if(removed.has(key))return;current.push({key,date:iso(d),dateLabel:labelDate(d),wd:DOW[d.getDay()],time:s});}));
+      const body=document.getElementById('previewBody');body.innerHTML='';
+      if(!current.length){document.getElementById('emptyState').style.display='block';document.getElementById('previewTable').style.display='none';}
+      else{document.getElementById('emptyState').style.display='none';document.getElementById('previewTable').style.display='table';
+        current.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${r.dateLabel}</td><td>${r.time||'<em style="color:#666">ganztägig</em>'}</td><td><button class="rm-slot">×</button></td>`;tr.querySelector('.rm-slot').addEventListener('click',()=>{removed.add(r.key);preview();});body.appendChild(tr);});
+      }
+      document.getElementById('cnt').textContent=current.length;
+    }
+    preview();
+    document.getElementById('save').addEventListener('click',async(ev)=>{
+      const title=document.getElementById('title').value.trim();
+      const location=document.getElementById('location').value.trim();
+      if(!title){toast('Bitte einen Titel eingeben.');return;}
+      if(!location){toast('Bitte einen Ort eingeben.');return;}
+      if(!current.length){toast('Es wurden noch keine Termine erzeugt.');return;}
+      const btn=ev.target;btn.disabled=true;btn.textContent='Speichert …';
+      const poll={
+        id:makeId(),title,location,
+        host:document.getElementById('host').value.trim()||'Gast',
+        desc:document.getElementById('desc').value.trim(),
+        options:current.map(r=>({date:r.date,dateLabel:r.dateLabel,wd:r.wd,time:r.time})),
+        allowMaybe:document.getElementById('optMaybe').checked,
+        oneOption:document.getElementById('optOne').checked,
+        allowComment:document.getElementById('optComment').checked,
+        responses:[],comments:[],created:Date.now()
+      };
+      if(await insertPoll(poll)){
+        location_setHash('poll='+poll.id);
+        renderVote(poll,true);window.scrollTo(0,0);
+      } else { btn.disabled=false;btn.textContent='Abstimmung erstellen'; }
+    });
+  }
+
+  function location_setHash(h){ history.replaceState(null,'', '#'+h); }
+
+  // ===================================================================
+  //  ANSICHT 2 — ABSTIMMEN / ERGEBNIS
+  // ===================================================================
+  function renderVote(poll, justCreated){
+    const opts=poll.options;
+    const shareUrl=location.href.split('#')[0]+'#poll='+poll.id;
+    const rows=poll.responses.map(resp=>{
+      const cells=opts.map((o,i)=>{const v=resp.votes[i];if(v==='yes')return`<td class="cell-yes">✓</td>`;if(v==='maybe')return`<td class="cell-maybe">?</td>`;return`<td></td>`;}).join('');
+      return`<tr><td class="name-col">${esc(resp.name)}</td>${cells}</tr>`;
+    }).join('');
+    const tally=opts.map((o,i)=>({yes:poll.responses.filter(r=>r.votes[i]==='yes').length,maybe:poll.responses.filter(r=>r.votes[i]==='maybe').length}));
+    const maxYes=Math.max(0,...tally.map(t=>t.yes));
+    const tallyCells=tally.map(t=>{const best=t.yes>0&&t.yes===maxYes?' best':'';const mb=poll.allowMaybe&&t.maybe?`<div style="font-size:11px;color:var(--maybe)">+${t.maybe} ?</div>`:'';return`<td class="${best}">${t.yes}${mb}</td>`;}).join('');
+    const headCells=opts.map(o=>`<th><span class="wd">${o.wd}</span>${o.dateLabel.split(', ')[1]}${o.time?'<span class="wd">'+o.time+'</span>':'<span class="wd">ganztägig</span>'}</th>`).join('');
+    const commentsHtml=poll.allowComment?`
+      <div class="panel"><h2>Kommentare</h2>
+        <div id="commentList">${poll.comments.length?poll.comments.map(c=>`<div style="padding:8px 0;border-bottom:1px solid var(--line-soft)"><b>${esc(c.name)}:</b> ${esc(c.text)}</div>`).join(''):'<div class="hint">Noch keine Kommentare.</div>'}</div>
+        <div class="row" style="margin-top:12px">
+          <input type="text" id="cName" placeholder="Name" style="flex:0 1 160px">
+          <input type="text" id="cText" placeholder="Kommentar …" style="flex:1 1 240px">
+          <button type="button" class="btn btn-light btn-sm" id="addComment" style="flex:0 0 auto">Senden</button>
+        </div>
+      </div>`:'';
+    app.innerHTML=`
+      <h1>${esc(poll.title)}</h1>
+      <div class="meta-line"><b>Ort:</b> ${esc(poll.location)} &nbsp;·&nbsp; <b>Einladung:</b> ${esc(poll.host)} ${poll.desc?'<br>'+esc(poll.desc):''}</div>
+      ${justCreated?`<div class="notice"><b>Umfrage erstellt!</b> Teile den folgenden Link, damit andere abstimmen können.</div>`:''}
+      <div class="toolbar">
+        <span class="pill">${poll.responses.length} Teilnehmer</span>
+        <div class="share-box"><input type="text" id="shareUrl" value="${shareUrl}" readonly><button type="button" class="btn btn-primary btn-sm" id="copyLink" style="flex:0 0 auto">Link kopieren</button></div>
+        <button type="button" class="btn btn-light btn-sm" id="reload" style="flex:0 0 auto">Aktualisieren</button>
+        <button type="button" class="btn btn-light btn-sm" id="newPoll" style="flex:0 0 auto">Neue Umfrage</button>
+      </div>
+      <div class="panel"><h2>Deine Antwort eintragen</h2>
+        <div class="field" style="margin-bottom:14px"><span class="lbl">Dein Name <span class="req">*</span></span><input type="text" id="voterName" placeholder="Name" style="max-width:280px"></div>
+        <div class="vote-scroll"><table class="vote"><thead><tr><th class="name-col">Name</th>${headCells}</tr></thead>
+          <tbody id="voteBody">${rows||''}<tr class="tally"><td class="name-col">Ja-Stimmen</td>${tallyCells}</tr></tbody></table></div>
+        <div class="legend-key">
+          <span><span class="swatch" style="background:var(--yes-bg)"></span> Ja / kann kommen</span>
+          ${poll.allowMaybe?'<span><span class="swatch" style="background:var(--maybe-bg)"></span> Vielleicht</span>':''}
+          <span><span class="swatch"></span> Nein / leer</span>
+          <span class="best" style="padding:1px 6px;border-radius:3px">bester Termin</span>
+        </div>
+        <div style="margin-top:16px"><div id="voteInputs"></div>
+          <button type="button" class="btn btn-primary" id="submitVote" style="margin-top:14px">Antwort abschicken</button>
+        </div>
+      </div>
+      ${commentsHtml}
+    `;
+    const vi=document.getElementById('voteInputs');
+    vi.innerHTML=`<span class="lbl">An welchen Terminen kannst du?</span>
+      <div class="vote-scroll"><table class="vote"><thead><tr>${headCells}</tr></thead><tbody><tr id="myVoteRow">${
+        opts.map((o,i)=>`<td><input type="checkbox" class="vote-check" data-i="${i}">${poll.allowMaybe?`<br><button type="button" class="maybe-btn" data-i="${i}">vielleicht</button>`:''}</td>`).join('')
+      }</tr></tbody></table></div>`;
+    vi.querySelectorAll('.maybe-btn').forEach(b=>b.addEventListener('click',()=>{
+      const i=b.dataset.i;const cb=vi.querySelector(`.vote-check[data-i="${i}"]`);b.classList.toggle('active');if(b.classList.contains('active'))cb.checked=false;
+    }));
+    vi.querySelectorAll('.vote-check').forEach(cb=>cb.addEventListener('change',()=>{
+      if(cb.checked){const i=cb.dataset.i;const mb=vi.querySelector(`.maybe-btn[data-i="${i}"]`);if(mb)mb.classList.remove('active');}
+      if(poll.oneOption&&cb.checked){vi.querySelectorAll('.vote-check').forEach(o=>{if(o!==cb)o.checked=false;});}
+    }));
+    document.getElementById('copyLink').addEventListener('click',()=>{
+      const inp=document.getElementById('shareUrl');inp.select();
+      navigator.clipboard?.writeText(inp.value).then(()=>toast('Link kopiert!'),()=>{document.execCommand('copy');toast('Link kopiert!');});
+    });
+    document.getElementById('reload').addEventListener('click',async()=>{const f=await loadPoll(poll.id);if(f){renderVote(f,false);toast('Aktualisiert.');}});
+    document.getElementById('newPoll').addEventListener('click',()=>{location_setHash('');renderCreate();window.scrollTo(0,0);});
+    document.getElementById('submitVote').addEventListener('click',async(ev)=>{
+      const name=document.getElementById('voterName').value.trim();
+      if(!name){toast('Bitte deinen Namen eingeben.');return;}
+      const btn=ev.target;btn.disabled=true;btn.textContent='Sendet …';
+      const votes=opts.map((o,i)=>{const cb=vi.querySelector(`.vote-check[data-i="${i}"]`);const mb=vi.querySelector(`.maybe-btn[data-i="${i}"]`);if(cb&&cb.checked)return'yes';if(mb&&mb.classList.contains('active'))return'maybe';return null;});
+      const fresh=await loadPoll(poll.id)||poll;
+      const ix=fresh.responses.findIndex(r=>r.name.toLowerCase()===name.toLowerCase());
+      const entry={name,votes,ts:Date.now()};
+      if(ix>=0)fresh.responses[ix]=entry;else fresh.responses.push(entry);
+      if(await updatePoll(fresh)){toast('Antwort gespeichert!');renderVote(fresh,false);window.scrollTo(0,0);}
+      else{btn.disabled=false;btn.textContent='Antwort abschicken';}
+    });
+    if(poll.allowComment){
+      document.getElementById('addComment').addEventListener('click',async()=>{
+        const n=document.getElementById('cName').value.trim(),t=document.getElementById('cText').value.trim();
+        if(!n||!t){toast('Name und Kommentar bitte ausfüllen.');return;}
+        const fresh=await loadPoll(poll.id)||poll;fresh.comments.push({name:n,text:t,ts:Date.now()});
+        if(await updatePoll(fresh))renderVote(fresh,false);
+      });
+    }
+  }
+
+  // ===== ROUTING =====
+  async function boot(){
+    const id=pollIdFromHash();
+    if(id){
+      const poll=await loadPoll(id);
+      if(poll){renderVote(poll,false);return;}
+      toast('Umfrage nicht gefunden – neue erstellen.');
+    }
+    renderCreate();
+  }
+  window.addEventListener('hashchange',boot);
+  boot();
+})();
+</script>
+</body>
+</html>
