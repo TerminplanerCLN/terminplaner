@@ -75,6 +75,13 @@
   .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px;}
   .share-box{display:flex;gap:8px;align-items:center;flex:1 1 320px;}
   .share-box input{font-family:monospace;font-size:12px;}
+  .link-box{background:#fff;border:1px solid var(--line);border-radius:4px;margin-bottom:20px;}
+  .link-box summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:13px;color:var(--blue-dark);list-style:none;user-select:none;}
+  .link-box summary::-webkit-details-marker{display:none;}
+  .link-box summary::before{content:"▸";margin-right:8px;display:inline-block;transition:transform .15s;}
+  .link-box[open] summary::before{transform:rotate(90deg);}
+  .link-box summary:hover{background:var(--blue-pale);border-radius:4px;}
+  .link-box-inner{padding:4px 16px 16px;border-top:1px solid var(--line-soft);}
   .pill{display:inline-block;background:var(--blue-pale);color:var(--blue-dark);border-radius:20px;padding:3px 11px;font-size:12px;font-weight:600;}
   .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(18px);background:#222;color:#fff;padding:11px 18px;border-radius:4px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
@@ -362,8 +369,6 @@
       ${closedBanner}
       <div class="toolbar">
         <span class="pill">${poll.responses.length} Teilnehmer</span>
-        <div class="share-box"><input type="text" id="shareUrl" value="${shareUrl}" readonly><button type="button" class="btn btn-primary btn-sm" id="copyLink" style="flex:0 0 auto">Oeffentlichen Link kopieren</button></div>
-        <button type="button" class="btn btn-light btn-sm" id="reload" style="flex:0 0 auto">Aktualisieren</button>
         <button type="button" class="btn btn-light btn-sm" id="newPoll" style="flex:0 0 auto">Neue Umfrage</button>
       </div>
       <div class="panel"><h2>Deine Antwort eintragen</h2>
@@ -381,6 +386,14 @@
         </div>
       </div>
       ${commentsHtml}
+      <details class="link-box">
+        <summary>Link zur Abstimmung</summary>
+        <div class="link-box-inner">
+          <p class="hint" style="margin-top:0">Sie können jetzt Teilnehmende einladen, an der Abstimmung teilzunehmen. Zum Aktualisieren der Ansicht einfach die Seite neu laden.</p>
+          <div class="share-box"><input type="text" id="shareUrl" value="${shareUrl}" readonly><button type="button" class="btn btn-primary btn-sm" id="copyLink" style="flex:0 0 auto">Link kopieren</button></div>
+          <p style="margin:12px 0 0"><a id="mailLink" href="mailto:?subject=${encodeURIComponent('Termin-Abstimmung: '+poll.title)}&body=${encodeURIComponent('Link zur Abstimmung:\n'+shareUrl)}">Link per E-Mail versenden</a></p>
+        </div>
+      </details>
     `;
     const vi=document.getElementById('voteInputs');
     if(vi && !poll.closed){
@@ -400,7 +413,6 @@
       const inp=document.getElementById('shareUrl');inp.select();
       navigator.clipboard?.writeText(inp.value).then(()=>toast('Link kopiert!'),()=>{document.execCommand('copy');toast('Link kopiert!');});
     });
-    document.getElementById('reload').addEventListener('click',async()=>{const f=await loadPoll(poll.id);if(f){renderVote(f,false,isOwner);toast('Aktualisiert.');}});
     document.getElementById('newPoll').addEventListener('click',()=>{location_setHash('');renderCreate();window.scrollTo(0,0);});
     if(isOwner){
       const tc=document.getElementById('toggleClosed');
