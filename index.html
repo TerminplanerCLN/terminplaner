@@ -90,6 +90,47 @@
   .legend-key{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-top:12px;}
   .legend-key span{display:flex;align-items:center;gap:6px;}
   .swatch{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid var(--line);}
+
+  .blocked-builder{display:grid;grid-template-columns:130px 1fr 120px 120px auto;gap:8px;align-items:end;margin-bottom:12px;}
+  .blocked-builder.date-mode{grid-template-columns:150px 1fr 120px 120px auto;}
+  .blocked-list{border:1px solid var(--line-soft);border-radius:3px;overflow:hidden;}
+  .blocked-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 10px;border-bottom:1px solid var(--line-soft);background:#fff;}
+  .blocked-item:last-child{border-bottom:0;}.blocked-item:nth-child(even){background:#f8fafb;}
+  .blocked-item button{border:0;background:transparent;color:var(--req);font-size:17px;cursor:pointer;}
+  .blocked-empty{padding:14px;color:var(--ink-soft);text-align:center;}
+  .blocked-badge{display:inline-block;background:#fbecec;color:#8a2a2a;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;margin-left:6px;}
+  .legacy-tabs{display:flex;gap:8px;border-bottom:1px solid #0b79b7;margin:0 0 3px;}
+  .legacy-tab{border:1px solid #0b79b7;border-bottom:0;background:#fff;color:#0b6091;padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;}
+  .legacy-tab.active{background:#0b79b7;color:#fff;}
+  .legacy-meta{font-size:13px;line-height:1.8;margin:0 0 8px;}
+  .legacy-meta strong{display:inline-block;min-width:42px;}
+  .legacy-export{text-align:right;margin:-28px 0 18px;}
+  .legacy-export button{border:0;background:transparent;color:#0b79b7;cursor:pointer;font-size:12px;}
+  .legacy-table-wrap{overflow-x:auto;margin-bottom:16px;}
+  table.legacy-vote{border-collapse:separate;border-spacing:0 3px;width:100%;min-width:640px;font-size:12px;table-layout:fixed;}
+  table.legacy-vote th,table.legacy-vote td{padding:5px 7px;text-align:center;background:#dedede;border-right:3px solid #fff;}
+  table.legacy-vote th:first-child,table.legacy-vote td:first-child{text-align:left;width:45%;}
+  table.legacy-vote thead th{font-weight:700;background:#dedede;color:#111;}
+  table.legacy-vote .month-row th{background:#dedede;text-align:left;font-size:12px;}
+  table.legacy-vote .date-row th{text-align:center;}
+  table.legacy-vote .time-row td{background:#efefef;}
+  table.legacy-vote .name-input-row td{background:#dedede;}
+  table.legacy-vote .name-input-row input{max-width:180px;padding:4px 6px;font-size:11px;}
+  table.legacy-vote .result-row td{background:#dedede;}
+  table.legacy-vote .sum-row td{background:#dedede;}
+  .legacy-savebar{background:#efefef;padding:10px 8px;margin-top:-3px;margin-bottom:14px;}
+  .legacy-save{background:#0b79b7;color:#fff;border:0;padding:7px 12px;font-weight:700;cursor:pointer;}
+  .legacy-accordion{margin-top:8px;}
+  .legacy-accordion summary{list-style:none;background:#13a0d3;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;padding:5px 8px;cursor:pointer;}
+  .legacy-accordion summary::-webkit-details-marker{display:none;}
+  .legacy-accordion summary::before{content:"▾";margin-right:7px;}
+  .legacy-accordion:not([open]) summary::before{content:"▸";}
+  .legacy-accordion .content{border:1px solid #13a0d3;border-top:0;padding:12px;background:#fff;}
+  .legacy-owner-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px;}
+  .legacy-check{width:16px;height:16px;accent-color:#0b79b7;cursor:pointer;}
+  .legacy-maybe{border:0;background:transparent;color:#a77400;font-size:10px;cursor:pointer;padding:1px 2px;}
+  .legacy-maybe.active{font-weight:700;text-decoration:underline;}
+  @media(max-width:720px){.blocked-builder,.blocked-builder.date-mode{grid-template-columns:1fr 1fr}.blocked-builder .wide,.blocked-builder.date-mode .wide{grid-column:1/-1}.blocked-builder button{grid-column:1/-1}.legacy-export{margin:0 0 10px;text-align:left;}}
   footer.site{background:var(--footer);color:#cfd8dd;}
   footer.site .wrap{max-width:1000px;margin:0 auto;padding:16px 24px;display:flex;gap:22px;flex-wrap:wrap;font-size:12.5px;}
   footer.site a{color:#cfd8dd;text-decoration:none;} footer.site a:hover{color:#fff;}
@@ -213,6 +254,30 @@
           </div>
         </div>
       </div>
+
+      <div class="panel"><h2>Nicht verfügbare Zeiten</h2>
+        <div class="hint" style="margin-bottom:14px">Sperrzeiten entfernen automatisch alle Zeitslots, die sich zeitlich mit ihnen überschneiden.</div>
+        <fieldset><legend>Wiederkehrende Sperrzeit</legend>
+          <div class="blocked-builder">
+            <div><span class="lbl">Wochentag</span><select id="blockWeekday"><option value="1">Montag</option><option value="2">Dienstag</option><option value="3">Mittwoch</option><option value="4">Donnerstag</option><option value="5">Freitag</option><option value="6">Samstag</option><option value="0">Sonntag</option></select></div>
+            <div class="wide"><span class="lbl">Bezeichnung</span><input type="text" id="blockWeeklyLabel" placeholder="optional, z. B. Jour fixe"></div>
+            <div><span class="lbl">Von</span><input type="time" id="blockWeeklyStart" value="14:00"></div>
+            <div><span class="lbl">Bis</span><input type="time" id="blockWeeklyEnd" value="16:00"></div>
+            <button type="button" class="btn btn-light btn-sm" id="addWeeklyBlock">Hinzufügen</button>
+          </div>
+        </fieldset>
+        <fieldset><legend>Individuelle Sperrzeit</legend>
+          <div class="blocked-builder date-mode">
+            <div><span class="lbl">Datum</span><input type="date" id="blockDate"></div>
+            <div class="wide"><span class="lbl">Bezeichnung</span><input type="text" id="blockDateLabel" placeholder="optional, z. B. Laborbesprechung"></div>
+            <div><span class="lbl">Von</span><input type="time" id="blockDateStart" value="10:00"></div>
+            <div><span class="lbl">Bis</span><input type="time" id="blockDateEnd" value="11:30"></div>
+            <button type="button" class="btn btn-light btn-sm" id="addDateBlock">Hinzufügen</button>
+          </div>
+        </fieldset>
+        <div class="lbl">Eingetragene Sperrzeiten</div>
+        <div class="blocked-list" id="blockedList"><div class="blocked-empty">Noch keine Sperrzeiten eingetragen.</div></div>
+      </div>
       <div class="panel"><h2>Optionale Einstellungen</h2>
         <div class="options-grid">
           <label class="opt"><input type="checkbox" id="optMaybe" checked> <span>„Vielleicht"-Option anbieten</span></label>
@@ -235,6 +300,36 @@
     }
     addSlotRow("09:00","10:00");
     document.getElementById('addSlot').addEventListener('click',()=>{addSlotRow();preview();});
+
+    const blockedTimes=[];
+    document.getElementById('blockDate').value=iso(today);
+    const WD_LONG=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
+    function renderBlocked(){
+      const box=document.getElementById('blockedList');
+      if(!blockedTimes.length){box.innerHTML='<div class="blocked-empty">Noch keine Sperrzeiten eingetragen.</div>';return;}
+      box.innerHTML='';
+      blockedTimes.forEach((b,i)=>{
+        const row=document.createElement('div');row.className='blocked-item';
+        const where=b.type==='weekly'?WD_LONG[b.weekday]:(b.date.split('-').reverse().join('.'));
+        row.innerHTML=`<span><b>${where}</b>, ${b.start}–${b.end}${b.label?` <span class="blocked-badge">${esc(b.label)}</span>`:''}</span><button type="button" title="Sperrzeit entfernen">×</button>`;
+        row.querySelector('button').addEventListener('click',()=>{blockedTimes.splice(i,1);renderBlocked();preview();});
+        box.appendChild(row);
+      });
+    }
+    function addBlock(type){
+      const weekly=type==='weekly';
+      const start=document.getElementById(weekly?'blockWeeklyStart':'blockDateStart').value;
+      const end=document.getElementById(weekly?'blockWeeklyEnd':'blockDateEnd').value;
+      if(!start||!end||toMin(end)<=toMin(start)){toast('Bitte eine gültige Sperrzeit eingeben.');return;}
+      const item=weekly
+        ?{type:'weekly',weekday:+document.getElementById('blockWeekday').value,start,end,label:document.getElementById('blockWeeklyLabel').value.trim()}
+        :{type:'date',date:document.getElementById('blockDate').value,start,end,label:document.getElementById('blockDateLabel').value.trim()};
+      if(!weekly&&!item.date){toast('Bitte ein Datum für die Sperrzeit auswählen.');return;}
+      blockedTimes.push(item);renderBlocked();preview();
+    }
+    document.getElementById('addWeeklyBlock').addEventListener('click',()=>addBlock('weekly'));
+    document.getElementById('addDateBlock').addEventListener('click',()=>addBlock('date'));
+
     document.querySelectorAll('input[name=slotmode]').forEach(r=>r.addEventListener('change',()=>{
       const m=document.querySelector('input[name=slotmode]:checked').value;
       document.getElementById('fsManual').classList.toggle('hidden',m!=='manual');
@@ -250,6 +345,24 @@
     let current=[];const removed=new Set();
     function toMin(v){if(!v)return null;const[h,m]=v.split(':').map(Number);return h*60+m;}
     function fmt(x){return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');}
+
+    function slotBounds(slot){
+      if(!slot)return null;
+      const parts=slot.split('–');
+      const start=toMin(parts[0]);
+      const end=parts[1]?toMin(parts[1]):start+1;
+      return {start,end};
+    }
+    function isBlocked(date,slot){
+      const bounds=slotBounds(slot);if(!bounds)return false;
+      const weekday=new Date(date+'T00:00').getDay();
+      return blockedTimes.some(b=>{
+        if(b.type==='weekly'&&b.weekday!==weekday)return false;
+        if(b.type==='date'&&b.date!==date)return false;
+        const bs=toMin(b.start),be=toMin(b.end);
+        return bounds.start<be&&bounds.end>bs;
+      });
+    }
     function getSlots(){
       const m=document.querySelector('input[name=slotmode]:checked').value;
       if(m==='allday')return[""];
@@ -266,7 +379,7 @@
     function labelDate(d){return DOW[d.getDay()]+', '+String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();}
     function preview(){
       const days=getDays(),slots=getSlots();current=[];
-      days.forEach(d=>slots.forEach(s=>{const key=iso(d)+'|'+s;if(removed.has(key))return;current.push({key,date:iso(d),dateLabel:labelDate(d),wd:DOW[d.getDay()],time:s});}));
+      days.forEach(d=>slots.forEach(s=>{const date=iso(d),key=date+'|'+s;if(removed.has(key)||isBlocked(date,s))return;current.push({key,date,dateLabel:labelDate(d),wd:DOW[d.getDay()],time:s});}));
       const body=document.getElementById('previewBody');body.innerHTML='';
       if(!current.length){document.getElementById('emptyState').style.display='block';document.getElementById('previewTable').style.display='none';}
       else{document.getElementById('emptyState').style.display='none';document.getElementById('previewTable').style.display='table';
@@ -290,6 +403,7 @@
         host:document.getElementById('host').value.trim()||'Gast',
         desc:document.getElementById('desc').value.trim(),
         options:current.map(r=>({date:r.date,dateLabel:r.dateLabel,wd:r.wd,time:r.time})),
+        blockedTimes:blockedTimes.map(b=>({...b})),
         allowMaybe:document.getElementById('optMaybe').checked,
         oneOption:document.getElementById('optOne').checked,
         allowComment:document.getElementById('optComment').checked,
@@ -337,115 +451,64 @@
   //  ANSICHT 2 — ABSTIMMEN / ERGEBNIS
   // ===================================================================
   function renderVote(poll, justCreated, isOwner){
-    const opts=poll.options;
+    const opts=poll.options||[];
     const shareUrl=location.href.split('#')[0]+'#poll='+poll.id;
-    const rows=poll.responses.map(resp=>{
-      const cells=opts.map((o,i)=>{const v=resp.votes[i];if(v==='yes')return`<td class="cell-yes">✓</td>`;if(v==='maybe')return`<td class="cell-maybe">?</td>`;return`<td></td>`;}).join('');
-      return`<tr><td class="name-col">${esc(resp.name)}</td>${cells}</tr>`;
-    }).join('');
-    const tally=opts.map((o,i)=>({yes:poll.responses.filter(r=>r.votes[i]==='yes').length,maybe:poll.responses.filter(r=>r.votes[i]==='maybe').length}));
-    const maxYes=Math.max(0,...tally.map(t=>t.yes));
-    const tallyCells=tally.map(t=>{const best=t.yes>0&&t.yes===maxYes?' best':'';const mb=poll.allowMaybe&&t.maybe?`<div style="font-size:11px;color:var(--maybe)">+${t.maybe} ?</div>`:'';return`<td class="${best}">${t.yes}${mb}</td>`;}).join('');
-    const headCells=opts.map(o=>`<th><span class="wd">${o.wd}</span>${o.dateLabel.split(', ')[1]}${o.time?'<span class="wd">'+o.time+'</span>':'<span class="wd">ganztägig</span>'}</th>`).join('');
-    const commentsHtml=poll.allowComment?`
-      <div class="panel"><h2>Kommentare</h2>
-        <div id="commentList">${poll.comments.length?poll.comments.map(c=>`<div style="padding:8px 0;border-bottom:1px solid var(--line-soft)"><b>${esc(c.name)}:</b> ${esc(c.text)}</div>`).join(''):'<div class="hint">Noch keine Kommentare.</div>'}</div>
-        <div class="row" style="margin-top:12px">
-          <input type="text" id="cName" placeholder="Name" style="flex:0 1 160px">
-          <input type="text" id="cText" placeholder="Kommentar …" style="flex:1 1 240px">
-          <button type="button" class="btn btn-light btn-sm" id="addComment" style="flex:0 0 auto">Senden</button>
-        </div>
-      </div>`:'';
-    const ownerBar = isOwner ? `
-      <div class="notice" style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
-        <span><b>Besitzer-Ansicht.</b> Du bearbeitest diese Umfrage. Der Bearbeitungslink ist geheim.</span>
-        <button type="button" class="btn ${poll.closed?'btn-primary':'btn-light'} btn-sm" id="toggleClosed" style="flex:0 0 auto">${poll.closed?'Umfrage wieder oeffnen':'Umfrage schliessen'}</button>
-      </div>` : '';
-    const closedBanner = poll.closed ? `<div class="notice err"><b>Diese Umfrage ist geschlossen.</b> Es koennen keine neuen Antworten mehr abgegeben werden.</div>` : '';
+    const tally=opts.map((o,i)=>({yes:(poll.responses||[]).filter(r=>r.votes[i]==='yes').length,maybe:(poll.responses||[]).filter(r=>r.votes[i]==='maybe').length}));
+    const monthNames=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+    const monthGroups=[];
+    opts.forEach((o,i)=>{const d=new Date(o.date+'T00:00');const key=d.getFullYear()+'-'+d.getMonth();let g=monthGroups.find(x=>x.key===key);if(!g){g={key,label:monthNames[d.getMonth()]+' '+d.getFullYear(),items:[]};monthGroups.push(g);}g.items.push({o,i,d});});
+    const cols=opts.length;
+    const monthRow=monthGroups.map(g=>`<th colspan="${g.items.length}">${g.label}</th>`).join('');
+    const dateHeads=opts.map(o=>{const d=new Date(o.date+'T00:00');return `<th>${DOW[d.getDay()]}. ${d.getDate()}</th>`;}).join('');
+    const timeCells=opts.map(o=>`<td>${o.time?esc(o.time.replace('–','→')):'ganztägig'}</td>`).join('');
+    const responseRows=(poll.responses||[]).map(resp=>`<tr class="result-row"><td>${esc(resp.name)}</td>${opts.map((o,i)=>{const v=resp.votes[i];return `<td>${v==='yes'?'✓':v==='maybe'?'?':'-'}</td>`;}).join('')}</tr>`).join('');
+    const sumCells=tally.map(t=>`<td>${t.yes}${poll.allowMaybe&&t.maybe?` <span style="color:#966f00">(+${t.maybe}?)</span>`:''}</td>`).join('');
+    const ownerTabs=isOwner?`<div class="legacy-tabs"><button class="legacy-tab active" type="button">Ansicht</button><button class="legacy-tab" type="button" id="ownerEditTab">Bearbeiten</button></div>`:'';
+    const ownerActions=isOwner?`<div class="legacy-owner-actions"><button type="button" class="btn btn-light btn-sm" id="toggleClosed">${poll.closed?'Umfrage wieder öffnen':'Umfrage schließen'}</button><span class="hint">Der Bearbeitungslink ist vertraulich.</span></div>`:'';
+    const closed=poll.closed?`<div class="notice err"><b>Diese Umfrage ist geschlossen.</b> Neue Antworten sind nicht möglich.</div>`:'';
+    const comments=poll.allowComment?`<details class="legacy-accordion"><summary>Kommentare</summary><div class="content"><div id="commentList">${(poll.comments||[]).length?(poll.comments||[]).map(c=>`<div style="padding:7px 0;border-bottom:1px solid var(--line-soft)"><b>${esc(c.name)}:</b> ${esc(c.text)}</div>`).join(''):'<div class="hint">Noch keine Kommentare.</div>'}</div>${poll.closed?'':`<div class="row" style="margin-top:12px"><input type="text" id="cName" placeholder="Name"><input type="text" id="cText" placeholder="Kommentar"><button type="button" class="btn btn-light btn-sm" id="addComment">Senden</button></div>`}</div></details>`:'';
     app.innerHTML=`
-      <h1>${esc(poll.title)}</h1>
-      <div class="meta-line"><b>Ort:</b> ${esc(poll.location)} &nbsp;·&nbsp; <b>Einladung:</b> ${esc(poll.host)} ${poll.desc?'<br>'+esc(poll.desc):''}</div>
-      ${ownerBar}
-      ${closedBanner}
-      <div class="toolbar">
-        <span class="pill">${poll.responses.length} Teilnehmer</span>
-        <button type="button" class="btn btn-light btn-sm" id="newPoll" style="flex:0 0 auto">Neue Umfrage</button>
-      </div>
-      <div class="panel"><h2>Deine Antwort eintragen</h2>
-        <div class="field" style="margin-bottom:14px"><span class="lbl">Dein Name <span class="req">*</span></span><input type="text" id="voterName" placeholder="Name" style="max-width:280px"></div>
-        <div class="vote-scroll"><table class="vote"><thead><tr><th class="name-col">Name</th>${headCells}</tr></thead>
-          <tbody id="voteBody">${rows||''}<tr class="tally"><td class="name-col">Ja-Stimmen</td>${tallyCells}</tr></tbody></table></div>
-        <div class="legend-key">
-          <span><span class="swatch" style="background:var(--yes-bg)"></span> Ja / kann kommen</span>
-          ${poll.allowMaybe?'<span><span class="swatch" style="background:var(--maybe-bg)"></span> Vielleicht</span>':''}
-          <span><span class="swatch"></span> Nein / leer</span>
-          <span class="best" style="padding:1px 6px;border-radius:3px">bester Termin</span>
-        </div>
-        <div style="margin-top:16px"${poll.closed?' class="hidden"':''}><div id="voteInputs"></div>
-          <button type="button" class="btn btn-primary" id="submitVote" style="margin-top:14px">Antwort abschicken</button>
-        </div>
-      </div>
-      ${commentsHtml}
-      <details class="link-box">
-        <summary>Link zur Abstimmung</summary>
-        <div class="link-box-inner">
-          <p class="hint" style="margin-top:0">Sie können jetzt Teilnehmende einladen, an der Abstimmung teilzunehmen. Zum Aktualisieren der Ansicht einfach die Seite neu laden.</p>
-          <div class="share-box"><input type="text" id="shareUrl" value="${shareUrl}" readonly><button type="button" class="btn btn-primary btn-sm" id="copyLink" style="flex:0 0 auto">Link kopieren</button></div>
-          <p style="margin:12px 0 0"><a id="mailLink" href="mailto:?subject=${encodeURIComponent('Termin-Abstimmung: '+poll.title)}&body=${encodeURIComponent('Link zur Abstimmung:\n'+shareUrl)}">Link per E-Mail versenden</a></p>
-        </div>
-      </details>
+      <h1 style="font-size:16px;font-weight:400;margin-bottom:16px">${esc(poll.title)}</h1>
+      ${ownerTabs}
+      <div class="legacy-meta"><div><strong>Wer lädt ein:</strong> ${esc(poll.host)}</div><div><strong>Ort:</strong> ${esc(poll.location)}</div>${poll.desc?`<div><strong>Info:</strong> ${esc(poll.desc)}</div>`:''}</div>
+      <div class="legacy-export"><button type="button" id="csvExport">CSV Export</button></div>
+      ${ownerActions}${closed}
+      <div style="font-weight:700;font-size:12px;margin-bottom:2px">Termin Auswahl:</div>
+      <div class="legacy-table-wrap"><table class="legacy-vote">
+        <thead><tr class="month-row"><th></th>${monthRow}</tr><tr class="date-row"><th></th>${dateHeads}</tr></thead>
+        <tbody>
+          <tr class="time-row"><td>${(poll.responses||[]).length} Teilnehmer</td>${timeCells}</tr>
+          ${responseRows}
+          ${poll.closed?'':`<tr class="name-input-row"><td><input type="text" id="voterName" placeholder="Name"></td>${opts.map((o,i)=>`<td><input type="checkbox" class="legacy-check" data-i="${i}">${poll.allowMaybe?`<br><button type="button" class="legacy-maybe" data-i="${i}">vielleicht</button>`:''}</td>`).join('')}</tr>`}
+        </tbody>
+      </table>${poll.closed?'':`<div class="legacy-savebar"><button type="button" class="legacy-save" id="submitVote">Speichern</button></div>`}</div>
+      <div class="legacy-table-wrap"><table class="legacy-vote"><tbody><tr class="sum-row"><td><b>Insgesamt</b></td>${sumCells}</tr></tbody></table></div>
+      <details class="legacy-accordion" open><summary>Link zur Abstimmung</summary><div class="content"><div class="share-box"><input type="text" id="shareUrl" value="${shareUrl}" readonly><button type="button" class="btn btn-primary btn-sm" id="copyLink">Link kopieren</button></div><p style="margin:10px 0 0"><a href="mailto:?subject=${encodeURIComponent('Termin-Abstimmung: '+poll.title)}&body=${encodeURIComponent('Link zur Abstimmung:\n'+shareUrl)}">Link per E-Mail versenden</a></p></div></details>
+      ${isOwner?`<details class="legacy-accordion"><summary>Termin fixieren</summary><div class="content"><div class="hint">Die Umfrage kann über die Schaltfläche oberhalb geschlossen werden. Die aktuell höchste Zahl an Ja-Stimmen ist in der Summenzeile sichtbar.</div></div></details>`:''}
+      ${comments}
+      <div style="margin-top:18px"><button type="button" class="btn btn-light btn-sm" id="newPoll">Neue Umfrage</button></div>
     `;
-    const vi=document.getElementById('voteInputs');
-    if(vi && !poll.closed){
-      vi.innerHTML=`<span class="lbl">An welchen Terminen kannst du?</span>
-        <div class="vote-scroll"><table class="vote"><thead><tr>${headCells}</tr></thead><tbody><tr id="myVoteRow">${
-          opts.map((o,i)=>`<td><input type="checkbox" class="vote-check" data-i="${i}">${poll.allowMaybe?`<br><button type="button" class="maybe-btn" data-i="${i}">vielleicht</button>`:''}</td>`).join('')
-        }</tr></tbody></table></div>`;
-      vi.querySelectorAll('.maybe-btn').forEach(b=>b.addEventListener('click',()=>{
-        const i=b.dataset.i;const cb=vi.querySelector(`.vote-check[data-i="${i}"]`);b.classList.toggle('active');if(b.classList.contains('active'))cb.checked=false;
-      }));
-      vi.querySelectorAll('.vote-check').forEach(cb=>cb.addEventListener('change',()=>{
-        if(cb.checked){const i=cb.dataset.i;const mb=vi.querySelector(`.maybe-btn[data-i="${i}"]`);if(mb)mb.classList.remove('active');}
-        if(poll.oneOption&&cb.checked){vi.querySelectorAll('.vote-check').forEach(o=>{if(o!==cb)o.checked=false;});}
-      }));
-    }
-    document.getElementById('copyLink').addEventListener('click',()=>{
-      const inp=document.getElementById('shareUrl');inp.select();
-      navigator.clipboard?.writeText(inp.value).then(()=>toast('Link kopiert!'),()=>{document.execCommand('copy');toast('Link kopiert!');});
-    });
+    document.querySelectorAll('.legacy-maybe').forEach(b=>b.addEventListener('click',()=>{const i=b.dataset.i;const cb=document.querySelector(`.legacy-check[data-i="${i}"]`);b.classList.toggle('active');if(b.classList.contains('active'))cb.checked=false;}));
+    document.querySelectorAll('.legacy-check').forEach(cb=>cb.addEventListener('change',()=>{if(cb.checked){const mb=document.querySelector(`.legacy-maybe[data-i="${cb.dataset.i}"]`);if(mb)mb.classList.remove('active');}if(poll.oneOption&&cb.checked)document.querySelectorAll('.legacy-check').forEach(x=>{if(x!==cb)x.checked=false;});}));
+    document.getElementById('copyLink').addEventListener('click',()=>copyField('shareUrl'));
     document.getElementById('newPoll').addEventListener('click',()=>{location_setHash('');renderCreate();window.scrollTo(0,0);});
-    if(isOwner){
-      const tc=document.getElementById('toggleClosed');
-      if(tc) tc.addEventListener('click',async(ev)=>{
-        const btn=ev.target;btn.disabled=true;
-        const fresh=await loadPoll(poll.id)||poll;
-        fresh.closed=!fresh.closed;
-        if(await updatePoll(fresh)){toast(fresh.closed?'Umfrage geschlossen.':'Umfrage geoeffnet.');renderVote(fresh,false,true);window.scrollTo(0,0);}
-        else btn.disabled=false;
-      });
-    }
-    const submitBtn=document.getElementById('submitVote');
-    if(submitBtn) submitBtn.addEventListener('click',async(ev)=>{
-      const name=document.getElementById('voterName').value.trim();
-      if(!name){toast('Bitte deinen Namen eingeben.');return;}
-      const btn=ev.target;btn.disabled=true;btn.textContent='Sendet …';
-      const votes=opts.map((o,i)=>{const cb=vi.querySelector(`.vote-check[data-i="${i}"]`);const mb=vi.querySelector(`.maybe-btn[data-i="${i}"]`);if(cb&&cb.checked)return'yes';if(mb&&mb.classList.contains('active'))return'maybe';return null;});
-      const fresh=await loadPoll(poll.id)||poll;
-      if(fresh.closed){toast('Diese Umfrage ist geschlossen.');renderVote(fresh,false,isOwner);return;}
-      const ix=fresh.responses.findIndex(r=>r.name.toLowerCase()===name.toLowerCase());
-      const entry={name,votes,ts:Date.now()};
-      if(ix>=0)fresh.responses[ix]=entry;else fresh.responses.push(entry);
-      if(await updatePoll(fresh)){toast('Antwort gespeichert!');renderVote(fresh,false,isOwner);window.scrollTo(0,0);}
-      else{btn.disabled=false;btn.textContent='Antwort abschicken';}
+    document.getElementById('csvExport').addEventListener('click',()=>{
+      const rows=[['Name',...opts.map(o=>o.date+' '+(o.time||'ganztägig'))],...(poll.responses||[]).map(r=>[r.name,...r.votes.map(v=>v||'nein')]),['Insgesamt',...tally.map(t=>t.yes)]];
+      const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\n');
+      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=(poll.title||'terminabstimmung').replace(/[^a-z0-9_-]+/gi,'_')+'.csv';a.click();URL.revokeObjectURL(a.href);
     });
-    if(poll.allowComment){
-      document.getElementById('addComment').addEventListener('click',async()=>{
-        const n=document.getElementById('cName').value.trim(),t=document.getElementById('cText').value.trim();
-        if(!n||!t){toast('Name und Kommentar bitte ausfüllen.');return;}
-        const fresh=await loadPoll(poll.id)||poll;fresh.comments.push({name:n,text:t,ts:Date.now()});
-        if(await updatePoll(fresh))renderVote(fresh,false,isOwner);
-      });
+    if(isOwner){
+      const tc=document.getElementById('toggleClosed');if(tc)tc.addEventListener('click',async()=>{const fresh=await loadPoll(poll.id)||poll;fresh.closed=!fresh.closed;if(await updatePoll(fresh)){toast(fresh.closed?'Umfrage geschlossen.':'Umfrage geöffnet.');renderVote(fresh,false,true);}});
+      const et=document.getElementById('ownerEditTab');if(et)et.addEventListener('click',()=>toast('Die Bearbeitungsfunktionen befinden sich in dieser Besitzer-Ansicht.'));
     }
+    const submit=document.getElementById('submitVote');if(submit)submit.addEventListener('click',async()=>{
+      const name=document.getElementById('voterName').value.trim();if(!name){toast('Bitte deinen Namen eingeben.');return;}
+      const votes=opts.map((o,i)=>{const cb=document.querySelector(`.legacy-check[data-i="${i}"]`);const mb=document.querySelector(`.legacy-maybe[data-i="${i}"]`);if(cb&&cb.checked)return'yes';if(mb&&mb.classList.contains('active'))return'maybe';return null;});
+      const fresh=await loadPoll(poll.id)||poll;if(fresh.closed){toast('Diese Umfrage ist geschlossen.');renderVote(fresh,false,isOwner);return;}
+      const ix=(fresh.responses||[]).findIndex(r=>r.name.toLowerCase()===name.toLowerCase());const entry={name,votes,ts:Date.now()};if(ix>=0)fresh.responses[ix]=entry;else fresh.responses.push(entry);
+      if(await updatePoll(fresh)){toast('Antwort gespeichert!');renderVote(fresh,false,isOwner);window.scrollTo(0,0);}
+    });
+    const addComment=document.getElementById('addComment');if(addComment)addComment.addEventListener('click',async()=>{const n=document.getElementById('cName').value.trim(),t=document.getElementById('cText').value.trim();if(!n||!t){toast('Name und Kommentar bitte ausfüllen.');return;}const fresh=await loadPoll(poll.id)||poll;fresh.comments=fresh.comments||[];fresh.comments.push({name:n,text:t,ts:Date.now()});if(await updatePoll(fresh))renderVote(fresh,false,isOwner);});
   }
 
   // ===== ROUTING =====
