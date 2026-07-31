@@ -1,540 +1,1546 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>DFN-Terminplaner · Terminabstimmung</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Trainer-Buchung</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
-    --blue:#0a5c8a;--blue-dark:#08405f;--blue-light:#3a7fa8;--blue-pale:#e8f1f7;
-    --ink:#333333;--ink-soft:#666666;--line:#cfd8dd;--line-soft:#e4e9ec;--paper:#ffffff;--canvas:#f4f6f7;--footer:#2b2b2b;
-    --req:#c0392b;--yes:#3f8f4f;--yes-bg:#e5f3e8;--maybe:#c99a2e;--maybe-bg:#faf2dd;--no-bg:#f6f2f2;
+    --bg:#0f1115;--surface:#181b22;--surface2:#20242e;--line:#2c313d;
+    --text:#e8eaed;--text-soft:#9aa0ac;--accent:#e8483f;--accent-deep:#c33a32;
+    --ok:#3fa96a;--ok-bg:#16311f;--warn:#d99a2b;--warn-bg:#33280f;--info:#3f7fd9;
+    --radius:14px;
   }
-  *{box-sizing:border-box;}
-  body{margin:0;background:var(--canvas);color:var(--ink);font-family:"Segoe UI","Helvetica Neue",Arial,sans-serif;font-size:14px;line-height:1.5;}
-  a{color:var(--blue);}
-  header.site{background:#fff;border-bottom:1px solid var(--line);}
-  header.site .wrap{max-width:1000px;margin:0 auto;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;}
-  .brand{font-size:30px;font-weight:300;color:var(--blue);letter-spacing:-.5px;}
-  .brand b{font-weight:700;} .brand .dfn{color:#b9d4e6;font-weight:800;margin-left:2px;}
-  .topnav{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);font-weight:600;display:flex;gap:22px;}
-  @media(max-width:640px){.topnav{display:none;}}
-  main{max-width:1000px;margin:0 auto;padding:26px 24px 60px;}
-  h1{font-size:22px;font-weight:600;color:var(--ink);margin:0 0 22px;}
-  .lbl{font-weight:700;font-size:13px;display:block;margin:0 0 5px;} .req{color:var(--req);}
-  .hint{color:var(--ink-soft);font-size:12px;margin-top:4px;}
-  input[type=text],input[type=email],input[type=date],input[type=time],input[type=number],textarea,select{font:inherit;color:var(--ink);border:1px solid var(--line);background:#fff;padding:7px 9px;border-radius:3px;width:100%;}
-  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 2px var(--blue-pale);}
-  textarea{resize:vertical;min-height:90px;}
-  .field{margin-bottom:18px;} .row{display:flex;gap:14px;flex-wrap:wrap;} .row>*{flex:1 1 150px;}
-  .btn{font:inherit;font-weight:600;border:none;border-radius:3px;cursor:pointer;padding:9px 16px;}
-  .btn-primary{background:var(--blue);color:#fff;} .btn-primary:hover{background:var(--blue-dark);}
-  .btn-light{background:#fff;color:var(--blue);border:1px solid var(--blue);} .btn-light:hover{background:var(--blue-pale);}
-  .btn-sm{padding:6px 11px;font-size:12.5px;} .btn[disabled]{opacity:.5;cursor:default;}
-  .panel{background:#fff;border:1px solid var(--line);border-radius:4px;padding:20px;margin-bottom:20px;}
-  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.05em;color:var(--blue-dark);margin:0 0 16px;border-bottom:2px solid var(--blue-pale);padding-bottom:8px;}
-  .weekdays{display:flex;gap:5px;flex-wrap:wrap;}
-  .weekdays button{flex:1 1 auto;min-width:44px;padding:8px 4px;border:1px solid var(--line);background:#fff;border-radius:3px;cursor:pointer;font:inherit;font-size:13px;color:var(--ink-soft);}
-  .weekdays button[aria-pressed=true]{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600;}
-  fieldset{border:1px solid var(--line-soft);border-radius:3px;padding:14px;margin:0 0 14px;}
-  legend{font-weight:700;font-size:12.5px;padding:0 6px;}
-  .radio-row{display:flex;gap:18px;flex-wrap:wrap;margin-bottom:12px;}
-  .radio-row label{display:flex;align-items:center;gap:6px;cursor:pointer;}
-  .slotline{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
-  .slotline input[type=time]{flex:0 1 118px;} .slotline .dash{color:var(--ink-soft);}
-  .slotline .rm{border:none;background:none;color:var(--req);cursor:pointer;font-size:18px;padding:2px 6px;}
-  .options-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px 20px;}
-  @media(max-width:560px){.options-grid{grid-template-columns:1fr;}}
-  .opt{display:flex;gap:8px;align-items:flex-start;} .opt input{margin-top:3px;}
-  table.mini{width:100%;border-collapse:collapse;font-size:13px;}
-  table.mini th{background:var(--blue-dark);color:#fff;text-align:left;padding:7px 9px;position:sticky;top:0;}
-  table.mini td{padding:6px 9px;border-bottom:1px solid var(--line-soft);}
-  table.mini tr:nth-child(even) td{background:#f8fafb;}
-  .scroll{max-height:320px;overflow:auto;border:1px solid var(--line-soft);border-radius:3px;}
-  .rm-slot{border:none;background:none;color:var(--req);cursor:pointer;font-size:15px;}
-  .empty{padding:26px;text-align:center;color:var(--ink-soft);}
-  .meta-line{color:var(--ink-soft);font-size:13px;margin:-8px 0 20px;} .meta-line b{color:var(--ink);font-weight:600;}
-  .vote-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:4px;}
-  table.vote{border-collapse:collapse;width:100%;font-size:13px;min-width:520px;}
-  table.vote th,table.vote td{border:1px solid var(--line-soft);padding:8px 10px;text-align:center;}
-  table.vote thead th{background:var(--blue-dark);color:#fff;font-weight:600;white-space:nowrap;}
-  table.vote thead th .wd{display:block;font-weight:400;opacity:.85;font-size:11px;}
-  table.vote th.name-col,table.vote td.name-col{text-align:left;white-space:nowrap;position:sticky;left:0;background:#fff;z-index:2;font-weight:600;}
-  table.vote thead th.name-col{background:var(--blue-dark);}
-  table.vote tbody tr:nth-child(even) td{background:#f8fafb;}
-  table.vote tbody tr:nth-child(even) td.name-col{background:#f8fafb;}
-  .cell-yes{background:var(--yes-bg)!important;color:var(--yes);font-weight:700;}
-  .cell-maybe{background:var(--maybe-bg)!important;color:var(--maybe);font-weight:700;}
-  .tally td{font-weight:700;background:var(--blue-pale)!important;}
-  .tally td.name-col{background:var(--blue-pale)!important;color:var(--blue-dark);}
-  .best{box-shadow:inset 0 0 0 2px var(--yes);}
-  .vote-check{width:20px;height:20px;cursor:pointer;accent-color:var(--blue);}
-  .maybe-btn{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:3px;padding:1px 5px;cursor:pointer;color:var(--ink-soft);margin-top:3px;background:#fff;}
-  .maybe-btn.active{background:var(--maybe);color:#fff;border-color:var(--maybe);}
-  .toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:18px;}
-  .share-box{display:flex;gap:8px;align-items:center;flex:1 1 320px;}
-  .share-box input{font-family:monospace;font-size:12px;}
-  .link-box{background:#fff;border:1px solid var(--line);border-radius:4px;margin-bottom:20px;}
-  .link-box summary{cursor:pointer;padding:12px 16px;font-weight:600;font-size:13px;color:var(--blue-dark);list-style:none;user-select:none;}
-  .link-box summary::-webkit-details-marker{display:none;}
-  .link-box summary::before{content:"▸";margin-right:8px;display:inline-block;transition:transform .15s;}
-  .link-box[open] summary::before{transform:rotate(90deg);}
-  .link-box summary:hover{background:var(--blue-pale);border-radius:4px;}
-  .link-box-inner{padding:4px 16px 16px;border-top:1px solid var(--line-soft);}
-  .pill{display:inline-block;background:var(--blue-pale);color:var(--blue-dark);border-radius:20px;padding:3px 11px;font-size:12px;font-weight:600;}
-  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(18px);background:#222;color:#fff;padding:11px 18px;border-radius:4px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw;}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html{-webkit-text-size-adjust:100%;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;font-size:15px;line-height:1.5;overflow-x:hidden;}
+  .topbar{position:sticky;top:0;z-index:10;background:rgba(15,17,21,.9);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top);}
+  .topbar .wrap{max-width:760px;margin:0 auto;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .logo{font-weight:800;letter-spacing:-.4px;font-size:19px;white-space:nowrap;}
+  .logo b{color:var(--accent);}
+  .who{font-size:13px;color:var(--text-soft);display:flex;align-items:center;gap:10px;min-width:0;}
+  .who span.name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:38vw;}
+  main{max-width:760px;margin:0 auto;padding:20px 18px calc(80px + env(safe-area-inset-bottom));padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right));}
+  h1{font-size:22px;margin:6px 0 18px;}
+  h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--text-soft);margin:26px 0 12px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:12px;}
+  .lbl{display:block;font-size:13px;font-weight:600;margin-bottom:5px;color:var(--text-soft);}
+  input,select,textarea{width:100%;font:inherit;font-size:16px;color:var(--text);background:var(--surface2);border:1px solid var(--line);border-radius:9px;padding:11px 12px;-webkit-appearance:none;appearance:none;}
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%239aa0ac' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:34px;}
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);}
+  input[type=datetime-local],input[type=date],input[type=time]{color-scheme:dark;min-height:44px;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;}.row>*{flex:1 1 140px;}
+  .btn{font:inherit;font-weight:700;border:none;border-radius:10px;padding:12px 18px;cursor:pointer;transition:.12s;min-height:44px;touch-action:manipulation;}
+  .btn-primary{background:var(--accent);color:#fff;}.btn-primary:active{background:var(--accent-deep);}
+  .btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line);}
+  .btn-ghost:active{border-color:var(--accent);}
+  .btn-ok{background:var(--ok);color:#fff;}
+  .btn-sm{padding:9px 14px;font-size:14px;min-height:40px;}
+  .btn[disabled]{opacity:.5;cursor:default;}
+  .btn-block{width:100%;}
+  .field{margin-bottom:14px;}
+  .slot{display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .slot-main{flex:1;}
+  .slot-when{font-weight:700;font-size:15px;}
+  .slot-meta{font-size:13px;color:var(--text-soft);margin-top:2px;}
+  .tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;text-transform:uppercase;letter-spacing:.04em;}
+  .tag-open{background:var(--ok-bg);color:var(--ok);}
+  .tag-booked{background:var(--surface2);color:var(--text-soft);}
+  .tag-pending{background:var(--warn-bg);color:var(--warn);}
+  .tag-accepted{background:var(--ok-bg);color:var(--ok);}
+  .tag-declined{background:#3a1f1e;color:#d98a86;}
+  .muted{color:var(--text-soft);font-size:13px;}
+  .empty{text-align:center;color:var(--text-soft);padding:26px 10px;font-size:14px;}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(16px);background:#000;border:1px solid var(--line);color:#fff;padding:12px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:.25s;z-index:60;max-width:90vw;}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-  .notice{background:var(--blue-pale);border-left:4px solid var(--blue);padding:11px 14px;border-radius:3px;font-size:13px;color:var(--blue-dark);margin-bottom:20px;}
-  .err{background:#fbecec;border-left:4px solid var(--req);color:#8a2a2a;}
-  .legend-key{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin-top:12px;}
-  .legend-key span{display:flex;align-items:center;gap:6px;}
-  .swatch{width:14px;height:14px;border-radius:3px;display:inline-block;border:1px solid var(--line);}
-
-  .blocked-builder{display:grid;grid-template-columns:130px 1fr 120px 120px auto;gap:8px;align-items:end;margin-bottom:12px;}
-  .blocked-builder.date-mode{grid-template-columns:150px 1fr 120px 120px auto;}
-  .blocked-list{border:1px solid var(--line-soft);border-radius:3px;overflow:hidden;}
-  .blocked-item{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 10px;border-bottom:1px solid var(--line-soft);background:#fff;}
-  .blocked-item:last-child{border-bottom:0;}.blocked-item:nth-child(even){background:#f8fafb;}
-  .blocked-item button{border:0;background:transparent;color:var(--req);font-size:17px;cursor:pointer;}
-  .blocked-empty{padding:14px;color:var(--ink-soft);text-align:center;}
-  .blocked-badge{display:inline-block;background:#fbecec;color:#8a2a2a;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;margin-left:6px;}
-  .legacy-tabs{display:flex;gap:8px;border-bottom:1px solid #0b79b7;margin:0 0 3px;}
-  .legacy-tab{border:1px solid #0b79b7;border-bottom:0;background:#fff;color:#0b6091;padding:4px 10px;font-size:11px;font-weight:700;text-transform:uppercase;cursor:pointer;}
-  .legacy-tab.active{background:#0b79b7;color:#fff;}
-  .legacy-meta{font-size:13px;line-height:1.8;margin:0 0 8px;}
-  .legacy-meta strong{display:inline-block;min-width:42px;}
-  .legacy-export{text-align:right;margin:-28px 0 18px;}
-  .legacy-export button{border:0;background:transparent;color:#0b79b7;cursor:pointer;font-size:12px;}
-  .legacy-table-wrap{overflow-x:auto;overflow-y:hidden;margin-bottom:16px;padding-bottom:3px;}
-  table.legacy-vote{border-collapse:separate;border-spacing:0 3px;font-size:12px;table-layout:fixed;max-width:none;}
-  table.legacy-vote th,table.legacy-vote td{padding:5px 7px;text-align:center;background:#dedede;border-right:3px solid #fff;white-space:normal;overflow:hidden;vertical-align:middle;}
-  table.legacy-vote th:first-child,table.legacy-vote td:first-child{position:sticky;left:0;z-index:3;text-align:left;}
-  table.legacy-vote thead th{font-weight:700;background:#dedede;color:#111;}
-  table.legacy-vote thead th:first-child{z-index:5;}
-  table.legacy-vote .month-row th{background:#dedede;text-align:left;font-size:12px;white-space:nowrap;overflow:hidden;}
-  
-  table.legacy-vote .date-row th{text-align:center;white-space:nowrap;overflow:hidden;}
-  table.legacy-vote .time-row td{background:#efefef;}
-  table.legacy-vote .name-input-row td{background:#dedede;}
-  table.legacy-vote .name-input-row input{max-width:180px;padding:4px 6px;font-size:11px;}
-  table.legacy-vote .result-row td{background:#dedede;}
-  table.legacy-vote .sum-row td{background:#dedede;}
-  .legacy-savebar{background:#efefef;padding:10px 8px;margin-top:-3px;margin-bottom:14px;}
-  .legacy-save{background:#0b79b7;color:#fff;border:0;padding:7px 12px;font-weight:700;cursor:pointer;}
-  .legacy-accordion{margin-top:8px;}
-  .legacy-accordion summary{list-style:none;background:#13a0d3;color:#fff;font-size:11px;font-weight:700;text-transform:uppercase;padding:5px 8px;cursor:pointer;}
-  .legacy-accordion summary::-webkit-details-marker{display:none;}
-  .legacy-accordion summary::before{content:"▾";margin-right:7px;}
-  .legacy-accordion:not([open]) summary::before{content:"▸";}
-  .legacy-accordion .content{border:1px solid #13a0d3;border-top:0;padding:12px;background:#fff;}
-  .legacy-owner-actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 14px;}
-  .legacy-check{width:16px;height:16px;accent-color:#0b79b7;cursor:pointer;}
-  .legacy-maybe{border:0;background:transparent;color:#a77400;font-size:10px;cursor:pointer;padding:1px 2px;}
-  .legacy-maybe.active{font-weight:700;text-decoration:underline;}
-  @media(max-width:720px){.blocked-builder,.blocked-builder.date-mode{grid-template-columns:1fr 1fr}.blocked-builder .wide,.blocked-builder.date-mode .wide{grid-column:1/-1}.blocked-builder button{grid-column:1/-1}.legacy-export{margin:0 0 10px;text-align:left;}}
-  footer.site{background:var(--footer);color:#cfd8dd;}
-  footer.site .wrap{max-width:1000px;margin:0 auto;padding:16px 24px;display:flex;gap:22px;flex-wrap:wrap;font-size:12.5px;}
-  footer.site a{color:#cfd8dd;text-decoration:none;} footer.site a:hover{color:#fff;}
-  .hidden{display:none!important;} .loading{padding:60px;text-align:center;color:var(--ink-soft);}
+  .tabs{display:flex;gap:6px;margin-bottom:8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:4px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+  .tabs::-webkit-scrollbar{display:none;}
+  .tabs button{flex:1 1 auto;white-space:nowrap;background:transparent;border:none;color:var(--text-soft);font:inherit;font-weight:600;padding:10px 12px;border-radius:9px;cursor:pointer;min-height:42px;touch-action:manipulation;}
+  .tabs button.active{background:var(--accent);color:#fff;}
+  .center-wrap{min-height:70vh;display:flex;align-items:center;justify-content:center;}
+  .auth-card{width:100%;max-width:380px;}
+  .banner{border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:14px;}
+  .banner-live{background:var(--warn-bg);border:1px solid var(--warn);}
+  .banner-active{background:var(--ok-bg);border:1px solid var(--ok);}
+  .divider{height:1px;background:var(--line);margin:22px 0;}
+  a.link{color:var(--accent);cursor:pointer;text-decoration:none;}
+  .spin{display:inline-block;width:16px;height:16px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 1s linear infinite;vertical-align:middle;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+  .pulse{animation:pl 1.4s ease-in-out infinite;}
+  @keyframes pl{0%,100%{opacity:1;}50%{opacity:.55;}}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+  .cal-title{font-weight:700;font-size:16px;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .cal-wd{text-align:center;font-size:11px;font-weight:700;color:var(--text-soft);padding:4px 0;text-transform:uppercase;letter-spacing:.04em;}
+  .cal-cell{aspect-ratio:1;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;transition:.1s;}
+  .cal-cell:hover{border-color:var(--accent);}
+  .cal-empty{background:transparent;border:none;cursor:default;}
+  .cal-num{font-size:14px;font-weight:600;}
+  .cal-today{border-color:var(--info);}
+  .cal-today .cal-num{color:var(--info);}
+  .cal-sel{border-color:var(--accent);background:var(--surface2);}
+  .cal-dots{display:flex;gap:3px;margin-top:auto;flex-wrap:wrap;justify-content:center;}
+  .cal-dot{width:7px;height:7px;border-radius:50%;display:inline-block;}
+  .dot-open{background:var(--ok);}
+  .dot-booked{background:var(--text-soft);}
+  .cal-legend{display:flex;gap:16px;justify-content:center;margin:14px 0 4px;font-size:12px;color:var(--text-soft);}
+  .cal-legend span{display:flex;align-items:center;gap:6px;}
+  @media(max-width:520px){
+    main{padding-top:16px;}
+    h1{font-size:20px;}
+    .card{padding:14px;border-radius:12px;}
+    .cal-cell{padding:3px;border-radius:8px;min-height:56px;}
+    .cal-num{font-size:12px;}
+    .cal-ev{font-size:9px;padding:1px 3px;}
+    /* Slot-Karten stapeln: Inhalt oben, Aktionen als Button-Reihe darunter */
+    .slot{flex-direction:column;align-items:stretch;gap:10px;}
+    .slot-main{width:100%;}
+    .slot > div:last-child{flex-direction:row!important;flex-wrap:wrap;}
+    .slot > div:last-child .btn{flex:1 1 auto;}
+    /* Modals nutzen volle Breite und respektieren Safe-Area */
+    .modal-bg{align-items:flex-end;padding:0;}
+    .modal{max-width:100%;border-radius:16px 16px 0 0;max-height:92vh;padding:20px 18px calc(20px + env(safe-area-inset-bottom));}
+    .toast{bottom:calc(18px + env(safe-area-inset-bottom));}
+  }
+  @media(hover:hover){
+    .btn-primary:hover{background:var(--accent-deep);}
+    .btn-ghost:hover{border-color:var(--accent);}
+  }
+  .weekdays{display:flex;gap:5px;flex-wrap:wrap;}
+  .weekdays button{flex:1 1 auto;min-width:42px;padding:8px 4px;border:1px solid var(--line);background:var(--surface2);border-radius:8px;cursor:pointer;font:inherit;font-size:13px;color:var(--text-soft);}
+  .weekdays button[aria-pressed=true]{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600;}
+  .cal-cell{min-height:64px;}
+  .cal-events{display:flex;flex-direction:column;gap:2px;width:100%;margin-top:3px;}
+  .cal-ev{font-size:10px;line-height:1.25;padding:1px 4px;border-radius:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:left;}
+  .cal-ev-open{background:var(--ok-bg);color:var(--ok);}
+  .cal-ev-booked{background:var(--surface2);color:var(--text-soft);}
+  .cal-ev-more{font-size:10px;color:var(--text-soft);text-align:center;}
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:70;padding:16px;}
+  .modal{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;width:100%;max-width:420px;max-height:88vh;overflow:auto;}
+  .swatch-btn{width:32px;height:32px;border-radius:8px;border:2px solid transparent;cursor:pointer;padding:0;}
+  .swatch-btn.sel{border-color:var(--text);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--text);}
+  .share-box{display:flex;gap:8px;align-items:center;}
+  .share-box input{flex:1;font-family:monospace;font-size:12px;min-width:0;}
+  .hint{color:var(--text-soft);font-size:12px;margin-top:4px;}
 </style>
 </head>
 <body>
-<header class="site">
-  <div class="wrap">
-    <span class="brand"><b>termin</b>planer<span class="dfn">DFN</span></span>
-    <nav class="topnav"><span>Hinzufügen ▾</span><span>Einloggen ▾</span><span>Sprachen ▾</span></nav>
-  </div>
-</header>
-<main><div id="app"><div class="loading">Lädt …</div></div></main>
-<footer class="site"><div class="wrap">
-  <a href="#">Anleitung</a><a href="#">FAQ</a><a href="#">Nutzungsbedingungen</a>
-  <a href="#">Datenschutz</a><a href="#">Impressum</a><a href="#">Barrierefreiheit</a><a href="#">Kontakt</a>
-</div></footer>
+<div class="topbar"><div class="wrap">
+  <span class="logo"><b>◆</b> Trainer-Buchung</span>
+  <span class="who" id="who"></span>
+</div></div>
+<main id="app"><div class="center-wrap"><span class="spin"></span></div></main>
 <div class="toast" id="toast"></div>
 
 <script>
 (function(){
-  // ===== SUPABASE KONFIGURATION =====
+  // ===== KONFIG =====
   const SUPABASE_URL = 'https://jnvpyttgzdcfdppaijxb.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_EJioAkDBkTm1MXRItJolbw_MRmkwfx-';
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  const TABLE = 'polls';
 
   const app = document.getElementById('app');
-  const DOW = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+  const whoEl = document.getElementById('who');
+  let me = null;        // profiles-Zeile des eingeloggten Nutzers
+  let session = null;
+
+  // ===== SPRACHE / i18n =====
+  // Persistenz über URL-Hash (?lang= geht bei GitHub Pages nicht immer, daher Hash)
+  function detectLang(){
+    const m=(location.hash||'').match(/lang=(de|en)/);
+    if(m) return m[1];
+    return (navigator.language||'de').toLowerCase().startsWith('en') ? 'en' : 'de';
+  }
+  let LANG = detectLang();
+  function setLang(l){
+    LANG=l;
+    // Hash neu aufbauen: nur lang behalten, join-Code entfernen
+    location.hash = 'lang='+l;
+  }
+  const I18N = {
+    de:{
+      login:'Anmelden', signup:'Registrieren', login_sub:'Melde dich mit deinen Zugangsdaten an.',
+      signup_sub:'Erstelle dein Kundenkonto.', name:'Name', email:'E-Mail', password:'Passwort',
+      create_account:'Konto erstellen', no_account:'Noch kein Konto?', have_account:'Schon ein Konto?',
+      logout:'Abmelden', please_wait:'Bitte warten …',
+      trainer_dashboard:'Trainer-Dashboard', tab_slots:'Slots', tab_clients:'Kunden', tab_requests:'Wünsche',
+      tab_sessions:'Sessions', create_slots:'+ Slots erstellen', close:'Schließen', done:'Fertig',
+      single_slot:'Einzelner Slot', series:'Serie (Mo–Fr etc.)', when:'Wann', duration_min:'Dauer (Min.)',
+      location:'Ort', slot_kind:'Art des Slots', new_kind:'+ Neue Art', training_note_opt:'Trainingsnotiz (optional)',
+      offer_slot:'Slot anbieten', weekdays:'Wochentage', from_date:'Von Datum', to_date:'Bis Datum',
+      day_starts:'Tag beginnt', day_ends:'Tag endet', dur_per_slot:'Dauer je Slot (Min.)',
+      gap_between:'Pause zwischen Slots (Min.)', lunch_from:'Mittagspause von', lunch_to:'Mittagspause bis',
+      note_series:'gilt für alle Slots der Serie', create_series:'Serie anlegen', offered_slots:'Angebotene Slots',
+      calendar:'Kalender', list:'Liste', free:'frei', booked:'gebucht', with_trainer_ph:'z.B. Oberkörper, Fokus Rücken',
+      slot_kinds:'Slot-Arten', new_kind_name:'Name der neuen Art', color:'Farbe', create_kind:'Art anlegen',
+      existing_kinds:'Vorhandene Arten', edit:'Bearbeiten', delete:'Löschen', cancel:'Abbrechen', save:'Speichern',
+      edit_kind:'Art bearbeiten', no_kinds:'Noch keine Arten.',
+      start_session:'Session starten', assign_client:'Kunde zuordnen', cancel_slot:'Absagen',
+      edit_slot:'Slot bearbeiten', no_slots:'Noch keine Slots angeboten.',
+      clients:'Kunden', balance:'Guthaben', hours:'Std.', manage:'Verwalten', no_clients:'Noch keine Kunden registriert.',
+      hours_balance:'Stundenguthaben', client_note:'Notiz zum Kunden (Ziele, dauerhaft)',
+      requests_h:'Wunschzeiten der Kunden', accept:'Annehmen', decline:'Ablehnen', no_requests:'Keine Wunschzeiten.',
+      open_r:'offen', accepted:'angenommen', declined:'abgelehnt',
+      sessions_h:'Trainingseinheiten', awaiting:'wartet auf Bestätigung', active:'läuft', finished:'beendet',
+      finish:'Beenden', no_sessions:'Noch keine Sessions.', settled:'abgerechnet',
+      session_comment:'Kommentar zu dieser Einheit', save_comment:'Kommentar speichern',
+      hi:'Hallo', your_balance:'Dein Guthaben', hours_full:'Stunden',
+      tab_book:'Freie Slots', tab_wish:'Wunschzeit', tab_mine:'Meine Buchungen',
+      free_times:'Freie Trainingszeiten', book:'Buchen', no_free:'Aktuell keine freien Slots. Schau später wieder rein oder schlage eine Wunschzeit vor.',
+      wish_h:'Wunschzeit vorschlagen', wish_sub:'Wann hättest du Lust zu trainieren? Dein Trainer bestätigt den Vorschlag.',
+      note_opt:'Notiz (optional)', send_wish:'Vorschlag senden', my_wishes:'Meine Vorschläge',
+      waiting:'wartet', withdraw:'Zurückziehen', no_wishes:'Noch keine Vorschläge.',
+      my_booked:'Meine gebuchten Trainings', nothing_booked:'Du hast noch nichts gebucht.',
+      cancel_only_2h:'Absage nur bis 2 Std. vorher möglich',
+      trainer_wants_start:'Dein Trainer möchte die Trainingseinheit starten.',
+      confirm_below:'Bestätige unten, dass dein Training jetzt begonnen hat.',
+      confirm_training:'Training bestätigen', training_running:'Training läuft.', since:'Seit',
+      cancel_training:'Training absagen', reason_required:'Begründung (erforderlich)',
+      confirm_cancel:'Absage bestätigen', back:'Zurück', my_answer:'Deine Antwort eintragen',
+      new_poll:'Neue Umfrage', which_days:'An welchen Terminen kannst du?',
+      pick_client:'— wählen —', assign:'Zuordnen', reason_ph:'Warum wird abgesagt?',
+      // Toasts
+      t_enter_name:'Bitte deinen Namen eingeben.', t_pick_time:'Bitte Datum und Uhrzeit wählen.',
+      t_slot_created:'Slot angelegt.', t_deleted:'Gelöscht.', t_saved:'Gespeichert.',
+      t_kind_created:'Art angelegt.', t_enter_kind:'Bitte einen Namen eingeben.',
+      t_session_started:'Session gestartet – Kunde muss am Handy bestätigen.',
+      t_confirmed:'Bestätigt – viel Erfolg beim Training!', t_booked:'Gebucht!',
+      t_taken:'Der Slot wurde gerade vergeben.', t_cancel_2h:'Absage nur bis 2 Stunden vorher möglich.',
+      t_need_reason:'Bitte eine Begründung angeben.', t_slot_cancelled:'Slot abgesagt und wieder freigegeben.',
+      t_training_cancelled:'Training abgesagt.', t_pick_client:'Bitte einen Kunden wählen.',
+      t_assigned:'Kunde zugeordnet.', t_wish_sent:'Vorschlag gesendet.', t_withdrawn:'Zurückgezogen.',
+      t_comment_saved:'Kommentar gespeichert.', t_session_ended:'Session beendet.',
+      t_accepted_booked:'Angenommen und als Buchung eingetragen.', t_declined:'Abgelehnt.',
+      t_kind_deleted_note:'Diese Art löschen? Bestehende Slots behalten ihre Farbe und ihren Namen.',
+      t_del_slot:'Slot wirklich löschen?', t_enter_title:'Bitte einen Titel eingeben.',
+      allday:'ganztägig', min:'Min',
+    },
+    en:{
+      login:'Sign in', signup:'Sign up', login_sub:'Sign in with your credentials.',
+      signup_sub:'Create your client account.', name:'Name', email:'Email', password:'Password',
+      create_account:'Create account', no_account:'No account yet?', have_account:'Already have an account?',
+      logout:'Sign out', please_wait:'Please wait …',
+      trainer_dashboard:'Trainer dashboard', tab_slots:'Slots', tab_clients:'Clients', tab_requests:'Requests',
+      tab_sessions:'Sessions', create_slots:'+ Create slots', close:'Close', done:'Done',
+      single_slot:'Single slot', series:'Series (Mon–Fri etc.)', when:'When', duration_min:'Duration (min)',
+      location:'Location', slot_kind:'Slot type', new_kind:'+ New type', training_note_opt:'Training note (optional)',
+      offer_slot:'Offer slot', weekdays:'Weekdays', from_date:'From date', to_date:'To date',
+      day_starts:'Day starts', day_ends:'Day ends', dur_per_slot:'Duration per slot (min)',
+      gap_between:'Break between slots (min)', lunch_from:'Lunch break from', lunch_to:'Lunch break to',
+      note_series:'applies to all slots in the series', create_series:'Create series', offered_slots:'Offered slots',
+      calendar:'Calendar', list:'List', free:'free', booked:'booked', with_trainer_ph:'e.g. upper body, focus back',
+      slot_kinds:'Slot types', new_kind_name:'Name of new type', color:'Color', create_kind:'Create type',
+      existing_kinds:'Existing types', edit:'Edit', delete:'Delete', cancel:'Cancel', save:'Save',
+      edit_kind:'Edit type', no_kinds:'No types yet.',
+      start_session:'Start session', assign_client:'Assign client', cancel_slot:'Cancel',
+      edit_slot:'Edit slot', no_slots:'No slots offered yet.',
+      clients:'Clients', balance:'Balance', hours:'hrs', manage:'Manage', no_clients:'No clients registered yet.',
+      hours_balance:'Hours balance', client_note:'Client note (goals, permanent)',
+      requests_h:'Client requested times', accept:'Accept', decline:'Decline', no_requests:'No requested times.',
+      open_r:'open', accepted:'accepted', declined:'declined',
+      sessions_h:'Training sessions', awaiting:'awaiting confirmation', active:'running', finished:'finished',
+      finish:'Finish', no_sessions:'No sessions yet.', settled:'settled',
+      session_comment:'Comment on this session', save_comment:'Save comment',
+      hi:'Hi', your_balance:'Your balance', hours_full:'hours',
+      tab_book:'Free slots', tab_wish:'Wish time', tab_mine:'My bookings',
+      free_times:'Free training times', book:'Book', no_free:'No free slots right now. Check back later or suggest a wish time.',
+      wish_h:'Suggest a wish time', wish_sub:'When would you like to train? Your trainer confirms the suggestion.',
+      note_opt:'Note (optional)', send_wish:'Send suggestion', my_wishes:'My suggestions',
+      waiting:'waiting', withdraw:'Withdraw', no_wishes:'No suggestions yet.',
+      my_booked:'My booked trainings', nothing_booked:'You have not booked anything yet.',
+      cancel_only_2h:'Cancellation only up to 2 hrs before',
+      trainer_wants_start:'Your trainer wants to start the training session.',
+      confirm_below:'Confirm below that your training has now started.',
+      confirm_training:'Confirm training', training_running:'Training running.', since:'Since',
+      cancel_training:'Cancel training', reason_required:'Reason (required)',
+      confirm_cancel:'Confirm cancellation', back:'Back', my_answer:'Enter your answer',
+      new_poll:'New poll', which_days:'Which times can you make?',
+      pick_client:'— choose —', assign:'Assign', reason_ph:'Why is it being cancelled?',
+      t_enter_name:'Please enter your name.', t_pick_time:'Please pick date and time.',
+      t_slot_created:'Slot created.', t_deleted:'Deleted.', t_saved:'Saved.',
+      t_kind_created:'Type created.', t_enter_kind:'Please enter a name.',
+      t_session_started:'Session started – client must confirm on their phone.',
+      t_confirmed:'Confirmed – enjoy your training!', t_booked:'Booked!',
+      t_taken:'The slot was just taken.', t_cancel_2h:'Cancellation only possible up to 2 hours before.',
+      t_need_reason:'Please provide a reason.', t_slot_cancelled:'Slot cancelled and made available again.',
+      t_training_cancelled:'Training cancelled.', t_pick_client:'Please choose a client.',
+      t_assigned:'Client assigned.', t_wish_sent:'Suggestion sent.', t_withdrawn:'Withdrawn.',
+      t_comment_saved:'Comment saved.', t_session_ended:'Session ended.',
+      t_accepted_booked:'Accepted and added as a booking.', t_declined:'Declined.',
+      t_kind_deleted_note:'Delete this type? Existing slots keep their color and name.',
+      t_del_slot:'Really delete slot?', t_enter_title:'Please enter a title.',
+      allday:'all day', min:'min',
+    }
+  };
+  function t(key){ return (I18N[LANG] && I18N[LANG][key]) || (I18N.de[key]) || key; }
+
   let toastTimer;
-  function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3200); }
-  function iso(d){ return d.toISOString().slice(0,10); }
-  function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
-  function pollIdFromHash(){ const m=(location.hash||'').match(/poll=([a-z0-9]+)/i); return m?m[1]:null; }
-  function editKeyFromHash(){ const m=(location.hash||'').match(/key=([a-z0-9]+)/i); return m?m[1]:null; }
-  function makeId(){ return Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4); }
-  function makeEditKey(){ // langer Zufallsschluessel, aehnlich dem authkey des DFN-Dienstes
-    const a=new Uint8Array(24); (crypto.getRandomValues?crypto.getRandomValues(a):a.forEach((_,i)=>a[i]=Math.random()*256));
+  function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),3200);}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+  function fmtDateTime(iso){
+    const d=new Date(iso);
+    const daysDe=['So','Mo','Di','Mi','Do','Fr','Sa'];
+    const daysEn=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const days=LANG==='en'?daysEn:daysDe;
+    return days[d.getDay()]+', '+String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'. '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+  }
+
+  // ---- Slot-Typen & Farben (frei definierbar, aus DB geladen) ----
+  let slotTypes = [];  // [{id,label,color,sort}]
+  async function loadSlotTypes(){
+    const {data}=await sb.from('slot_types').select('*').order('sort').order('created_at');
+    slotTypes = data || [];
+    return slotTypes;
+  }
+  function typeById(id){ return slotTypes.find(t=>t.id===id); }
+  function slotColor(s){
+    if(s.color) return s.color;                        // im Slot gespeicherte Farbe
+    const t=typeById(s.slot_type_id); return t?t.color:'#7a8290';
+  }
+  function slotTypeLabel(s){
+    if(s.custom_label) return s.custom_label;          // im Slot gespeicherter Name
+    const t=typeById(s.slot_type_id); return t?t.label:'Slot';
+  }
+  function typeOptionsHTML(selectedId){
+    if(!slotTypes.length) return '<option value="">(keine Arten – erst anlegen)</option>';
+    return slotTypes.map(t=>`<option value="${t.id}"${t.id===selectedId?' selected':''}>${esc(t.label)}</option>`).join('');
+  }
+  function legendHTML(){
+    if(!slotTypes.length) return '';
+    return slotTypes.map(t=>`<span><span class="cal-dot" style="background:${t.color}"></span> ${esc(t.label)}</span>`).join('');
+  }
+  // Darf dieser Slot noch abgesagt werden? (mind. 2 Std. vorher)
+  function canCancel(s){
+    return (new Date(s.starts_at).getTime() - Date.now()) > 2*60*60*1000;
+  }
+
+  // ===================================================================
+  //  AUTH
+  // ===================================================================
+  function renderAuth(mode){
+    mode = mode || 'login';
+    whoEl.innerHTML = `<a class="link" id="lang-toggle-auth">${LANG==='de'?'EN':'DE'}</a>`;
+    app.innerHTML = `
+      <div class="center-wrap"><div class="card auth-card">
+        <h1 style="margin-top:0">${mode==='login'?t('login'):t('signup')}</h1>
+        <p class="muted" style="margin-top:-8px">${mode==='login'?t('login_sub'):t('signup_sub')}</p>
+        ${mode==='signup'?`<div class="field"><label class="lbl">${t('name')}</label><input id="a-name" placeholder="${t('name')}"></div>`:''}
+        <div class="field"><label class="lbl">${t('email')}</label><input id="a-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
+        <div class="field"><label class="lbl">${t('password')}</label><input id="a-pass" type="password" placeholder="••••••••" autocomplete="${mode==='login'?'current-password':'new-password'}"></div>
+        <button class="btn btn-primary btn-block" id="a-go" style="margin-top:6px">${mode==='login'?t('login'):t('create_account')}</button>
+        <p class="muted" style="text-align:center;margin-bottom:0;margin-top:16px">
+          ${mode==='login'
+            ? t('no_account')+' <a class="link" id="a-switch">'+t('signup')+'</a>'
+            : t('have_account')+' <a class="link" id="a-switch">'+t('login')+'</a>'}
+        </p>
+      </div></div>`;
+    document.getElementById('lang-toggle-auth').addEventListener('click',()=>{ setLang(LANG==='de'?'en':'de'); renderAuth(mode); });
+    document.getElementById('a-switch').addEventListener('click',()=>renderAuth(mode==='login'?'signup':'login'));
+    document.getElementById('a-go').addEventListener('click', async (ev)=>{
+      const email=document.getElementById('a-email').value.trim();
+      const pass=document.getElementById('a-pass').value;
+      if(!email||!pass){toast(t('email')+' / '+t('password'));return;}
+      const btn=ev.target;btn.disabled=true;btn.textContent=t('please_wait');
+      if(mode==='signup'){
+        const name=document.getElementById('a-name').value.trim();
+        const {error}=await sb.auth.signUp({email,password:pass,options:{data:{full_name:name}}});
+        if(error){toast(error.message);btn.disabled=false;btn.textContent=t('create_account');return;}
+        toast(LANG==='de'?'Konto erstellt! Du kannst dich jetzt anmelden.':'Account created! You can sign in now.');
+        renderAuth('login');
+      }else{
+        const {error}=await sb.auth.signInWithPassword({email,password:pass});
+        if(error){toast(error.message);btn.disabled=false;btn.textContent=t('login');return;}
+      }
+    });
+  }
+
+  async function loadMe(){
+    const {data:{user}} = await sb.auth.getUser();
+    if(!user) return null;
+    let {data:prof} = await sb.from('profiles').select('*').eq('id',user.id).maybeSingle();
+    if(!prof){
+      // Falls Trigger nicht griff: Profil nachlegen
+      await sb.from('profiles').insert({id:user.id,full_name:user.user_metadata?.full_name||'',role:'client'});
+      ({data:prof} = await sb.from('profiles').select('*').eq('id',user.id).maybeSingle());
+    }
+    prof.email = user.email;
+    return prof;
+  }
+
+  // ===================================================================
+  //  ADMIN-ANSICHT — Trainer einladen
+  // ===================================================================
+  async function renderAdmin(){
+    app.innerHTML = `<h1>${LANG==='de'?'Admin':'Admin'}</h1>
+      <div class="card">
+        <h2 style="margin-top:0">${LANG==='de'?'Neuen Trainer einladen':'Invite a new trainer'}</h2>
+        <p class="muted" style="margin-top:-4px">${LANG==='de'?'Erzeuge einen Einladungslink und schicke ihn dem Trainer. Beim Registrieren über den Link wird er automatisch zum Trainer.':'Generate an invite link and send it to the trainer. Registering through the link makes them a trainer automatically.'}</p>
+        <div class="field"><label class="lbl">${LANG==='de'?'E-Mail (optional, nur als Notiz)':'Email (optional, note only)'}</label><input id="inv-email" type="email" placeholder="trainer@example.com"></div>
+        <button class="btn btn-primary btn-block" id="inv-create">${LANG==='de'?'Einladungslink erzeugen':'Create invite link'}</button>
+      </div>
+      <h2>${LANG==='de'?'Erzeugte Einladungen':'Created invites'}</h2>
+      <div id="inv-list"><div class="center-wrap" style="min-height:20vh"><span class="spin"></span></div></div>`;
+    document.getElementById('inv-create').addEventListener('click',async(ev)=>{
+      ev.target.disabled=true;
+      const code=makeInviteCode();
+      const {error}=await sb.from('invites').insert({code,role:'trainer',created_by:me.id,email:document.getElementById('inv-email').value.trim()});
+      if(error){toast(error.message);ev.target.disabled=false;return;}
+      toast(LANG==='de'?'Einladung erstellt.':'Invite created.');renderAdmin();
+    });
+    // Liste
+    const {data:invs}=await sb.from('invites').select('*').eq('role','trainer').order('created_at',{ascending:false});
+    const list=document.getElementById('inv-list');
+    if(!invs||!invs.length){list.innerHTML=`<div class="empty">${LANG==='de'?'Noch keine Einladungen.':'No invites yet.'}</div>`;return;}
+    const base=location.href.split('#')[0];
+    list.innerHTML=invs.map(iv=>{
+      const link=base+'#join='+iv.code;
+      return `<div class="card">
+        <div class="slot-meta">${iv.email?esc(iv.email)+' · ':''}${iv.used?(LANG==='de'?'eingelöst':'redeemed'):(LANG==='de'?'offen':'open')}</div>
+        <div class="share-box" style="margin-top:8px"><input type="text" value="${link}" readonly><button class="btn btn-primary btn-sm" data-copy="${link}" style="flex:0 0 auto">${LANG==='de'?'Kopieren':'Copy'}</button></div>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>{
+      navigator.clipboard?.writeText(b.dataset.copy).then(()=>toast(LANG==='de'?'Link kopiert!':'Link copied!'),()=>{});
+    }));
+  }
+  function makeInviteCode(){
+    const a=new Uint8Array(9); (crypto.getRandomValues?crypto.getRandomValues(a):a.forEach((_,i)=>a[i]=Math.random()*256));
     return Array.from(a,b=>('0'+b.toString(16)).slice(-2)).join('');
   }
 
-  // ===== SUPABASE HELFER =====
-  async function loadPoll(id){
-    const { data, error } = await sb.from(TABLE).select('data').eq('id', id).maybeSingle();
-    if(error){ console.error(error); toast('Fehler beim Laden.'); return null; }
-    return data ? data.data : null;
-  }
-  async function insertPoll(poll){
-    const { error } = await sb.from(TABLE).insert({ id: poll.id, data: poll });
-    if(error){ console.error(error); toast('Speichern fehlgeschlagen: '+error.message); return false; }
-    return true;
-  }
-  async function updatePoll(poll){
-    const { error } = await sb.from(TABLE).update({ data: poll }).eq('id', poll.id);
-    if(error){ console.error(error); toast('Speichern fehlgeschlagen: '+error.message); return false; }
-    return true;
-  }
-
   // ===================================================================
-  //  ANSICHT 1 — ERSTELLEN
+  //  TRAINER-ANSICHT
   // ===================================================================
-  function renderCreate(){
-    app.innerHTML = `
-      <h1>Termin-Abstimmung erstellen</h1>
-      <div class="notice">Datumsbereich, Wochentage und Zeitslots wählen — die Termine werden automatisch erzeugt. Nach dem Speichern erhältst du einen Link zum Teilen, über den alle abstimmen können.</div>
-      <div class="panel"><h2>Eckdaten</h2>
-        <div class="field"><span class="lbl">Abstimmungstitel <span class="req">*</span></span><input type="text" id="title" placeholder="z. B. Projekt-Kickoff Q3"></div>
-        <div class="row">
-          <div class="field" style="margin-bottom:0"><span class="lbl">Ort <span class="req">*</span></span><input type="text" id="location" placeholder="Adresse, Raumnummer, virtuell"></div>
-          <div class="field" style="margin-bottom:0"><span class="lbl">Wer lädt ein <span class="req">*</span></span><input type="text" id="host" value="Gast"></div>
-        </div>
-        <div class="field" style="margin-top:18px"><span class="lbl">Deine E-Mail-Adresse</span><input type="email" id="email" placeholder="fuer den Bearbeitungslink (optional)"><div class="hint">Wird nur genutzt, um dir den Bearbeitungslink anzuzeigen, und nirgends veroeffentlicht.</div></div>
-        <div class="field" style="margin-bottom:0"><span class="lbl">Beschreibung</span><textarea id="desc" placeholder="Einladungstext, Tagesordnung …"></textarea></div>
+  async function renderTrainer(){
+    // Fällige Stunden abrechnen (zieht nur ab, was wirklich vorbei ist)
+    try{ await sb.rpc('settle_due_sessions'); }catch(e){}
+    app.innerHTML = `<h1>${t('trainer_dashboard')}</h1>
+      <div class="tabs">
+        <button data-tab="slots" class="active">${t('tab_slots')}</button>
+        <button data-tab="clients">${t('tab_clients')}</button>
+        <button data-tab="requests">${t('tab_requests')}</button>
+        <button data-tab="sessions">${t('tab_sessions')}</button>
       </div>
-      <div class="panel"><h2>Zeitraum &amp; Wochentage</h2>
-        <div class="row">
-          <div class="field"><span class="lbl">Von Datum <span class="req">*</span></span><input type="date" id="dateFrom"></div>
-          <div class="field"><span class="lbl">Bis Datum <span class="req">*</span></span><input type="date" id="dateTo"></div>
-        </div>
-        <div class="field" style="margin-bottom:0"><span class="lbl">Wochentage einbeziehen</span>
-          <div class="weekdays" id="weekdays">
-            <button type="button" data-d="1" aria-pressed="true">Mo</button><button type="button" data-d="2" aria-pressed="true">Di</button>
-            <button type="button" data-d="3" aria-pressed="true">Mi</button><button type="button" data-d="4" aria-pressed="true">Do</button>
-            <button type="button" data-d="5" aria-pressed="true">Fr</button><button type="button" data-d="6" aria-pressed="false">Sa</button>
-            <button type="button" data-d="0" aria-pressed="false">So</button>
-          </div>
-          <div class="hint">Nur angeklickte Wochentage werden als Termine erzeugt.</div>
-        </div>
-      </div>
-      <div class="panel"><h2>Zeitslots</h2>
-        <div class="radio-row">
-          <label><input type="radio" name="slotmode" value="manual" checked> Feste Uhrzeiten</label>
-          <label><input type="radio" name="slotmode" value="interval"> Automatisch im Raster</label>
-          <label><input type="radio" name="slotmode" value="allday"> Ganztägig</label>
-        </div>
-        <fieldset id="fsManual"><legend>Feste Uhrzeiten pro Tag</legend>
-          <div id="slotList"></div>
-          <button type="button" class="btn btn-light btn-sm" id="addSlot">+ Zeitslot hinzufügen</button>
-          <div class="hint">Endzeit optional — leer lassen für „nur Startzeit".</div>
-        </fieldset>
-        <fieldset id="fsInterval" class="hidden"><legend>Automatisches Raster</legend>
-          <div class="row">
-            <div class="field" style="margin-bottom:0"><span class="lbl">Tag beginnt</span><input type="time" id="ivStart" value="09:00"></div>
-            <div class="field" style="margin-bottom:0"><span class="lbl">Tag endet</span><input type="time" id="ivEnd" value="17:00"></div>
-          </div>
-          <div class="row" style="margin-top:12px">
-            <div class="field" style="margin-bottom:0"><span class="lbl">Slot-Dauer (Min.)</span><input type="number" id="ivDur" value="60" min="5" step="5"></div>
-            <div class="field" style="margin-bottom:0"><span class="lbl">Pause dazwischen (Min.)</span><input type="number" id="ivGap" value="0" min="0" step="5"></div>
-          </div>
-          <div class="hint">Beispiel: 09:00–17:00, 60 Min, 0 Pause → 09:00–10:00, 10:00–11:00 …</div>
-        </fieldset>
-        <fieldset id="fsAllday" class="hidden"><legend>Ganztägig</legend><div class="hint">Jeder ausgewählte Tag wird als ganztägiger Termin ohne Uhrzeit erzeugt.</div></fieldset>
-        <div style="margin-top:16px">
-          <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px">
-            <span class="lbl" style="margin:0">Vorschau</span><span class="hint"><b id="cnt">0</b> Termine</span>
-          </div>
-          <div class="scroll">
-            <table class="mini" id="previewTable"><thead><tr><th style="width:52%">Datum</th><th>Zeit</th><th style="width:34px"></th></tr></thead><tbody id="previewBody"></tbody></table>
-            <div class="empty" id="emptyState">Noch keine Termine.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel"><h2>Nicht verfügbare Zeiten</h2>
-        <div class="hint" style="margin-bottom:14px">Sperrzeiten entfernen automatisch alle Zeitslots, die sich zeitlich mit ihnen überschneiden.</div>
-        <fieldset><legend>Wiederkehrende Sperrzeit</legend>
-          <div class="blocked-builder">
-            <div><span class="lbl">Wochentag</span><select id="blockWeekday"><option value="1">Montag</option><option value="2">Dienstag</option><option value="3">Mittwoch</option><option value="4">Donnerstag</option><option value="5">Freitag</option><option value="6">Samstag</option><option value="0">Sonntag</option></select></div>
-            <div class="wide"><span class="lbl">Bezeichnung</span><input type="text" id="blockWeeklyLabel" placeholder="optional, z. B. Jour fixe"></div>
-            <div><span class="lbl">Von</span><input type="time" id="blockWeeklyStart" value="14:00"></div>
-            <div><span class="lbl">Bis</span><input type="time" id="blockWeeklyEnd" value="16:00"></div>
-            <button type="button" class="btn btn-light btn-sm" id="addWeeklyBlock">Hinzufügen</button>
-          </div>
-        </fieldset>
-        <fieldset><legend>Individuelle Sperrzeit</legend>
-          <div class="blocked-builder date-mode">
-            <div><span class="lbl">Datum</span><input type="date" id="blockDate"></div>
-            <div class="wide"><span class="lbl">Bezeichnung</span><input type="text" id="blockDateLabel" placeholder="optional, z. B. Laborbesprechung"></div>
-            <div><span class="lbl">Von</span><input type="time" id="blockDateStart" value="10:00"></div>
-            <div><span class="lbl">Bis</span><input type="time" id="blockDateEnd" value="11:30"></div>
-            <button type="button" class="btn btn-light btn-sm" id="addDateBlock">Hinzufügen</button>
-          </div>
-        </fieldset>
-        <div class="lbl">Eingetragene Sperrzeiten</div>
-        <div class="blocked-list" id="blockedList"><div class="blocked-empty">Noch keine Sperrzeiten eingetragen.</div></div>
-      </div>
-      <div class="panel"><h2>Optionale Einstellungen</h2>
-        <div class="options-grid">
-          <label class="opt"><input type="checkbox" id="optMaybe" checked> <span>„Vielleicht"-Option anbieten</span></label>
-          <label class="opt"><input type="checkbox" id="optOne"> <span>Nur ein Termin pro Teilnehmer wählbar</span></label>
-          <label class="opt"><input type="checkbox" id="optComment"> <span>Kommentare erlauben</span></label>
-        </div>
-      </div>
-      <button type="button" class="btn btn-primary" id="save" style="font-size:15px;padding:11px 26px">Abstimmung erstellen</button>
-    `;
-    const today=new Date(),plus7=new Date();plus7.setDate(today.getDate()+7);
-    document.getElementById('dateFrom').value=iso(today);
-    document.getElementById('dateTo').value=iso(plus7);
-    const slotList=document.getElementById('slotList');
-    function addSlotRow(s="",e=""){
-      const d=document.createElement('div');d.className='slotline';
-      d.innerHTML=`<input type="time" class="s-start" value="${s}"><span class="dash">–</span><input type="time" class="s-end" value="${e}"><button type="button" class="rm">×</button>`;
-      d.querySelector('.rm').addEventListener('click',()=>{d.remove();preview();});
-      d.querySelectorAll('input').forEach(i=>i.addEventListener('input',preview));
-      slotList.appendChild(d);
-    }
-    addSlotRow("09:00","10:00");
-    document.getElementById('addSlot').addEventListener('click',()=>{addSlotRow();preview();});
-
-    const blockedTimes=[];
-    document.getElementById('blockDate').value=iso(today);
-    const WD_LONG=['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'];
-    function renderBlocked(){
-      const box=document.getElementById('blockedList');
-      if(!blockedTimes.length){box.innerHTML='<div class="blocked-empty">Noch keine Sperrzeiten eingetragen.</div>';return;}
-      box.innerHTML='';
-      blockedTimes.forEach((b,i)=>{
-        const row=document.createElement('div');row.className='blocked-item';
-        const where=b.type==='weekly'?WD_LONG[b.weekday]:(b.date.split('-').reverse().join('.'));
-        row.innerHTML=`<span><b>${where}</b>, ${b.start}–${b.end}${b.label?` <span class="blocked-badge">${esc(b.label)}</span>`:''}</span><button type="button" title="Sperrzeit entfernen">×</button>`;
-        row.querySelector('button').addEventListener('click',()=>{blockedTimes.splice(i,1);renderBlocked();preview();});
-        box.appendChild(row);
-      });
-    }
-    function addBlock(type){
-      const weekly=type==='weekly';
-      const start=document.getElementById(weekly?'blockWeeklyStart':'blockDateStart').value;
-      const end=document.getElementById(weekly?'blockWeeklyEnd':'blockDateEnd').value;
-      if(!start||!end||toMin(end)<=toMin(start)){toast('Bitte eine gültige Sperrzeit eingeben.');return;}
-      const item=weekly
-        ?{type:'weekly',weekday:+document.getElementById('blockWeekday').value,start,end,label:document.getElementById('blockWeeklyLabel').value.trim()}
-        :{type:'date',date:document.getElementById('blockDate').value,start,end,label:document.getElementById('blockDateLabel').value.trim()};
-      if(!weekly&&!item.date){toast('Bitte ein Datum für die Sperrzeit auswählen.');return;}
-      blockedTimes.push(item);renderBlocked();preview();
-    }
-    document.getElementById('addWeeklyBlock').addEventListener('click',()=>addBlock('weekly'));
-    document.getElementById('addDateBlock').addEventListener('click',()=>addBlock('date'));
-
-    document.querySelectorAll('input[name=slotmode]').forEach(r=>r.addEventListener('change',()=>{
-      const m=document.querySelector('input[name=slotmode]:checked').value;
-      document.getElementById('fsManual').classList.toggle('hidden',m!=='manual');
-      document.getElementById('fsInterval').classList.toggle('hidden',m!=='interval');
-      document.getElementById('fsAllday').classList.toggle('hidden',m!=='allday');
-      preview();
+      <div id="tab-body"><div class="center-wrap" style="min-height:30vh"><span class="spin"></span></div></div>`;
+    app.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+      app.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const t=b.dataset.tab;
+      if(t==='slots')trainerSlots();
+      if(t==='clients')trainerClients();
+      if(t==='requests')trainerRequests();
+      if(t==='sessions')trainerSessions();
     }));
-    document.getElementById('weekdays').addEventListener('click',e=>{
-      const b=e.target.closest('button');if(!b)return;
-      b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');preview();
-    });
-    ['dateFrom','dateTo','ivStart','ivEnd','ivDur','ivGap'].forEach(id=>document.getElementById(id).addEventListener('input',preview));
-    let current=[];const removed=new Set();
-    function toMin(v){if(!v)return null;const[h,m]=v.split(':').map(Number);return h*60+m;}
-    function fmt(x){return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0');}
+    trainerSlots();
+  }
 
-    function slotBounds(slot){
-      if(!slot)return null;
-      const parts=slot.split('–');
-      const start=toMin(parts[0]);
-      const end=parts[1]?toMin(parts[1]):start+1;
-      return {start,end};
+  async function trainerSlots(){
+    const body=document.getElementById('tab-body');
+    body.innerHTML=`
+      <button class="btn btn-primary btn-block" id="show-create" style="margin-bottom:8px">${t('create_slots')}</button>
+      <div class="card" id="create-panel" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h2 style="margin:0">${LANG==='de'?'Slots erstellen':'Create slots'}</h2>
+          <button class="btn btn-ghost btn-sm" id="hide-create">${t('close')}</button>
+        </div>
+        <div class="tabs" style="margin-bottom:14px">
+          <button id="mode-single" class="active">${t('single_slot')}</button>
+          <button id="mode-series">${t('series')}</button>
+        </div>
+
+        <div id="form-single">
+          <div class="field"><label class="lbl">${t('when')}</label><input id="s-when" type="datetime-local"></div>
+          <div class="row">
+            <div class="field"><label class="lbl">${t('duration_min')}</label><input id="s-dur" type="number" value="60" min="15" step="15"></div>
+            <div class="field"><label class="lbl">${t('location')}</label><input id="s-loc" placeholder="Studio, Raum 2"></div>
+          </div>
+          <div class="field"><label class="lbl">${t('slot_kind')}</label>
+            <div style="display:flex;gap:8px"><select id="s-type" style="flex:1">${typeOptionsHTML()}</select><button class="btn btn-ghost btn-sm" id="s-newtype" style="flex:0 0 auto">${t('new_kind')}</button></div>
+          </div>
+          <div class="field"><label class="lbl">${t('training_note_opt')}</label><input id="s-note" placeholder="${t('with_trainer_ph')}"></div>
+          <div class="field"><label class="lbl">${LANG==='de'?'Kunde (optional)':'Client (optional)'}</label>
+            <select id="s-client"><option value="">${LANG==='de'?'— frei lassen —':'— leave open —'}</option></select>
+            <div class="hint">${LANG==='de'?'Wählst du einen Kunden, wird der Slot direkt für ihn gebucht.':'If you pick a client, the slot is booked for them directly.'}</div>
+          </div>
+          <button class="btn btn-primary btn-block" id="s-add">${t('offer_slot')}</button>
+        </div>
+
+        <div id="form-series" style="display:none">
+          <div class="field"><label class="lbl">${t('weekdays')}</label>
+            <div class="weekdays" id="ser-days">
+              <button type="button" data-d="1" aria-pressed="true">Mo</button>
+              <button type="button" data-d="2" aria-pressed="true">Di</button>
+              <button type="button" data-d="3" aria-pressed="true">Mi</button>
+              <button type="button" data-d="4" aria-pressed="true">Do</button>
+              <button type="button" data-d="5" aria-pressed="true">Fr</button>
+              <button type="button" data-d="6" aria-pressed="false">Sa</button>
+              <button type="button" data-d="0" aria-pressed="false">So</button>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field"><label class="lbl">${t('from_date')}</label><input id="ser-from" type="date"></div>
+            <div class="field"><label class="lbl">${t('to_date')}</label><input id="ser-to" type="date"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label class="lbl">${t('day_starts')}</label><input id="ser-start" type="time" value="09:00"></div>
+            <div class="field"><label class="lbl">${t('day_ends')}</label><input id="ser-end" type="time" value="17:30"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label class="lbl">${t('dur_per_slot')}</label><input id="ser-dur" type="number" value="60" min="15" step="15"></div>
+            <div class="field"><label class="lbl">${t('gap_between')}</label><input id="ser-gap" type="number" value="0" min="0" step="5"></div>
+          </div>
+          <div class="row">
+            <div class="field"><label class="lbl">${t('lunch_from')}</label><input id="ser-lunch-from" type="time" value="12:00"></div>
+            <div class="field"><label class="lbl">${t('lunch_to')}</label><input id="ser-lunch-to" type="time" value="13:00"></div>
+          </div>
+          <div class="field"><label class="lbl">${t('location')}</label><input id="ser-loc" placeholder="Studio, Raum 2"></div>
+          <div class="field"><label class="lbl">${t('slot_kind')}</label>
+            <div style="display:flex;gap:8px"><select id="ser-type" style="flex:1">${typeOptionsHTML()}</select><button class="btn btn-ghost btn-sm" id="ser-newtype" style="flex:0 0 auto">${t('new_kind')}</button></div>
+          </div>
+          <div class="field"><label class="lbl">${t('training_note_opt')}</label><input id="ser-note" placeholder="${t('note_series')}"></div>
+          <div class="field"><label class="lbl">${LANG==='de'?'Kunde (optional)':'Client (optional)'}</label>
+            <select id="ser-client"><option value="">${LANG==='de'?'— frei lassen —':'— leave open —'}</option></select>
+            <div class="hint">${LANG==='de'?'Für einen festen wöchentlichen Termin: alle Slots der Serie werden direkt für diesen Kunden gebucht.':'For a fixed weekly slot: every slot in the series is booked for this client directly.'}</div>
+          </div>
+          <p class="muted" id="ser-preview" style="margin-top:-2px"></p>
+          <button class="btn btn-primary btn-block" id="ser-add">${t('create_series')}</button>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:26px 0 12px">
+        <h2 style="margin:0">${t('offered_slots')}</h2>
+        <div class="tabs" style="margin:0;flex:0 0 auto;width:auto">
+          <button id="view-cal" class="active" style="padding:6px 14px">${t('calendar')}</button>
+          <button id="view-list" style="padding:6px 14px">${t('list')}</button>
+        </div>
+      </div>
+      <div class="card" id="filter-bar" style="display:none;padding:12px">
+        <div class="row" style="gap:8px">
+          <div class="field" style="margin:0"><label class="lbl">${LANG==='de'?'Datum':'Date'}</label><input id="f-date" type="date"></div>
+          <div class="field" style="margin:0"><label class="lbl">Status</label>
+            <select id="f-status">
+              <option value="">${LANG==='de'?'Alle':'All'}</option>
+              <option value="open">${t('free')}</option>
+              <option value="booked">${t('booked')}</option>
+            </select>
+          </div>
+          <div class="field" style="margin:0"><label class="lbl">${LANG==='de'?'Kunde':'Client'}</label>
+            <select id="f-client"><option value="">${LANG==='de'?'Alle':'All'}</option></select>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+          <span class="muted" id="f-count"></span>
+          <button class="btn btn-ghost btn-sm" id="f-reset">${LANG==='de'?'Zurücksetzen':'Reset'}</button>
+        </div>
+      </div>
+      <div id="slot-list"><div class="center-wrap" style="min-height:20vh"><span class="spin"></span></div></div>`;
+
+    // Formular ein-/ausblenden
+    document.getElementById('show-create').addEventListener('click',()=>{
+      document.getElementById('create-panel').style.display='';
+      document.getElementById('show-create').style.display='none';
+    });
+    document.getElementById('hide-create').addEventListener('click',()=>{
+      document.getElementById('create-panel').style.display='none';
+      document.getElementById('show-create').style.display='';
+    });
+    // "Neue Art" öffnet die Arten-Verwaltung als Dialog
+    document.getElementById('s-newtype').addEventListener('click',()=>openTypesManager());
+    document.getElementById('ser-newtype').addEventListener('click',()=>openTypesManager());
+
+    // Umschalter Einzel/Serie
+    document.getElementById('mode-single').addEventListener('click',()=>{
+      document.getElementById('mode-single').classList.add('active');
+      document.getElementById('mode-series').classList.remove('active');
+      document.getElementById('form-single').style.display='';
+      document.getElementById('form-series').style.display='none';
+    });
+    document.getElementById('mode-series').addEventListener('click',()=>{
+      document.getElementById('mode-series').classList.add('active');
+      document.getElementById('mode-single').classList.remove('active');
+      document.getElementById('form-series').style.display='';
+      document.getElementById('form-single').style.display='none';
+      updateSeriesPreview();
+    });
+
+    // Wochentag-Buttons
+    document.getElementById('ser-days').addEventListener('click',e=>{
+      const b=e.target.closest('button');if(!b)return;
+      b.setAttribute('aria-pressed',b.getAttribute('aria-pressed')==='true'?'false':'true');
+      updateSeriesPreview();
+    });
+    // Serie-Standarddaten
+    (function(){const t=new Date();const p=new Date();p.setDate(t.getDate()+13);
+      document.getElementById('ser-from').value=t.toISOString().slice(0,10);
+      document.getElementById('ser-to').value=p.toISOString().slice(0,10);
+    })();
+    ['ser-from','ser-to','ser-start','ser-end','ser-dur','ser-gap','ser-lunch-from','ser-lunch-to'].forEach(id=>{
+      const el=document.getElementById(id);if(el)el.addEventListener('input',updateSeriesPreview);
+    });
+
+    function buildSeriesSlots(){
+      const days=new Set();document.getElementById('ser-days').querySelectorAll('button[aria-pressed=true]').forEach(b=>days.add(+b.dataset.d));
+      const from=document.getElementById('ser-from').value, to=document.getElementById('ser-to').value;
+      const toMin=v=>{if(!v)return null;const[h,m]=v.split(':').map(Number);return h*60+m;};
+      const dayStart=toMin(document.getElementById('ser-start').value), dayEnd=toMin(document.getElementById('ser-end').value);
+      const dur=parseInt(document.getElementById('ser-dur').value)||60, gap=parseInt(document.getElementById('ser-gap').value)||0;
+      const lunchFrom=toMin(document.getElementById('ser-lunch-from').value), lunchTo=toMin(document.getElementById('ser-lunch-to').value);
+      const loc=document.getElementById('ser-loc').value.trim(), note=document.getElementById('ser-note').value.trim();
+      const stypeId=document.getElementById('ser-type').value;
+      const st=typeById(stypeId);
+      const serClient=document.getElementById('ser-client')?document.getElementById('ser-client').value:'';
+      const out=[];
+      if(!from||!to||dayStart==null||dayEnd==null||dur<=0||dayEnd<=dayStart)return out;
+      let d=new Date(from+'T00:00'), end=new Date(to+'T00:00'), guard=0;
+      while(d<=end&&guard<400){
+        if(days.has(d.getDay())){
+          let t=dayStart;
+          while(t+dur<=dayEnd){
+            const overlapsLunch = lunchFrom!=null&&lunchTo!=null && (t < lunchTo && (t+dur) > lunchFrom);
+            if(!overlapsLunch){
+              const dt=new Date(d);dt.setHours(Math.floor(t/60),t%60,0,0);
+              out.push({starts_at:dt.toISOString(),duration_min:dur,location:loc,training_note:note,slot_type_id:stypeId||null,custom_label:st?st.label:'',color:st?st.color:'',trainer_id:me.id,status:serClient?'booked':'open',booked_by:serClient||null});
+            }
+            t+=dur+gap;
+          }
+        }
+        d.setDate(d.getDate()+1);guard++;
+      }
+      return out;
     }
-    function isBlocked(date,slot){
-      const bounds=slotBounds(slot);if(!bounds)return false;
-      const weekday=new Date(date+'T00:00').getDay();
-      return blockedTimes.some(b=>{
-        if(b.type==='weekly'&&b.weekday!==weekday)return false;
-        if(b.type==='date'&&b.date!==date)return false;
-        const bs=toMin(b.start),be=toMin(b.end);
-        return bounds.start<be&&bounds.end>bs;
+    function updateSeriesPreview(){
+      const el=document.getElementById('ser-preview');if(!el)return;
+      const n=buildSeriesSlots().length;
+      const forClient=document.getElementById('ser-client')&&document.getElementById('ser-client').value;
+      if(!n){ el.textContent = LANG==='de'?'Keine Slots — bitte Eingaben prüfen.':'No slots — please check your input.'; return; }
+      if(forClient){
+        const nm=document.getElementById('ser-client').selectedOptions[0].textContent;
+        el.textContent = LANG==='de'?`${n} Slots werden für ${nm} gebucht.`:`${n} slots will be booked for ${nm}.`;
+      }else{
+        el.textContent = LANG==='de'?`Es werden ${n} Slots angelegt.`:`${n} slots will be created.`;
+      }
+    }
+
+    document.getElementById('ser-client')&&document.getElementById('ser-client').addEventListener('input',updateSeriesPreview);
+
+    document.getElementById('ser-add').addEventListener('click',async(ev)=>{
+      const slotsToAdd=buildSeriesSlots();
+      if(!slotsToAdd.length){toast(LANG==='de'?'Keine Slots — bitte Eingaben prüfen.':'No slots — please check your input.');return;}
+      if(!confirm((LANG==='de'?slotsToAdd.length+' Slots anlegen?':'Create '+slotsToAdd.length+' slots?')))return;
+      const btn=ev.target;btn.disabled=true;btn.textContent=LANG==='de'?'Legt an …':'Creating …';
+      const {error}=await sb.from('slots').insert(slotsToAdd);
+      if(error){toast(error.message);btn.disabled=false;btn.textContent=t('create_series');return;}
+      toast(LANG==='de'?slotsToAdd.length+' Slots angelegt.':slotsToAdd.length+' slots created.');trainerSlots();
+    });
+
+    document.getElementById('s-add').addEventListener('click', async (ev)=>{
+      const when=document.getElementById('s-when').value;
+      if(!when){toast(t('t_pick_time'));return;}
+      const btn=ev.target;btn.disabled=true;
+      const stypeId=document.getElementById('s-type').value;
+      const st=typeById(stypeId);
+      const chosenClient=document.getElementById('s-client').value;
+      const dur=parseInt(document.getElementById('s-dur').value)||60;
+      const startsAt=new Date(when);
+
+      // Wenn ein Kunde gewählt wurde: Überlappungsregel anwenden
+      if(chosenClient){
+        const sStart=startsAt.getTime(), sEnd=sStart+dur*60000;
+        const overlaps=(slots||[]).filter(o=>{
+          const oStart=new Date(o.starts_at).getTime(), oEnd=oStart+(o.duration_min||60)*60000;
+          return oStart<sEnd && oEnd>sStart;
+        });
+        const bookedOverlap=overlaps.find(o=>o.status==='booked');
+        if(bookedOverlap){
+          toast(LANG==='de'
+            ? 'Achtung: überschneidet sich mit Buchung von '+nameOf(bookedOverlap.booked_by)+' – bitte zuerst dort absagen.'
+            : 'Warning: overlaps with '+nameOf(bookedOverlap.booked_by)+"'s booking – cancel that one first.");
+          btn.disabled=false;return;
+        }
+        const emptyIds=overlaps.filter(o=>o.status==='open').map(o=>o.id);
+        if(emptyIds.length){ await sb.from('slots').delete().in('id',emptyIds); }
+      }
+
+      const {error}=await sb.from('slots').insert({
+        starts_at:startsAt.toISOString(),
+        duration_min:dur,
+        location:document.getElementById('s-loc').value.trim(),
+        training_note:document.getElementById('s-note').value.trim(),
+        slot_type_id:stypeId||null,
+        custom_label:st?st.label:'',
+        color:st?st.color:'',
+        trainer_id:me.id,
+        status:chosenClient?'booked':'open',
+        booked_by:chosenClient||null
+      });
+      if(error){toast(error.message);btn.disabled=false;return;}
+      toast(chosenClient
+        ? (LANG==='de'?'Slot für Kunde gebucht.':'Slot booked for client.')
+        : t('t_slot_created'));
+      trainerSlots();
+    });
+    // Daten laden
+    const {data:slots}=await sb.from('slots').select('*').order('starts_at');
+    const {data:profs}=await sb.from('profiles').select('id,full_name');
+    const nameOf=id=>{const p=(profs||[]).find(x=>x.id===id);return p?p.full_name||'(ohne Name)':'—';};
+    const list=document.getElementById('slot-list');
+
+    // Filter-Kundenliste befüllen (nur Kunden, die wirklich einen Slot gebucht haben)
+    const bookedClientIds=[...new Set((slots||[]).filter(s=>s.booked_by).map(s=>s.booked_by))];
+    const fClient=document.getElementById('f-client');
+    bookedClientIds.forEach(id=>{const o=document.createElement('option');o.value=id;o.textContent=nameOf(id);fClient.appendChild(o);});
+
+    // Kunden-Auswahl im Erstellen-Formular befüllen (alle Kunden dieses Trainers)
+    const myClients=(profs||[]).filter(p=>p.id!==me.id);
+    const sClientSel=document.getElementById('s-client');
+    if(sClientSel){ myClients.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.full_name||'(ohne Name)';sClientSel.appendChild(o);}); }
+    const serClientSel=document.getElementById('ser-client');
+    if(serClientSel){ myClients.forEach(c=>{const o=document.createElement('option');o.value=c.id;o.textContent=c.full_name||'(ohne Name)';serClientSel.appendChild(o);}); }
+    // Filter-Events
+    ['f-date','f-status','f-client'].forEach(id=>document.getElementById(id).addEventListener('input',()=>{if(mode==='list')drawList();}));
+    document.getElementById('f-reset').addEventListener('click',()=>{
+      document.getElementById('f-date').value='';document.getElementById('f-status').value='';document.getElementById('f-client').value='';
+      if(mode==='list')drawList();
+    });
+
+    // Wendet die aktiven Filter auf ein Slot-Array an
+    function applyFilters(arr){
+      const fd=document.getElementById('f-date').value;
+      const fs=document.getElementById('f-status').value;
+      const fc=document.getElementById('f-client').value;
+      return arr.filter(s=>{
+        if(fd){ const d=new Date(s.starts_at); const iso=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); if(iso!==fd)return false; }
+        if(fs && s.status!==fs)return false;
+        if(fc && s.booked_by!==fc)return false;
+        return true;
       });
     }
-    function getSlots(){
-      const m=document.querySelector('input[name=slotmode]:checked').value;
-      if(m==='allday')return[""];
-      if(m==='manual'){const out=[];slotList.querySelectorAll('.slotline').forEach(l=>{const s=l.querySelector('.s-start').value,e=l.querySelector('.s-end').value;if(s)out.push(e?s+'–'+e:s);});return out;}
-      const st=toMin(document.getElementById('ivStart').value),en=toMin(document.getElementById('ivEnd').value),du=parseInt(document.getElementById('ivDur').value)||0,ga=parseInt(document.getElementById('ivGap').value)||0;
-      const out=[];if(st==null||en==null||du<=0||en<=st)return out;let t=st;while(t+du<=en){out.push(fmt(t)+'–'+fmt(t+du));t+=du+ga;}return out;
+
+    // Umschalter (Filterleiste nur in Listenansicht)
+    let mode='cal';
+    function updateFilterBar(){ document.getElementById('filter-bar').style.display = mode==='list' ? '' : 'none'; }
+    document.getElementById('view-cal').addEventListener('click',()=>{mode='cal';document.getElementById('view-cal').classList.add('active');document.getElementById('view-list').classList.remove('active');updateFilterBar();draw();});
+    document.getElementById('view-list').addEventListener('click',()=>{mode='list';document.getElementById('view-list').classList.add('active');document.getElementById('view-cal').classList.remove('active');updateFilterBar();draw();});
+
+    function slotCardHTML(s){
+      const col=slotColor(s);
+      const cancelled = s.cancel_reason ? `<div class="slot-meta" style="color:var(--accent)">✖ abgesagt: ${esc(s.cancel_reason)}</div>` : '';
+      return `<div class="card slot" style="border-left:4px solid ${col}">
+        <div class="slot-main">
+          <div class="slot-when">${fmtDateTime(s.starts_at)}</div>
+          <div class="slot-meta">${s.duration_min} Min${s.location?' · '+esc(s.location):''}</div>
+          <div class="slot-meta" style="color:${col}">● ${esc(slotTypeLabel(s))}</div>
+          ${s.training_note?`<div class="slot-meta" style="color:var(--text)">📋 ${esc(s.training_note)}</div>`:''}
+          ${cancelled}
+          <div style="margin-top:6px">
+            ${s.status==='open'?'<span class="tag tag-open">'+t('free')+'</span>':'<span class="tag tag-booked">'+t('booked')+' · '+esc(nameOf(s.booked_by))+'</span>'}
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px">
+          ${s.status==='booked'?`<button class="btn btn-ok btn-sm" data-start="${s.id}" data-client="${s.booked_by}">${t('start_session')}</button>`:''}
+          ${s.status==='open'?`<button class="btn btn-ghost btn-sm" data-assign="${s.id}">${t('assign_client')}</button>`:''}
+          ${s.status==='booked'&&canCancel(s)?`<button class="btn btn-ghost btn-sm" data-cancel="${s.id}">${t('cancel_slot')}</button>`:''}
+          <button class="btn btn-ghost btn-sm" data-edit="${s.id}">${t('edit')}</button>
+          <button class="btn btn-ghost btn-sm" data-del="${s.id}">${t('delete')}</button>
+        </div>
+      </div>`;
     }
-    function getDays(){
-      const f=document.getElementById('dateFrom').value,to=document.getElementById('dateTo').value;if(!f||!to)return[];
-      const act=new Set();document.getElementById('weekdays').querySelectorAll('button[aria-pressed=true]').forEach(b=>act.add(+b.dataset.d));
-      const days=[];let d=new Date(f+'T00:00'),end=new Date(to+'T00:00'),g=0;
-      while(d<=end&&g<1000){if(act.has(d.getDay()))days.push(new Date(d));d.setDate(d.getDate()+1);g++;}return days;
+
+    function openEditModal(s){
+      const whenLocal=(()=>{const d=new Date(s.starts_at);const p=n=>String(n).padStart(2,'0');return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes());})();
+      const bg=document.createElement('div');bg.className='modal-bg';
+      bg.innerHTML=`<div class="modal">
+        <h2 style="margin-top:0">${t('edit_slot')}</h2>
+        <div class="field"><label class="lbl">${t('when')}</label><input id="e-when" type="datetime-local" value="${whenLocal}"></div>
+        <div class="row">
+          <div class="field"><label class="lbl">${t('duration_min')}</label><input id="e-dur" type="number" value="${s.duration_min}" min="15" step="15"></div>
+          <div class="field"><label class="lbl">${t('location')}</label><input id="e-loc" value="${esc(s.location||'')}"></div>
+        </div>
+        <div class="field"><label class="lbl">${t('slot_kind')}</label>
+          <select id="e-type">${typeOptionsHTML(s.slot_type_id)}</select>
+        </div>
+        <div class="field"><label class="lbl">${LANG==="de"?"Trainingsnotiz":"Training note"}</label><input id="e-note" value="${esc(s.training_note||'')}"></div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn btn-ghost" id="e-cancel">${t('cancel')}</button>
+          <button class="btn btn-primary" id="e-save">${t('save')}</button>
+        </div>
+      </div>`;
+      document.body.appendChild(bg);
+      const close=()=>bg.remove();
+      bg.addEventListener('click',e=>{if(e.target===bg)close();});
+      bg.querySelector('#e-cancel').addEventListener('click',close);
+      bg.querySelector('#e-save').addEventListener('click',async(ev)=>{
+        const when=bg.querySelector('#e-when').value;if(!when){toast(t('t_pick_time'));return;}
+        ev.target.disabled=true;
+        const etId=bg.querySelector('#e-type').value;
+        const est=typeById(etId);
+        const {error}=await sb.from('slots').update({
+          starts_at:new Date(when).toISOString(),
+          duration_min:parseInt(bg.querySelector('#e-dur').value)||60,
+          location:bg.querySelector('#e-loc').value.trim(),
+          slot_type_id:etId||null,
+          custom_label:est?est.label:'',
+          color:est?est.color:'',
+          training_note:bg.querySelector('#e-note').value.trim()
+        }).eq('id',s.id);
+        if(error){toast(error.message);ev.target.disabled=false;return;}
+        close();toast(t('t_saved'));trainerSlots();
+      });
     }
-    function labelDate(d){return DOW[d.getDay()]+', '+String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear();}
-    function preview(){
-      const days=getDays(),slots=getSlots();current=[];
-      days.forEach(d=>slots.forEach(s=>{const date=iso(d),key=date+'|'+s;if(removed.has(key)||isBlocked(date,s))return;current.push({key,date,dateLabel:labelDate(d),wd:DOW[d.getDay()],time:s});}));
-      const body=document.getElementById('previewBody');body.innerHTML='';
-      if(!current.length){document.getElementById('emptyState').style.display='block';document.getElementById('previewTable').style.display='none';}
-      else{document.getElementById('emptyState').style.display='none';document.getElementById('previewTable').style.display='table';
-        current.forEach(r=>{const tr=document.createElement('tr');tr.innerHTML=`<td>${r.dateLabel}</td><td>${r.time||'<em style="color:#666">ganztägig</em>'}</td><td><button class="rm-slot">×</button></td>`;tr.querySelector('.rm-slot').addEventListener('click',()=>{removed.add(r.key);preview();});body.appendChild(tr);});
+
+    function attachActions(){
+      list.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async()=>{
+        if(!confirm(t('t_del_slot')))return;
+        const {error}=await sb.from('slots').delete().eq('id',b.dataset.del);
+        if(error){toast(error.message);return;}
+        toast(t('t_deleted'));trainerSlots();
+      }));
+      list.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>{
+        const s=(slots||[]).find(x=>x.id===b.dataset.edit);if(s)openEditModal(s);
+      }));
+      list.querySelectorAll('[data-assign]').forEach(b=>b.addEventListener('click',()=>{
+        const s=(slots||[]).find(x=>x.id===b.dataset.assign);if(s)openAssignModal(s);
+      }));
+      list.querySelectorAll('[data-cancel]').forEach(b=>b.addEventListener('click',()=>{
+        const s=(slots||[]).find(x=>x.id===b.dataset.cancel);if(s)openCancelModal(s,true);
+      }));
+      list.querySelectorAll('[data-start]').forEach(b=>b.addEventListener('click',async()=>{
+        b.disabled=true;
+        const s=(slots||[]).find(x=>x.id===b.dataset.start);
+        const endsAt=s?new Date(new Date(s.starts_at).getTime()+ (s.duration_min||60)*60000).toISOString():null;
+        const {error}=await sb.from('sessions').insert({slot_id:b.dataset.start,client_id:b.dataset.client,trainer_id:me.id,status:'awaiting_confirm',slot_ends_at:endsAt});
+        if(error){toast(error.message);b.disabled=false;return;}
+        toast(t('t_session_started'));
+        app.querySelector('[data-tab="sessions"]').click();
+      }));
+    }
+
+    // Kunde einem offenen Slot zuordnen
+    function openAssignModal(s){
+      const clients=(profs||[]).filter(p=>p.id); // profs enthält alle Profile
+      const bg=document.createElement('div');bg.className='modal-bg';
+      bg.innerHTML=`<div class="modal">
+        <h2 style="margin-top:0">${t('assign_client')}</h2>
+        <p class="muted" style="margin-top:-4px">${fmtDateTime(s.starts_at)} · ${esc(slotTypeLabel(s))}</p>
+        <div class="field"><label class="lbl">${LANG==='de'?'Kunde':'Client'}</label>
+          <select id="as-client"><option value="">— wählen —</option>${clients.map(c=>`<option value="${c.id}">${esc(c.full_name||'(ohne Name)')}</option>`).join('')}</select>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn btn-ghost" id="as-cancel">${t('cancel')}</button>
+          <button class="btn btn-primary" id="as-save">${t('assign')}</button>
+        </div>
+      </div>`;
+      document.body.appendChild(bg);
+      const close=()=>bg.remove();
+      bg.addEventListener('click',e=>{if(e.target===bg)close();});
+      bg.querySelector('#as-cancel').addEventListener('click',close);
+      bg.querySelector('#as-save').addEventListener('click',async(ev)=>{
+        const cid=bg.querySelector('#as-client').value;
+        if(!cid){toast(t('t_pick_client'));return;}
+        ev.target.disabled=true;
+        // Überlappungsregel: andere Slots zur selben Zeit prüfen
+        const sStart=new Date(s.starts_at).getTime();
+        const sEnd=sStart+(s.duration_min||60)*60000;
+        const overlaps=(slots||[]).filter(o=>{
+          if(o.id===s.id)return false;
+          const oStart=new Date(o.starts_at).getTime();
+          const oEnd=oStart+(o.duration_min||60)*60000;
+          return oStart<sEnd && oEnd>sStart; // echte Zeitüberlappung
+        });
+        const bookedOverlap=overlaps.find(o=>o.status==='booked');
+        if(bookedOverlap){
+          const who=nameOf(bookedOverlap.booked_by);
+          toast(LANG==='de'
+            ? 'Achtung: überschneidet sich mit Buchung von '+who+' – bitte zuerst dort absagen.'
+            : 'Warning: overlaps with '+who+"'s booking – cancel that one first.");
+          ev.target.disabled=false;return;
+        }
+        // Leere überlappende Slots entfernen (werden überschrieben)
+        const emptyIds=overlaps.filter(o=>o.status==='open').map(o=>o.id);
+        if(emptyIds.length){ await sb.from('slots').delete().in('id',emptyIds); }
+        const {error}=await sb.from('slots').update({status:'booked',booked_by:cid,cancel_reason:''}).eq('id',s.id);
+        if(error){toast(error.message);ev.target.disabled=false;return;}
+        close();
+        toast(emptyIds.length
+          ? (LANG==='de'?'Zugeordnet. '+emptyIds.length+' leeren Slot(s) überschrieben.':'Assigned. Overwrote '+emptyIds.length+' empty slot(s).')
+          : t('t_assigned'));
+        trainerSlots();
+      });
+    }
+
+    // Slot absagen (Trainer oder Kunde) – Begründungspflicht, 2h-Frist
+    function openCancelModal(s,isTrainerCancel){
+      const bg=document.createElement('div');bg.className='modal-bg';
+      bg.innerHTML=`<div class="modal">
+        <h2 style="margin-top:0">${t('cancel_slot')}</h2>
+        <p class="muted" style="margin-top:-4px">${fmtDateTime(s.starts_at)} · ${esc(slotTypeLabel(s))}</p>
+        <div class="field"><label class="lbl">${t('reason_required')}</label><textarea id="cx-reason" rows="3" placeholder="Warum wird abgesagt?"></textarea></div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn btn-ghost" id="cx-cancel">${t('back')}</button>
+          <button class="btn btn-primary" id="cx-save">${t('confirm_cancel')}</button>
+        </div>
+      </div>`;
+      document.body.appendChild(bg);
+      const close=()=>bg.remove();
+      bg.addEventListener('click',e=>{if(e.target===bg)close();});
+      bg.querySelector('#cx-cancel').addEventListener('click',close);
+      bg.querySelector('#cx-save').addEventListener('click',async(ev)=>{
+        if(!canCancel(s)){toast(t('t_cancel_2h'));return;}
+        const reason=bg.querySelector('#cx-reason').value.trim();
+        if(!reason){toast(t('t_need_reason'));return;}
+        ev.target.disabled=true;
+        // Slot wieder freigeben, Grund vermerken
+        const {error}=await sb.from('slots').update({status:'open',booked_by:null,cancel_reason:reason}).eq('id',s.id);
+        if(error){toast(error.message);ev.target.disabled=false;return;}
+        close();toast(t('t_slot_cancelled'));
+        if(typeof trainerSlots==='function' && me.role==='trainer') trainerSlots();
+        else renderClient();
+      });
+    }
+
+    function drawList(){
+      if(!slots||!slots.length){list.innerHTML=`<div class="empty">${t('no_slots')}</div>`;document.getElementById('f-count').textContent='';return;}
+      const filtered=applyFilters(slots);
+      document.getElementById('f-count').textContent = (LANG==='de'?filtered.length+' von '+slots.length+' Slots':filtered.length+' of '+slots.length+' slots');
+      if(!filtered.length){list.innerHTML=`<div class="empty">${LANG==='de'?'Keine Slots passen zum Filter.':'No slots match the filter.'}</div>`;return;}
+      list.innerHTML=filtered.map(slotCardHTML).join('');
+      attachActions();
+    }
+
+    // ---- Kalender ----
+    let calY, calM; // aktuell angezeigter Monat
+    (function initMonth(){
+      const first = slots && slots.length ? new Date(slots[0].starts_at) : new Date();
+      const now = new Date();
+      // Beginne beim aktuellen Monat, außer alle Slots liegen später
+      calY = now.getFullYear(); calM = now.getMonth();
+    })();
+    let selectedDay = null;
+
+    function drawCalendar(){
+      const monthNames=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+      const firstDow=(new Date(calY,calM,1).getDay()+6)%7; // Mo=0
+      const daysInMonth=new Date(calY,calM+1,0).getDate();
+      // Slots nach Tag gruppieren (nur dieser Monat)
+      const byDay={};
+      (slots||[]).forEach(s=>{const d=new Date(s.starts_at);if(d.getFullYear()===calY&&d.getMonth()===calM){const k=d.getDate();(byDay[k]=byDay[k]||[]).push(s);}});
+      const todayK=(new Date().getFullYear()===calY&&new Date().getMonth()===calM)?new Date().getDate():-1;
+      let cells='';
+      const wd=['Mo','Di','Mi','Do','Fr','Sa','So'];
+      cells+=wd.map(d=>`<div class="cal-wd">${d}</div>`).join('');
+      for(let i=0;i<firstDow;i++)cells+=`<div class="cal-cell cal-empty"></div>`;
+      for(let day=1;day<=daysInMonth;day++){
+        const has=(byDay[day]||[]).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
+        const sel=selectedDay===day?' cal-sel':'';
+        const isToday=day===todayK?' cal-today':'';
+        let evs='';
+        const shown=has.slice(0,2);
+        shown.forEach(s=>{
+          const t=new Date(s.starts_at);
+          const hm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+          const col=slotColor(s);
+          const booked=s.status==='booked';
+          evs+=`<div class="cal-ev" style="background:${col}22;color:${col};${booked?'opacity:.65;':''}">${hm}${booked?' •':''}</div>`;
+        });
+        if(has.length>2)evs+=`<div class="cal-ev-more">+${has.length-2}</div>`;
+        cells+=`<div class="cal-cell${sel}${isToday}" data-day="${day}">
+          <span class="cal-num">${day}</span><div class="cal-events">${evs}</div>
+        </div>`;
       }
-      document.getElementById('cnt').textContent=current.length;
-    }
-    preview();
-    document.getElementById('save').addEventListener('click',async(ev)=>{
-      const title=document.getElementById('title').value.trim();
-      const location=document.getElementById('location').value.trim();
-      if(!title){toast('Bitte einen Titel eingeben.');return;}
-      if(!location){toast('Bitte einen Ort eingeben.');return;}
-      if(!current.length){toast('Es wurden noch keine Termine erzeugt.');return;}
-      const btn=ev.target;btn.disabled=true;btn.textContent='Speichert …';
-      const poll={
-        id:makeId(),
-        editKey:makeEditKey(),
-        ownerEmail:document.getElementById('email').value.trim(),
-        title,location,
-        host:document.getElementById('host').value.trim()||'Gast',
-        desc:document.getElementById('desc').value.trim(),
-        options:current.map(r=>({date:r.date,dateLabel:r.dateLabel,wd:r.wd,time:r.time})),
-        blockedTimes:blockedTimes.map(b=>({...b})),
-        allowMaybe:document.getElementById('optMaybe').checked,
-        oneOption:document.getElementById('optOne').checked,
-        allowComment:document.getElementById('optComment').checked,
-        responses:[],comments:[],created:Date.now()
-      };
-      if(await insertPoll(poll)){
-        renderCreated(poll);window.scrollTo(0,0);
-      } else { btn.disabled=false;btn.textContent='Abstimmung erstellen'; }
-    });
-  }
-
-  function location_setHash(h){ history.replaceState(null,'', '#'+h); }
-
-  // ===================================================================
-  //  BESTAETIGUNGSSEITE — beide Links nach dem Erstellen
-  // ===================================================================
-  function renderCreated(poll){
-    const base=location.href.split('#')[0];
-    const voteUrl=base+'#poll='+poll.id;
-    const editUrl=base+'#poll='+poll.id+'&key='+poll.editKey;
-    const emailNote = poll.ownerEmail
-      ? `<div class="hint">Notiere dir den Bearbeitungslink gut. Aus Sicherheitsgruenden wird er nur hier angezeigt (diese Seite verschickt keine E-Mails — siehe Hinweis unten).</div>`
-      : `<div class="hint">Du hast keine E-Mail angegeben. Notiere dir den Bearbeitungslink unbedingt — ohne ihn kannst du die Umfrage spaeter nicht mehr aendern.</div>`;
-    app.innerHTML=`
-      <h1>Umfrage erstellt</h1>
-      <div class="notice"><b>${esc(poll.title)}</b> wurde gespeichert. Unten findest du beide Links.</div>
-      <div class="panel"><h2>Oeffentlicher Link — zum Verschicken</h2>
-        <div class="hint" style="margin-bottom:8px">Diesen Link schickst du an alle Teilnehmenden. Damit koennen sie abstimmen und die Antworten sehen.</div>
-        <div class="share-box"><input type="text" id="voteUrl" value="${voteUrl}" readonly><button type="button" class="btn btn-primary btn-sm" id="copyVote" style="flex:0 0 auto">Kopieren</button></div>
-      </div>
-      <div class="panel"><h2>Bearbeitungslink — nur fuer dich</h2>
-        <div class="hint err" style="padding:10px 12px;border-radius:3px;margin-bottom:8px"><b>Geheim halten!</b> Wer diesen Link hat, kann die Umfrage aendern und schliessen. Nicht mitverschicken.</div>
-        <div class="share-box"><input type="text" id="editUrl" value="${editUrl}" readonly><button type="button" class="btn btn-light btn-sm" id="copyEdit" style="flex:0 0 auto">Kopieren</button></div>
-        ${emailNote}
-      </div>
-      <button type="button" class="btn btn-primary" id="goVote" style="font-size:15px;padding:11px 26px">Zur Umfrage &rarr;</button>
-    `;
-    document.getElementById('copyVote').addEventListener('click',()=>copyField('voteUrl'));
-    document.getElementById('copyEdit').addEventListener('click',()=>copyField('editUrl'));
-    document.getElementById('goVote').addEventListener('click',()=>{location_setHash('poll='+poll.id+'&key='+poll.editKey);renderVote(poll,false,true);window.scrollTo(0,0);});
-  }
-  function copyField(id){const inp=document.getElementById(id);inp.select();navigator.clipboard?.writeText(inp.value).then(()=>toast('Kopiert!'),()=>{document.execCommand('copy');toast('Kopiert!');});}
-
-  // ===================================================================
-  //  ANSICHT 2 — ABSTIMMEN / ERGEBNIS
-  // ===================================================================
-  function renderVote(poll, justCreated, isOwner){
-    const opts=poll.options||[];
-    const shareUrl=location.href.split('#')[0]+'#poll='+poll.id;
-    const tally=opts.map((o,i)=>({yes:(poll.responses||[]).filter(r=>r.votes[i]==='yes').length,maybe:(poll.responses||[]).filter(r=>r.votes[i]==='maybe').length}));
-    const monthNames=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
-    const monthGroups=[];
-    opts.forEach((o,i)=>{const d=new Date(o.date+'T00:00');const key=d.getFullYear()+'-'+d.getMonth();let g=monthGroups.find(x=>x.key===key);if(!g){g={key,label:monthNames[d.getMonth()]+' '+d.getFullYear(),items:[]};monthGroups.push(g);}g.items.push({o,i,d});});
-    const cols=opts.length;
-    const nameColWidth=240;
-    const optionColWidth=86;
-    const tableWidth=nameColWidth+(cols*optionColWidth);
-    const voteTableStyle=`width:${tableWidth}px;min-width:${tableWidth}px`;
-    const voteColgroup=`<colgroup><col style="width:${nameColWidth}px">${opts.map(()=>`<col style="width:${optionColWidth}px">`).join('')}</colgroup>`;
-    const monthRow=monthGroups.map(g=>`<th colspan="${g.items.length}">${g.label}</th>`).join('');
-    const dateHeads=opts.map(o=>{const d=new Date(o.date+'T00:00');return `<th>${DOW[d.getDay()]}. ${d.getDate()}</th>`;}).join('');
-    const timeCells=opts.map(o=>`<td>${o.time?esc(o.time.replace('–','→')):'ganztägig'}</td>`).join('');
-    const responseRows=(poll.responses||[]).map(resp=>`<tr class="result-row"><td>${esc(resp.name)}</td>${opts.map((o,i)=>{const v=resp.votes[i];return `<td>${v==='yes'?'✓':v==='maybe'?'?':'-'}</td>`;}).join('')}</tr>`).join('');
-    const sumCells=tally.map(t=>`<td>${t.yes}${poll.allowMaybe&&t.maybe?` <span style="color:#966f00">(+${t.maybe}?)</span>`:''}</td>`).join('');
-    const ownerTabs=isOwner?`<div class="legacy-tabs"><button class="legacy-tab active" type="button">Ansicht</button><button class="legacy-tab" type="button" id="ownerEditTab">Bearbeiten</button></div>`:'';
-    const ownerActions=isOwner?`<div class="legacy-owner-actions"><button type="button" class="btn btn-light btn-sm" id="toggleClosed">${poll.closed?'Umfrage wieder öffnen':'Umfrage schließen'}</button><span class="hint">Der Bearbeitungslink ist vertraulich.</span></div>`:'';
-    const closed=poll.closed?`<div class="notice err"><b>Diese Umfrage ist geschlossen.</b> Neue Antworten sind nicht möglich.</div>`:'';
-    const comments=poll.allowComment?`<details class="legacy-accordion"><summary>Kommentare</summary><div class="content"><div id="commentList">${(poll.comments||[]).length?(poll.comments||[]).map(c=>`<div style="padding:7px 0;border-bottom:1px solid var(--line-soft)"><b>${esc(c.name)}:</b> ${esc(c.text)}</div>`).join(''):'<div class="hint">Noch keine Kommentare.</div>'}</div>${poll.closed?'':`<div class="row" style="margin-top:12px"><input type="text" id="cName" placeholder="Name"><input type="text" id="cText" placeholder="Kommentar"><button type="button" class="btn btn-light btn-sm" id="addComment">Senden</button></div>`}</div></details>`:'';
-    app.innerHTML=`
-      <h1 style="font-size:16px;font-weight:400;margin-bottom:16px">${esc(poll.title)}</h1>
-      ${ownerTabs}
-      <div class="legacy-meta"><div><strong>Wer lädt ein:</strong> ${esc(poll.host)}</div><div><strong>Ort:</strong> ${esc(poll.location)}</div>${poll.desc?`<div><strong>Info:</strong> ${esc(poll.desc)}</div>`:''}</div>
-      <div class="legacy-export"><button type="button" id="csvExport">CSV Export</button></div>
-      ${ownerActions}${closed}
-      <div style="font-weight:700;font-size:12px;margin-bottom:2px">Termin Auswahl:</div>
-      <div class="legacy-table-wrap"><table class="legacy-vote" style="${voteTableStyle}">${voteColgroup}
-        <thead><tr class="month-row"><th></th>${monthRow}</tr><tr class="date-row"><th></th>${dateHeads}</tr></thead>
-        <tbody>
-          <tr class="time-row"><td>${(poll.responses||[]).length} Teilnehmer</td>${timeCells}</tr>
-          ${responseRows}
-          ${poll.closed?'':`<tr class="name-input-row"><td><input type="text" id="voterName" placeholder="Name"></td>${opts.map((o,i)=>`<td><input type="checkbox" class="legacy-check" data-i="${i}">${poll.allowMaybe?`<br><button type="button" class="legacy-maybe" data-i="${i}">vielleicht</button>`:''}</td>`).join('')}</tr>`}
-        </tbody>
-      </table>${poll.closed?'':`<div class="legacy-savebar"><button type="button" class="legacy-save" id="submitVote">Speichern</button></div>`}</div>
-      <div class="legacy-table-wrap"><table class="legacy-vote" style="${voteTableStyle}">${voteColgroup}<tbody><tr class="sum-row"><td><b>Insgesamt</b></td>${sumCells}</tr></tbody></table></div>
-      <details class="legacy-accordion" open><summary>Link zur Abstimmung</summary><div class="content"><div class="share-box"><input type="text" id="shareUrl" value="${shareUrl}" readonly><button type="button" class="btn btn-primary btn-sm" id="copyLink">Link kopieren</button></div><p style="margin:10px 0 0"><a href="mailto:?subject=${encodeURIComponent('Termin-Abstimmung: '+poll.title)}&body=${encodeURIComponent('Link zur Abstimmung:\n'+shareUrl)}">Link per E-Mail versenden</a></p></div></details>
-      ${isOwner?`<details class="legacy-accordion"><summary>Termin fixieren</summary><div class="content"><div class="hint">Die Umfrage kann über die Schaltfläche oberhalb geschlossen werden. Die aktuell höchste Zahl an Ja-Stimmen ist in der Summenzeile sichtbar.</div></div></details>`:''}
-      ${comments}
-      <div style="margin-top:18px"><button type="button" class="btn btn-light btn-sm" id="newPoll">Neue Umfrage</button></div>
-    `;
-    document.querySelectorAll('.legacy-maybe').forEach(b=>b.addEventListener('click',()=>{const i=b.dataset.i;const cb=document.querySelector(`.legacy-check[data-i="${i}"]`);b.classList.toggle('active');if(b.classList.contains('active'))cb.checked=false;}));
-    document.querySelectorAll('.legacy-check').forEach(cb=>cb.addEventListener('change',()=>{if(cb.checked){const mb=document.querySelector(`.legacy-maybe[data-i="${cb.dataset.i}"]`);if(mb)mb.classList.remove('active');}if(poll.oneOption&&cb.checked)document.querySelectorAll('.legacy-check').forEach(x=>{if(x!==cb)x.checked=false;});}));
-    document.getElementById('copyLink').addEventListener('click',()=>copyField('shareUrl'));
-    document.getElementById('newPoll').addEventListener('click',()=>{location_setHash('');renderCreate();window.scrollTo(0,0);});
-    document.getElementById('csvExport').addEventListener('click',()=>{
-      const rows=[['Name',...opts.map(o=>o.date+' '+(o.time||'ganztägig'))],...(poll.responses||[]).map(r=>[r.name,...r.votes.map(v=>v||'nein')]),['Insgesamt',...tally.map(t=>t.yes)]];
-      const csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\n');
-      const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=(poll.title||'terminabstimmung').replace(/[^a-z0-9_-]+/gi,'_')+'.csv';a.click();URL.revokeObjectURL(a.href);
-    });
-    if(isOwner){
-      const tc=document.getElementById('toggleClosed');if(tc)tc.addEventListener('click',async()=>{const fresh=await loadPoll(poll.id)||poll;fresh.closed=!fresh.closed;if(await updatePoll(fresh)){toast(fresh.closed?'Umfrage geschlossen.':'Umfrage geöffnet.');renderVote(fresh,false,true);}});
-      const et=document.getElementById('ownerEditTab');if(et)et.addEventListener('click',()=>toast('Die Bearbeitungsfunktionen befinden sich in dieser Besitzer-Ansicht.'));
-    }
-    const submit=document.getElementById('submitVote');if(submit)submit.addEventListener('click',async()=>{
-      const name=document.getElementById('voterName').value.trim();if(!name){toast('Bitte deinen Namen eingeben.');return;}
-      const votes=opts.map((o,i)=>{const cb=document.querySelector(`.legacy-check[data-i="${i}"]`);const mb=document.querySelector(`.legacy-maybe[data-i="${i}"]`);if(cb&&cb.checked)return'yes';if(mb&&mb.classList.contains('active'))return'maybe';return null;});
-      const fresh=await loadPoll(poll.id)||poll;if(fresh.closed){toast('Diese Umfrage ist geschlossen.');renderVote(fresh,false,isOwner);return;}
-      const ix=(fresh.responses||[]).findIndex(r=>r.name.toLowerCase()===name.toLowerCase());const entry={name,votes,ts:Date.now()};if(ix>=0)fresh.responses[ix]=entry;else fresh.responses.push(entry);
-      if(await updatePoll(fresh)){toast('Antwort gespeichert!');renderVote(fresh,false,isOwner);window.scrollTo(0,0);}
-    });
-    const addComment=document.getElementById('addComment');if(addComment)addComment.addEventListener('click',async()=>{const n=document.getElementById('cName').value.trim(),t=document.getElementById('cText').value.trim();if(!n||!t){toast('Name und Kommentar bitte ausfüllen.');return;}const fresh=await loadPoll(poll.id)||poll;fresh.comments=fresh.comments||[];fresh.comments.push({name:n,text:t,ts:Date.now()});if(await updatePoll(fresh))renderVote(fresh,false,isOwner);});
-  }
-
-  // ===== ROUTING =====
-  async function boot(){
-    const id=pollIdFromHash();
-    if(id){
-      const poll=await loadPoll(id);
-      if(poll){
-        const key=editKeyFromHash();
-        const isOwner = !!(key && poll.editKey && key===poll.editKey);
-        renderVote(poll,false,isOwner);
-        return;
+      list.innerHTML=`
+        <div class="cal-head">
+          <button class="btn btn-ghost btn-sm" id="cal-prev">‹</button>
+          <span class="cal-title">${monthNames[calM]} ${calY}</span>
+          <button class="btn btn-ghost btn-sm" id="cal-next">›</button>
+        </div>
+        <div class="cal-grid">${cells}</div>
+        <div class="cal-legend">${legendHTML()}<span>• = ${t('booked')}</span></div>
+        <div id="cal-day"></div>`;
+      document.getElementById('cal-prev').addEventListener('click',()=>{calM--;if(calM<0){calM=11;calY--;}selectedDay=null;drawCalendar();});
+      document.getElementById('cal-next').addEventListener('click',()=>{calM++;if(calM>11){calM=0;calY++;}selectedDay=null;drawCalendar();});
+      list.querySelectorAll('[data-day]').forEach(c=>c.addEventListener('click',()=>{
+        selectedDay=parseInt(c.dataset.day);drawCalendar();
+      }));
+      // Detailbereich für gewählten Tag
+      const dayBox=document.getElementById('cal-day');
+      if(selectedDay){
+        const has=(byDay[selectedDay]||[]).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
+        if(has.length){
+          dayBox.innerHTML=`<h2>${selectedDay}. ${monthNames[calM]}</h2>`+has.map(slotCardHTML).join('');
+          attachActions();
+        }else{
+          dayBox.innerHTML=`<div class="empty">Keine Slots an diesem Tag.</div>`;
+        }
       }
-      toast('Umfrage nicht gefunden – neue erstellen.');
     }
-    renderCreate();
+
+    function draw(){ if(mode==='cal')drawCalendar(); else drawList(); }
+    draw();
   }
-  window.addEventListener('hashchange',boot);
-  boot();
+
+  // Arten-Verwaltung als Dialog (aus dem Slot-Formular geöffnet)
+  async function openTypesManager(){
+    await loadSlotTypes();
+    const palette=['#e0b020','#3fa96a','#3f7fd9','#c0504f','#8e5fd9','#d97a2b','#2bb0b0','#b0407a'];
+    const bg=document.createElement('div');bg.className='modal-bg';
+    bg.innerHTML=`<div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h2 style="margin:0">${t('slot_kinds')}</h2>
+        <button class="btn btn-ghost btn-sm" id="tm-close">${t('done')}</button>
+      </div>
+      <div class="field"><label class="lbl">${t('new_kind_name')}</label><input id="t-label" placeholder="z.B. Reha-Training, Probetraining"></div>
+      <div class="field"><label class="lbl">${t('color')}</label>
+        <div id="t-palette" style="display:flex;gap:8px;flex-wrap:wrap">
+          ${palette.map((c,i)=>`<button type="button" class="swatch-btn${i===0?' sel':''}" data-color="${c}" style="background:${c}"></button>`).join('')}
+        </div>
+        <input id="t-color" type="hidden" value="${palette[0]}">
+      </div>
+      <button class="btn btn-primary btn-block" id="t-add">${t('create_kind')}</button>
+      <h2 style="margin-top:22px">${t('existing_kinds')}</h2>
+      <div id="types-list"></div>
+    </div>`;
+    document.body.appendChild(bg);
+    const close=()=>{ bg.remove(); if(me.role==='trainer') trainerSlots(); }; // Selects neu füllen
+    bg.querySelector('#tm-close').addEventListener('click',close);
+    bg.addEventListener('click',e=>{if(e.target===bg)close();});
+
+    const pal=bg.querySelector('#t-palette');
+    pal.addEventListener('click',e=>{const b=e.target.closest('.swatch-btn');if(!b)return;
+      pal.querySelectorAll('.swatch-btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');
+      bg.querySelector('#t-color').value=b.dataset.color;
+    });
+    bg.querySelector('#t-add').addEventListener('click',async(ev)=>{
+      const label=bg.querySelector('#t-label').value.trim();
+      if(!label){toast(t('t_enter_kind'));return;}
+      ev.target.disabled=true;
+      const {error}=await sb.from('slot_types').insert({label,color:bg.querySelector('#t-color').value,sort:slotTypes.length+1,trainer_id:me.id});
+      if(error){toast(error.message);ev.target.disabled=false;return;}
+      toast(t('t_kind_created'));await loadSlotTypes();ev.target.disabled=false;bg.querySelector('#t-label').value='';renderList();
+    });
+
+    function renderList(){
+      const list=bg.querySelector('#types-list');
+      if(!slotTypes.length){list.innerHTML=`<div class="empty">${t('no_kinds')}</div>`;return;}
+      list.innerHTML=slotTypes.map(st=>`
+        <div class="card slot" style="border-left:4px solid ${st.color};margin-bottom:8px">
+          <div class="slot-main">
+            <div class="slot-when">${esc(st.label)}</div>
+            <div class="slot-meta" style="color:${st.color}">● ${st.color}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <button class="btn btn-ghost btn-sm" data-edit="${st.id}">${t('edit')}</button>
+            <button class="btn btn-ghost btn-sm" data-del="${st.id}">${t('delete')}</button>
+          </div>
+        </div>`).join('');
+      list.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async()=>{
+        if(!confirm(t('t_kind_deleted_note')))return;
+        const {error}=await sb.from('slot_types').delete().eq('id',b.dataset.del);
+        if(error){toast(error.message);return;}
+        toast(t('t_deleted'));await loadSlotTypes();renderList();
+      }));
+      list.querySelectorAll('[data-edit]').forEach(b=>b.addEventListener('click',()=>{
+        const t=slotTypes.find(x=>x.id===b.dataset.edit);if(t)openTypeEdit(t);
+      }));
+    }
+    renderList();
+
+    function openTypeEdit(t){
+      const bg2=document.createElement('div');bg2.className='modal-bg';
+      bg2.innerHTML=`<div class="modal">
+        <h2 style="margin-top:0">${t('edit_kind')}</h2>
+        <div class="field"><label class="lbl">${t('name')}</label><input id="te-label" value="${esc(t.label)}"></div>
+        <div class="field"><label class="lbl">${t('color')}</label>
+          <div id="te-palette" style="display:flex;gap:8px;flex-wrap:wrap">
+            ${palette.map(c=>`<button type="button" class="swatch-btn${c===t.color?' sel':''}" data-color="${c}" style="background:${c}"></button>`).join('')}
+          </div>
+          <input id="te-color" type="hidden" value="${t.color}">
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn btn-ghost" id="te-cancel">${t('cancel')}</button>
+          <button class="btn btn-primary" id="te-save">${t('save')}</button>
+        </div>
+      </div>`;
+      document.body.appendChild(bg2);
+      const close2=()=>bg2.remove();
+      bg2.addEventListener('click',e=>{if(e.target===bg2)close2();});
+      const tpal=bg2.querySelector('#te-palette');
+      tpal.addEventListener('click',e=>{const x=e.target.closest('.swatch-btn');if(!x)return;
+        tpal.querySelectorAll('.swatch-btn').forEach(y=>y.classList.remove('sel'));x.classList.add('sel');
+        bg2.querySelector('#te-color').value=x.dataset.color;
+      });
+      bg2.querySelector('#te-cancel').addEventListener('click',close2);
+      bg2.querySelector('#te-save').addEventListener('click',async(ev)=>{
+        const label=bg2.querySelector('#te-label').value.trim();
+        if(!label){toast(t('t_enter_kind'));return;}
+        ev.target.disabled=true;
+        const {error}=await sb.from('slot_types').update({label,color:bg2.querySelector('#te-color').value}).eq('id',t.id);
+        if(error){toast(error.message);ev.target.disabled=false;return;}
+        close2();toast(t('t_saved'));await loadSlotTypes();renderList();
+      });
+    }
+  }
+
+  async function trainerClients(){
+    const body=document.getElementById('tab-body');
+    body.innerHTML=`
+      <div class="card">
+        <h2 style="margin-top:0">${LANG==='de'?'Kunde einladen':'Invite a client'}</h2>
+        <p class="muted" style="margin-top:-4px">${LANG==='de'?'Erzeuge einen Einladungslink und schicke ihn deinem Kunden. Beim Registrieren wird er automatisch dir zugeordnet.':'Generate an invite link and send it to your client. On sign-up they get linked to you automatically.'}</p>
+        <div class="field"><label class="lbl">${LANG==='de'?'E-Mail (optional, nur als Notiz)':'Email (optional, note only)'}</label><input id="ci-email" type="email" placeholder="client@example.com"></div>
+        <button class="btn btn-primary btn-block" id="ci-create">${LANG==='de'?'Einladungslink erzeugen':'Create invite link'}</button>
+        <div id="ci-links" style="margin-top:12px"></div>
+      </div>
+      <h2 style="margin-top:4px">${t('clients')}</h2><div id="cli-list"><div class="center-wrap" style="min-height:20vh"><span class="spin"></span></div></div>`;
+    // Kunden-Einladung erstellen
+    document.getElementById('ci-create').addEventListener('click',async(ev)=>{
+      ev.target.disabled=true;
+      const code=makeInviteCode();
+      const {error}=await sb.from('invites').insert({code,role:'client',created_by:me.id,trainer_id:me.id,email:document.getElementById('ci-email').value.trim()});
+      if(error){toast(error.message);ev.target.disabled=false;return;}
+      toast(LANG==='de'?'Einladung erstellt.':'Invite created.');trainerClients();
+    });
+    // Offene Kunden-Einladungen anzeigen
+    const {data:cinv}=await sb.from('invites').select('*').eq('role','client').eq('trainer_id',me.id).eq('used',false).order('created_at',{ascending:false});
+    const cl=document.getElementById('ci-links');
+    if(cinv&&cinv.length){
+      const base=location.href.split('#')[0];
+      cl.innerHTML=`<div class="lbl">${LANG==='de'?'Offene Einladungen':'Open invites'}</div>`+cinv.map(iv=>{
+        const link=base+'#join='+iv.code;
+        return `<div class="share-box" style="margin-bottom:6px"><input type="text" value="${link}" readonly><button class="btn btn-ghost btn-sm" data-copy="${link}" style="flex:0 0 auto">${LANG==='de'?'Kopieren':'Copy'}</button></div>`;
+      }).join('');
+      cl.querySelectorAll('[data-copy]').forEach(b=>b.addEventListener('click',()=>{
+        navigator.clipboard?.writeText(b.dataset.copy).then(()=>toast(LANG==='de'?'Link kopiert!':'Link copied!'),()=>{});
+      }));
+    }
+    const {data:clients}=await sb.from('profiles').select('*').eq('role','client').order('full_name');
+    const list=document.getElementById('cli-list');
+    if(!clients||!clients.length){list.innerHTML=`<div class="empty">${t('no_clients')}</div>`;return;}
+    list.innerHTML=clients.map(c=>{
+      const bal=Number(c.hours_balance||0);
+      const balColor = bal<=0?'var(--accent)':(bal<2?'var(--warn)':'var(--ok)');
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div>
+            <div class="slot-when">${esc(c.full_name||'(ohne Name)')}</div>
+            <div class="slot-meta">${t('balance')}: <b style="color:${balColor}">${bal.toFixed(1)} Std.</b></div>
+          </div>
+          <button class="btn btn-ghost btn-sm" data-cli="${c.id}">${t('manage')}</button>
+        </div>
+        ${c.trainer_note?`<div class="slot-meta" style="margin-top:8px;color:var(--text)">📝 ${esc(c.trainer_note)}</div>`:''}
+      </div>`;
+    }).join('');
+    list.querySelectorAll('[data-cli]').forEach(b=>b.addEventListener('click',()=>{
+      const c=clients.find(x=>x.id===b.dataset.cli);openClientModal(c);
+    }));
+
+    function openClientModal(c){
+      const bg=document.createElement('div');bg.className='modal-bg';
+      bg.innerHTML=`<div class="modal">
+        <h2 style="margin-top:0">${esc(c.full_name||'Kunde')}</h2>
+        <div class="field"><label class="lbl">${t('hours_balance')}</label><input id="c-bal" type="number" step="0.5" value="${Number(c.hours_balance||0)}"></div>
+        <div class="row" style="margin:-4px 0 10px">
+          <button class="btn btn-ghost btn-sm" data-add="1">+1</button>
+          <button class="btn btn-ghost btn-sm" data-add="5">+5</button>
+          <button class="btn btn-ghost btn-sm" data-add="10">+10</button>
+        </div>
+        <div class="field"><label class="lbl">${t('client_note')}</label><textarea id="c-note" rows="4" placeholder="${LANG==='de'?'z.B. Ziel: Rückenaufbau':'e.g. goal: back strength'}">${esc(c.trainer_note||'')}</textarea></div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn btn-ghost" id="c-cancel">${t('cancel')}</button>
+          <button class="btn btn-primary" id="c-save">${t('save')}</button>
+        </div>
+      </div>`;
+      document.body.appendChild(bg);
+      const close=()=>bg.remove();
+      bg.addEventListener('click',e=>{if(e.target===bg)close();});
+      bg.querySelector('#c-cancel').addEventListener('click',close);
+      bg.querySelectorAll('[data-add]').forEach(btn=>btn.addEventListener('click',()=>{
+        const inp=bg.querySelector('#c-bal');inp.value=(Number(inp.value||0)+Number(btn.dataset.add)).toString();
+      }));
+      bg.querySelector('#c-save').addEventListener('click',async(ev)=>{
+        ev.target.disabled=true;
+        const {error}=await sb.from('profiles').update({
+          hours_balance:Number(bg.querySelector('#c-bal').value)||0,
+          trainer_note:bg.querySelector('#c-note').value.trim()
+        }).eq('id',c.id);
+        if(error){toast(error.message);ev.target.disabled=false;return;}
+        close();toast(t('t_saved'));trainerClients();
+      });
+    }
+  }
+
+  async function trainerRequests(){
+    const body=document.getElementById('tab-body');
+    body.innerHTML=`<h2 style="margin-top:4px">${t('requests_h')}</h2><div id="req-list"><div class="center-wrap" style="min-height:20vh"><span class="spin"></span></div></div>`;
+    const {data:reqs}=await sb.from('requests').select('*').order('created_at',{ascending:false});
+    const {data:profs}=await sb.from('profiles').select('id,full_name');
+    const nameOf=id=>{const p=(profs||[]).find(x=>x.id===id);return p?p.full_name||'(ohne Name)':'—';};
+    const list=document.getElementById('req-list');
+    if(!reqs||!reqs.length){list.innerHTML=`<div class="empty">${t('no_requests')}</div>`;return;}
+    list.innerHTML=reqs.map(r=>`
+      <div class="card slot">
+        <div class="slot-main">
+          <div class="slot-when">${fmtDateTime(r.wish_at)}</div>
+          <div class="slot-meta">${esc(nameOf(r.client_id))}${r.note?' · '+esc(r.note):''}</div>
+          <div style="margin-top:6px"><span class="tag tag-${r.status}">${r.status==='pending'?t('open_r'):r.status==='accepted'?t('accepted'):t('declined')}</span></div>
+        </div>
+        ${r.status==='pending'?`<div style="display:flex;flex-direction:column;gap:6px">
+          <button class="btn btn-ok btn-sm" data-acc="${r.id}">${t('accept')}</button>
+          <button class="btn btn-ghost btn-sm" data-dec="${r.id}">${t('decline')}</button>
+        </div>`:''}
+      </div>`).join('');
+    list.querySelectorAll('[data-acc]').forEach(b=>b.addEventListener('click',async()=>{
+      const r=reqs.find(x=>x.id===b.dataset.acc);
+      // Wunsch annehmen → als gebuchten Slot anlegen
+      const {error:e1}=await sb.from('requests').update({status:'accepted'}).eq('id',r.id);
+      const {error:e2}=await sb.from('slots').insert({starts_at:r.wish_at,duration_min:60,location:'',training_note:'aus Wunsch',status:'booked',booked_by:r.client_id,trainer_id:me.id});
+      if(e1||e2){toast((e1||e2).message);return;}
+      toast(t('t_accepted_booked'));trainerRequests();
+    }));
+    list.querySelectorAll('[data-dec]').forEach(b=>b.addEventListener('click',async()=>{
+      const {error}=await sb.from('requests').update({status:'declined'}).eq('id',b.dataset.dec);
+      if(error){toast(error.message);return;}
+      toast(t('t_declined'));trainerRequests();
+    }));
+  }
+
+  async function trainerSessions(){
+    const body=document.getElementById('tab-body');
+    body.innerHTML=`<h2 style="margin-top:4px">${t('sessions_h')}</h2><div id="ses-list"><div class="center-wrap" style="min-height:20vh"><span class="spin"></span></div></div>`;
+    const {data:ses}=await sb.from('sessions').select('*').order('created_at',{ascending:false});
+    const {data:profs}=await sb.from('profiles').select('id,full_name');
+    const {data:slots}=await sb.from('slots').select('id,starts_at,duration_min,training_note');
+    const nameOf=id=>{const p=(profs||[]).find(x=>x.id===id);return p?p.full_name||'(ohne Name)':'—';};
+    const slotOf=id=>(slots||[]).find(x=>x.id===id);
+    const list=document.getElementById('ses-list');
+    if(!ses||!ses.length){list.innerHTML=`<div class="empty">${t('no_sessions')}</div>`;return;}
+    const stLabel={awaiting_confirm:t('awaiting'),active:t('active'),finished:t('finished')};
+    const stTag={awaiting_confirm:'tag-pending',active:'tag-accepted',finished:'tag-booked'};
+    list.innerHTML=ses.map(s=>{
+      const sl=slotOf(s.slot_id);
+      return `<div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+          <div class="slot-main">
+            <div class="slot-when">${esc(nameOf(s.client_id))}</div>
+            <div class="slot-meta">${sl?fmtDateTime(sl.starts_at)+' · '+sl.duration_min+' Min':(s.started_at?'gestartet '+fmtDateTime(s.started_at):'—')}</div>
+            <div style="margin-top:6px"><span class="tag ${stTag[s.status]} ${s.status==='awaiting_confirm'?'pulse':''}">${stLabel[s.status]}</span>${s.hours_deducted?' <span class="tag tag-booked">'+t('settled')+'</span>':''}</div>
+          </div>
+          ${s.status==='active'?`<button class="btn btn-ghost btn-sm" data-fin="${s.id}">${t('finish')}</button>`:''}
+        </div>
+        <div class="field" style="margin:10px 0 0">
+          <label class="lbl">${t('session_comment')}</label>
+          <textarea rows="2" data-note="${s.id}" placeholder="Was wurde trainiert, wie lief es?">${esc(s.session_note||'')}</textarea>
+          <button class="btn btn-ghost btn-sm" data-savenote="${s.id}" style="margin-top:6px">${t('save_comment')}</button>
+        </div>
+      </div>`;
+    }).join('');
+    list.querySelectorAll('[data-fin]').forEach(b=>b.addEventListener('click',async()=>{
+      const {error}=await sb.from('sessions').update({status:'finished',finished_at:new Date().toISOString()}).eq('id',b.dataset.fin);
+      if(error){toast(error.message);return;}
+      toast(t('t_session_ended'));trainerSessions();
+    }));
+    list.querySelectorAll('[data-savenote]').forEach(b=>b.addEventListener('click',async()=>{
+      const ta=list.querySelector(`[data-note="${b.dataset.savenote}"]`);
+      const {error}=await sb.from('sessions').update({session_note:ta.value.trim()}).eq('id',b.dataset.savenote);
+      if(error){toast(error.message);return;}
+      toast(t('t_comment_saved'));
+    }));
+  }
+
+  // ===================================================================
+  //  KUNDEN-ANSICHT
+  // ===================================================================
+  async function renderClient(){
+    // Fällige Stunden abrechnen, dann eigenes Profil frisch laden (Guthaben)
+    try{ await sb.rpc('settle_due_sessions'); }catch(e){}
+    const {data:freshMe}=await sb.from('profiles').select('*').eq('id',me.id).maybeSingle();
+    if(freshMe){freshMe.email=me.email;me=freshMe;}
+    // Kein Trainer zugeordnet? Dann Hinweis zeigen (Kunde muss über Einladungslink kommen)
+    if(!me.trainer_id){
+      app.innerHTML=`<div class="center-wrap"><div class="card auth-card">
+        <h1 style="margin-top:0">${LANG==='de'?'Kein Trainer verknüpft':'No trainer linked'}</h1>
+        <p class="muted">${LANG==='de'?'Dein Konto ist noch keinem Trainer zugeordnet. Bitte öffne den Einladungslink, den dir dein Trainer geschickt hat, um loszulegen.':'Your account is not linked to a trainer yet. Please open the invite link your trainer sent you to get started.'}</p>
+      </div></div>`;
+      return;
+    }
+    // Zuerst: gibt es eine Session, die auf Bestätigung wartet oder läuft?
+    const {data:mySes}=await sb.from('sessions').select('*').eq('client_id',me.id).in('status',['awaiting_confirm','active']).order('created_at',{ascending:false}).limit(1);
+    const liveSession = mySes && mySes[0];
+    const bal=Number(me.hours_balance||0);
+    const balColor = bal<=0?'var(--accent)':(bal<2?'var(--warn)':'var(--ok)');
+
+    app.innerHTML=`<h1 style="margin-bottom:4px">Hallo ${esc(me.full_name||'')}</h1>
+      <p class="muted" style="margin-top:0;margin-bottom:16px">Dein ${t('balance')}: <b style="color:${balColor}">${bal.toFixed(1)} Stunden</b></p>
+      <div id="live-area"></div>
+      <div class="tabs">
+        <button data-tab="book" class="active">${t('tab_book')}</button>
+        <button data-tab="wish">${t('tab_wish')}</button>
+        <button data-tab="mine">${t('tab_mine')}</button>
+      </div>
+      <div id="tab-body"><div class="center-wrap" style="min-height:30vh"><span class="spin"></span></div></div>`;
+
+    renderLiveArea(liveSession);
+
+    app.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{
+      app.querySelectorAll('.tabs button').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      const t=b.dataset.tab;
+      if(t==='book')clientBook();
+      if(t==='wish')clientWish();
+      if(t==='mine')clientMine();
+    }));
+    clientBook();
+  }
+
+  function renderLiveArea(liveSession){
+    const area=document.getElementById('live-area');
+    if(!area)return;
+    if(!liveSession){area.innerHTML='';return;}
+    if(liveSession.status==='awaiting_confirm'){
+      area.innerHTML=`<div class="banner banner-live">
+        <b>Dein Trainer möchte die Trainingseinheit starten.</b><br>
+        <span class="muted">Bestätige unten, dass dein Training jetzt begonnen hat.</span>
+        <button class="btn btn-primary btn-block" id="confirm-start" style="margin-top:12px">${t('confirm_training')}</button>
+      </div>`;
+      document.getElementById('confirm-start').addEventListener('click',async(ev)=>{
+        ev.target.disabled=true;
+        const {error}=await sb.from('sessions').update({status:'active',started_at:new Date().toISOString(),confirmed_at:new Date().toISOString()}).eq('id',liveSession.id);
+        if(error){toast(error.message);ev.target.disabled=false;return;}
+        toast(t('t_confirmed'));renderClient();
+      });
+    }else if(liveSession.status==='active'){
+      area.innerHTML=`<div class="banner banner-active">
+        <b>Training läuft.</b> <span class="muted">Seit ${liveSession.started_at?fmtDateTime(liveSession.started_at):'gerade'}.</span>
+      </div>`;
+    }
+  }
+
+  async function clientBook(){
+    const body=document.getElementById('tab-body');
+    body.innerHTML=`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin:4px 0 12px">
+        <h2 style="margin:0">${t('free_times')}</h2>
+        <div class="tabs" style="margin:0;flex:0 0 auto;width:auto">
+          <button id="cv-cal" class="active" style="padding:6px 14px">Kalender</button>
+          <button id="cv-list" style="padding:6px 14px">Liste</button>
+        </div>
+      </div>
+      <div id="free-list"><div class="center-wrap" style="min-height:20vh"><span class="spin"></span></div></div>`;
+    const {data:slots}=await sb.from('slots').select('*').eq('status','open').gte('starts_at',new Date().toISOString()).order('starts_at');
+    const list=document.getElementById('free-list');
+
+    let mode='cal';
+    document.getElementById('cv-cal').addEventListener('click',()=>{mode='cal';document.getElementById('cv-cal').classList.add('active');document.getElementById('cv-list').classList.remove('active');draw();});
+    document.getElementById('cv-list').addEventListener('click',()=>{mode='list';document.getElementById('cv-list').classList.add('active');document.getElementById('cv-cal').classList.remove('active');draw();});
+
+    function bookCardHTML(s){
+      const col=slotColor(s);
+      return `<div class="card slot" style="border-left:4px solid ${col}">
+        <div class="slot-main">
+          <div class="slot-when">${fmtDateTime(s.starts_at)}</div>
+          <div class="slot-meta">${s.duration_min} Min${s.location?' · '+esc(s.location):''}</div>
+          <div class="slot-meta" style="color:${col}">● ${esc(slotTypeLabel(s))}</div>
+          ${s.training_note?`<div class="slot-meta" style="color:var(--text)">📋 ${esc(s.training_note)}</div>`:''}
+        </div>
+        <button class="btn btn-primary btn-sm" data-book="${s.id}">${t('book')}</button>
+      </div>`;
+    }
+    function attachBook(){
+      list.querySelectorAll('[data-book]').forEach(b=>b.addEventListener('click',async()=>{
+        b.disabled=true;
+        const {data:upd,error}=await sb.from('slots').update({status:'booked',booked_by:me.id,cancel_reason:''}).eq('id',b.dataset.book).eq('status','open').select();
+        if(error){toast(error.message);b.disabled=false;return;}
+        if(!upd||!upd.length){toast(t('t_taken'));clientBook();return;}
+        toast(t('t_booked'));clientBook();
+      }));
+    }
+    function drawList(){
+      if(!slots||!slots.length){list.innerHTML=`<div class="empty">Aktuell keine freien Slots. Schau später wieder rein oder schlage eine Wunschzeit vor.</div>`;return;}
+      list.innerHTML=slots.map(bookCardHTML).join('');
+      attachBook();
+    }
+    // Kalender für Kunde
+    let calY,calM,selectedDay=null;
+    (function(){const n=new Date();calY=n.getFullYear();calM=n.getMonth();})();
+    function drawCalendar(){
+      const monthNames=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+      const firstDow=(new Date(calY,calM,1).getDay()+6)%7;
+      const daysInMonth=new Date(calY,calM+1,0).getDate();
+      const byDay={};
+      (slots||[]).forEach(s=>{const d=new Date(s.starts_at);if(d.getFullYear()===calY&&d.getMonth()===calM){const k=d.getDate();(byDay[k]=byDay[k]||[]).push(s);}});
+      const todayK=(new Date().getFullYear()===calY&&new Date().getMonth()===calM)?new Date().getDate():-1;
+      let cells='';const wd=['Mo','Di','Mi','Do','Fr','Sa','So'];
+      cells+=wd.map(d=>`<div class="cal-wd">${d}</div>`).join('');
+      for(let i=0;i<firstDow;i++)cells+=`<div class="cal-cell cal-empty"></div>`;
+      for(let day=1;day<=daysInMonth;day++){
+        const has=(byDay[day]||[]).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
+        const sel=selectedDay===day?' cal-sel':'';const isToday=day===todayK?' cal-today':'';
+        let evs='';
+        has.slice(0,2).forEach(s=>{
+          const t=new Date(s.starts_at);const hm=String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+          const col=slotColor(s);
+          evs+=`<div class="cal-ev" style="background:${col}22;color:${col}">${hm}</div>`;
+        });
+        if(has.length>2)evs+=`<div class="cal-ev-more">+${has.length-2}</div>`;
+        cells+=`<div class="cal-cell${sel}${isToday}" data-day="${day}"><span class="cal-num">${day}</span><div class="cal-events">${evs}</div></div>`;
+      }
+      list.innerHTML=`
+        <div class="cal-head">
+          <button class="btn btn-ghost btn-sm" id="ccal-prev">‹</button>
+          <span class="cal-title">${monthNames[calM]} ${calY}</span>
+          <button class="btn btn-ghost btn-sm" id="ccal-next">›</button>
+        </div>
+        <div class="cal-grid">${cells}</div>
+        <div class="cal-legend">${legendHTML()}</div>
+        <div id="ccal-day"></div>`;
+      document.getElementById('ccal-prev').addEventListener('click',()=>{calM--;if(calM<0){calM=11;calY--;}selectedDay=null;drawCalendar();});
+      document.getElementById('ccal-next').addEventListener('click',()=>{calM++;if(calM>11){calM=0;calY++;}selectedDay=null;drawCalendar();});
+      list.querySelectorAll('[data-day]').forEach(c=>c.addEventListener('click',()=>{selectedDay=parseInt(c.dataset.day);drawCalendar();}));
+      const dayBox=document.getElementById('ccal-day');
+      if(selectedDay){
+        const has=(byDay[selectedDay]||[]).sort((a,b)=>new Date(a.starts_at)-new Date(b.starts_at));
+        dayBox.innerHTML=has.length?`<h2>${selectedDay}. ${monthNames[calM]}</h2>`+has.map(bookCardHTML).join(''):`<div class="empty">Keine freien Slots an diesem Tag.</div>`;
+        if(has.length)attachBook();
+      }
+    }
+    function draw(){ if(mode==='cal')drawCalendar(); else drawList(); }
+    draw();
+  }
+
+  async function clientWish(){
+    const body=document.getElementById('tab-body');
+    body.innerHTML=`
+      <div class="card">
+        <h2 style="margin-top:0">${t('wish_h')}</h2>
+        <p class="muted" style="margin-top:-4px">Wann hättest du Lust zu trainieren? Dein Trainer bestätigt den Vorschlag.</p>
+        <div class="field"><label class="lbl">${t('when')}</label><input id="w-when" type="datetime-local"></div>
+        <div class="field"><label class="lbl">${t('note_opt')}</label><input id="w-note" placeholder="z.B. lieber morgens"></div>
+        <button class="btn btn-primary btn-block" id="w-add">${t('send_wish')}</button>
+      </div>
+      <h2>${t('my_wishes')}</h2>
+      <div id="wish-list"><div class="center-wrap" style="min-height:15vh"><span class="spin"></span></div></div>`;
+    document.getElementById('w-add').addEventListener('click',async(ev)=>{
+      const when=document.getElementById('w-when').value;
+      if(!when){toast(t('t_pick_time'));return;}
+      ev.target.disabled=true;
+      const {error}=await sb.from('requests').insert({client_id:me.id,trainer_id:me.trainer_id,wish_at:new Date(when).toISOString(),note:document.getElementById('w-note').value.trim(),status:'pending'});
+      if(error){toast(error.message);ev.target.disabled=false;return;}
+      toast(t('t_wish_sent'));clientWish();
+    });
+    const {data:reqs}=await sb.from('requests').select('*').eq('client_id',me.id).order('created_at',{ascending:false});
+    const list=document.getElementById('wish-list');
+    if(!reqs||!reqs.length){list.innerHTML=`<div class="empty">${t('no_wishes')}</div>`;return;}
+    list.innerHTML=reqs.map(r=>`
+      <div class="card slot">
+        <div class="slot-main">
+          <div class="slot-when">${fmtDateTime(r.wish_at)}</div>
+          <div class="slot-meta">${r.note?esc(r.note):''}</div>
+          <div style="margin-top:6px"><span class="tag tag-${r.status}">${r.status==='pending'?t('waiting'):r.status==='accepted'?t('accepted'):t('declined')}</span></div>
+        </div>
+        ${r.status==='pending'?`<button class="btn btn-ghost btn-sm" data-del="${r.id}">${t("withdraw")}</button>`:''}
+      </div>`).join('');
+    list.querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async()=>{
+      const {error}=await sb.from('requests').delete().eq('id',b.dataset.del);
+      if(error){toast(error.message);return;}
+      toast(t('t_withdrawn'));clientWish();
+    }));
+  }
+
+  // Globale Absage-Funktion (Kunde), mit Frist- und Begründungsprüfung
+  function clientCancelFlow(s, onDone){
+    const bg=document.createElement('div');bg.className='modal-bg';
+    bg.innerHTML=`<div class="modal">
+      <h2 style="margin-top:0">${t('cancel_training')}</h2>
+      <p class="muted" style="margin-top:-4px">${fmtDateTime(s.starts_at)} · ${esc(slotTypeLabel(s))}</p>
+      <div class="field"><label class="lbl">${t('reason_required')}</label><textarea id="cc-reason" rows="3" placeholder="Warum musst du absagen?"></textarea></div>
+      <div class="row" style="margin-top:8px">
+        <button class="btn btn-ghost" id="cc-cancel">${t('back')}</button>
+        <button class="btn btn-primary" id="cc-save">${t('confirm_cancel')}</button>
+      </div>
+    </div>`;
+    document.body.appendChild(bg);
+    const close=()=>bg.remove();
+    bg.addEventListener('click',e=>{if(e.target===bg)close();});
+    bg.querySelector('#cc-cancel').addEventListener('click',close);
+    bg.querySelector('#cc-save').addEventListener('click',async(ev)=>{
+      if(!canCancel(s)){toast(t('t_cancel_2h'));return;}
+      const reason=bg.querySelector('#cc-reason').value.trim();
+      if(!reason){toast(t('t_need_reason'));return;}
+      ev.target.disabled=true;
+      const {error}=await sb.from('slots').update({status:'open',booked_by:null,cancel_reason:reason}).eq('id',s.id);
+      if(error){toast(error.message);ev.target.disabled=false;return;}
+      close();toast(t('t_training_cancelled'));if(onDone)onDone();
+    });
+  }
+
+  async function clientMine(){
+    const body=document.getElementById('tab-body');
+    body.innerHTML=`<h2 style="margin-top:4px">${t('my_booked')}</h2><div id="mine-list"><div class="center-wrap" style="min-height:20vh"><span class="spin"></span></div></div>`;
+    const {data:slots}=await sb.from('slots').select('*').eq('booked_by',me.id).order('starts_at');
+    const list=document.getElementById('mine-list');
+    if(!slots||!slots.length){list.innerHTML=`<div class="empty">${t('nothing_booked')}</div>`;return;}
+    list.innerHTML=slots.map(s=>{
+      const col=slotColor(s);
+      const cancellable=canCancel(s);
+      return `<div class="card slot" style="border-left:4px solid ${col}">
+        <div class="slot-main">
+          <div class="slot-when">${fmtDateTime(s.starts_at)}</div>
+          <div class="slot-meta">${s.duration_min} Min${s.location?' · '+esc(s.location):''}</div>
+          <div class="slot-meta" style="color:${col}">● ${esc(slotTypeLabel(s))}</div>
+          ${s.training_note?`<div class="slot-meta" style="color:var(--text)">📋 ${esc(s.training_note)}</div>`:''}
+          <div style="margin-top:6px"><span class="tag tag-booked">${t('booked')}</span></div>
+          ${!cancellable?`<div class="slot-meta" style="color:var(--text-soft)">Absage nur bis 2 Std. vorher möglich</div>`:''}
+        </div>
+        ${cancellable?`<button class="btn btn-ghost btn-sm" data-cancel="${s.id}">${t('cancel_slot')}</button>`:''}
+      </div>`;
+    }).join('');
+    list.querySelectorAll('[data-cancel]').forEach(b=>b.addEventListener('click',()=>{
+      const s=(slots||[]).find(x=>x.id===b.dataset.cancel);
+      if(s)clientCancelFlow(s,clientMine);
+    }));
+  }
+
+  // ===================================================================
+  //  ROUTING / SESSION
+  // ===================================================================
+  // Invite-Code aus URL lesen (#join=CODE)
+  function inviteFromHash(){ const m=(location.hash||'').match(/join=([A-Za-z0-9]+)/); return m?m[1]:null; }
+
+  async function route(){
+    const {data:{session:s}} = await sb.auth.getSession();
+    session = s;
+    if(!session){ whoEl.innerHTML=''; renderAuth('login'); return; }
+    me = await loadMe();
+    if(!me){ renderAuth('login'); return; }
+
+    // Falls ein Invite-Code in der URL steht und noch nicht eingelöst wurde: einlösen
+    const code = inviteFromHash();
+    if(code){
+      try{
+        const {data:res}=await sb.rpc('redeem_invite',{invite_code:code});
+        if(res==='ok'){ toast(LANG==='de'?'Einladung eingelöst!':'Invite redeemed!'); }
+        else if(res==='already_used'){ toast(LANG==='de'?'Einladung bereits benutzt.':'Invite already used.'); }
+        else if(res==='not_found'){ toast(LANG==='de'?'Einladung ungültig.':'Invite not found.'); }
+      }catch(e){ /* still */ }
+      // Code aus dem Hash entfernen, damit er nicht erneut eingelöst wird
+      setLang(LANG); // schreibt Hash ohne join= neu (siehe unten)
+      me = await loadMe(); // Rolle/Zuordnung neu laden
+    }
+
+    await loadSlotTypes();
+    whoEl.innerHTML = `<a class="link" id="lang-toggle" title="Sprache / Language">${LANG==='de'?'EN':'DE'}</a> <span class="name">${esc(me.full_name||me.email)}</span> <a class="link" id="logout">${t('logout')}</a>`;
+    document.getElementById('lang-toggle').addEventListener('click',()=>{ setLang(LANG==='de'?'en':'de'); route(); });
+    document.getElementById('logout').addEventListener('click',async()=>{await sb.auth.signOut();});
+    if(me.role==='admin') renderAdmin();
+    else if(me.role==='trainer') renderTrainer();
+    else renderClient();
+  }
+
+  sb.auth.onAuthStateChange((_event,s)=>{ route(); });
+  route();
 })();
 </script>
 </body>
