@@ -10,6 +10,7 @@
   --ink: #0F1115; --ink-2: #3D424D; --ink-3: #6B7280; --ink-4: #9CA3AF;
   --paper: #FFFFFF; --bg: #F7F8FA; --bg-2: #F0F2F5;
   --accent: #4338CA; --accent-dk: #3730A3; --accent-soft: #EEF0FB; --accent-border: #D8DCF5;
+  --sky: #2AA8F2; --sky-dk: #1B8FD6; --sky-soft: #E8F5FE; --sky-deep: #0B5C8A;
   --green: #047857; --green-soft: #E6F4EF;
   --amber: #B45309; --amber-soft: #FBF0E1;
   --red: #B91C1C; --red-soft: #FBEBEB;
@@ -391,3 +392,87 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.5; }
   .admin-table { min-width: 560px; }
   .modal-lg { max-width: 100%; }
 }
+
+/* =====================================================================
+   HOMEPAGE (Startseite vor dem Login) — hellblaue Identität
+   ===================================================================== */
+.brand-btn { border: 0; background: transparent; cursor: pointer; font: inherit; color: inherit; }
+
+.home { background: var(--paper); }
+.home-wrap { max-width: 1080px; margin: 0 auto; padding: 0 28px; }
+.home-wrap.narrow { max-width: 760px; }
+
+/* Hero mit hellblauem Verlauf */
+.hero { background: linear-gradient(160deg, var(--sky) 0%, var(--sky-dk) 100%); color: #fff; text-align: center; padding: 72px 28px 80px; }
+.hero-inner { max-width: 760px; margin: 0 auto; }
+.hero-logo { width: 120px; height: 94px; margin: 0 auto 28px; background: rgba(255,255,255,.14); border-radius: 20px; padding: 12px; }
+.hero h1 { color: #fff; font-size: 44px; line-height: 1.08; letter-spacing: -0.03em; margin-bottom: 20px; }
+.hero-sub { font-size: 17px; line-height: 1.6; color: rgba(255,255,255,.92); max-width: 620px; margin: 0 auto 32px; }
+.hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+.btn-hero-primary { background: #fff; color: var(--sky-dk); font-weight: 600; padding: 13px 26px; font-size: 15px; border: 0; border-radius: var(--radius); cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.btn-hero-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(0,0,0,.16); }
+.btn-hero-ghost { background: rgba(255,255,255,.12); color: #fff; font-weight: 600; padding: 13px 26px; font-size: 15px; border: 1px solid rgba(255,255,255,.4); border-radius: var(--radius); cursor: pointer; transition: background .12s; }
+.btn-hero-ghost:hover { background: rgba(255,255,255,.22); }
+.hero-tagline { margin-top: 30px; font-size: 14px; color: rgba(255,255,255,.8); font-style: italic; }
+
+/* Sektionen */
+.home-section { padding: 72px 0; }
+.home-section.alt { background: var(--sky-soft); }
+.section-eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sky-dk); margin-bottom: 12px; text-align: center; }
+.home-section h2 { font-size: 32px; text-align: center; margin-bottom: 44px; letter-spacing: -0.025em; }
+
+/* So funktioniert's */
+.how-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; max-width: 900px; margin: 0 auto; }
+.how-col { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 28px; box-shadow: var(--shadow-sm); }
+.how-label { font-size: 13px; font-weight: 600; color: var(--sky-dk); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 18px; }
+.how-steps { list-style: none; counter-reset: step; }
+.how-steps li { counter-increment: step; position: relative; padding-left: 44px; margin-bottom: 18px; font-size: 14.5px; line-height: 1.55; color: var(--ink-2); }
+.how-steps li:last-child { margin-bottom: 0; }
+.how-steps li::before { content: counter(step); position: absolute; left: 0; top: -2px; width: 30px; height: 30px; background: var(--sky-soft); color: var(--sky-dk); border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+.how-steps b { color: var(--ink); font-weight: 600; }
+
+/* Vorteile */
+.feat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; max-width: 860px; margin: 0 auto; }
+.feat { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 26px; box-shadow: var(--shadow-sm); }
+.feat-ico { width: 44px; height: 44px; background: var(--sky-soft); border-radius: 10px; display: grid; place-items: center; margin-bottom: 16px; color: var(--sky-dk); }
+.feat-ico svg { width: 22px; height: 22px; }
+.feat h3 { font-size: 17px; margin-bottom: 8px; }
+.feat p { font-size: 14px; line-height: 1.55; color: var(--ink-3); }
+
+/* Vertrauen */
+.trust-text { font-size: 16px; line-height: 1.7; color: var(--ink-2); text-align: center; }
+
+/* CTA */
+.home-cta { background: linear-gradient(160deg, var(--sky) 0%, var(--sky-dk) 100%); color: #fff; text-align: center; padding: 68px 28px; }
+.home-cta h2 { color: #fff; font-size: 30px; margin-bottom: 12px; }
+.home-cta p { font-size: 16px; color: rgba(255,255,255,.92); margin-bottom: 28px; }
+
+/* Footer */
+.home-footer { background: var(--ink); color: rgba(255,255,255,.7); padding: 32px 0; }
+.footer-inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.footer-brand { display: flex; align-items: center; gap: 8px; color: #fff; font-weight: 600; font-size: 15px; }
+.footer-brand .mark { width: 34px; height: 27px; }
+.footer-links { display: flex; gap: 22px; }
+.footer-links a { color: rgba(255,255,255,.7); text-decoration: none; font-size: 14px; }
+.footer-links a:hover { color: #fff; }
+.footer-copy { font-size: 13px; color: rgba(255,255,255,.5); }
+
+/* Homepage responsive */
+@media (max-width: 760px) {
+  .hero { padding: 52px 20px 60px; }
+  .hero h1 { font-size: 32px; }
+  .hero-sub { font-size: 15.5px; }
+  .home-section { padding: 52px 0; }
+  .home-section h2 { font-size: 25px; margin-bottom: 32px; }
+  .how-grid { grid-template-columns: 1fr; gap: 18px; }
+  .feat-grid { grid-template-columns: 1fr; gap: 16px; }
+  .home-cta h2 { font-size: 24px; }
+  .footer-inner { flex-direction: column; text-align: center; gap: 16px; }
+}
+
+/* Homepage-Navigations-Buttons (hellblau statt Indigo) */
+.btn-home-nav { font: inherit; font-size: 13.5px; font-weight: 600; padding: 8px 16px; border-radius: var(--radius); cursor: pointer; transition: all .12s; }
+.btn-home-nav.ghost { background: transparent; border: 1px solid var(--line-2); color: var(--ink-2); }
+.btn-home-nav.ghost:hover { border-color: var(--sky); color: var(--sky-dk); }
+.btn-home-nav.solid { background: var(--sky); border: 1px solid var(--sky); color: #fff; }
+.btn-home-nav.solid:hover { background: var(--sky-dk); border-color: var(--sky-dk); }

@@ -32,7 +32,7 @@ const App = {
     if (this._authState === uid && this._authRendered) return;
     this._authState = uid;
     this._authRendered = false;
-    if (!user) { this.renderAuth(); this._authRendered = true; return; }
+    if (!user) { this.renderHome(); this._authRendered = true; return; }
     this.state.userId = user.id;
     this.state.riderId = user.id;
     this.state.driverId = user.id;
@@ -229,11 +229,149 @@ const App = {
   },
 
   /* =============================================================
+   * HOMEPAGE — Startseite vor dem Login
+   * =========================================================== */
+  renderHome() {
+    const bar = document.getElementById('topbar');
+    if (bar) bar.innerHTML = `
+      <div class="brand"><span class="mark">${ICON.logo()}</span> Werpfährtmich?</div>
+      <div style="margin-left:auto;display:flex;gap:8px">
+        <button class="btn-home-nav ghost" id="homeLogin">Anmelden</button>
+        <button class="btn-home-nav solid" id="homeSignup">Konto erstellen</button>
+      </div>`;
+    const app = document.getElementById('app');
+    app.style.display = '';
+    app.innerHTML = `
+      <div class="home">
+        <!-- Hero -->
+        <section class="hero">
+          <div class="hero-inner">
+            <div class="hero-logo">${ICON.logoArt('#fff', 'var(--sky)')}</div>
+            <h1>Pferdetransport,<br>von Mensch zu Mensch.</h1>
+            <p class="hero-sub">Werpfährtmich? bringt Pferdebesitzer und Fahrer mit Anhänger zusammen. Du stellst eine Anfrage, Fahrer aus deiner Region machen dir ein Angebot — mit Preis, Bewertung und allen Infos vorab.</p>
+            <div class="hero-actions">
+              <button class="btn btn-hero-primary" id="heroFind">Transport finden</button>
+              <button class="btn btn-hero-ghost" id="heroDrive">Als Fahrer anbieten</button>
+            </div>
+            <div class="hero-tagline">Mitfahrgelegenheiten für Pferde.</div>
+          </div>
+        </section>
+
+        <!-- So funktioniert's -->
+        <section class="home-section">
+          <div class="home-wrap">
+            <div class="section-eyebrow">So funktioniert's</div>
+            <h2>In wenigen Schritten zum Transport</h2>
+            <div class="how-grid">
+              <div class="how-col">
+                <div class="how-label">Für Pferdebesitzer</div>
+                <ol class="how-steps">
+                  <li><b>Anfrage stellen.</b> Abhol- und Zieladresse, Datum und Anzahl der Pferde eingeben.</li>
+                  <li><b>Angebote erhalten.</b> Fahrer aus deiner Umgebung melden sich mit ihrem Preis.</li>
+                  <li><b>Fahrer wählen.</b> Bewertungen und Angaben vergleichen und annehmen.</li>
+                </ol>
+              </div>
+              <div class="how-col">
+                <div class="how-label">Für Fahrer</div>
+                <ol class="how-steps">
+                  <li><b>Profil anlegen.</b> Fahrzeug, Anhänger, Preise und Verfügbarkeit festlegen.</li>
+                  <li><b>Passende Anfragen sehen.</b> Nur Anfragen in deinem Umkreis und deiner Zeit.</li>
+                  <li><b>Angebot abgeben.</b> Du entscheidest selbst, wann und zu welchem Preis.</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Vorteile -->
+        <section class="home-section alt">
+          <div class="home-wrap">
+            <div class="section-eyebrow">Warum Werpfährtmich?</div>
+            <h2>Kein Automatismus. Echte Menschen.</h2>
+            <div class="feat-grid">
+              <div class="feat">
+                <div class="feat-ico">${ICON.users()}</div>
+                <h3>Echte Angebote</h3>
+                <p>Keine automatische Zuteilung. Jeder Fahrer entscheidet selbst und nennt dir seinen Preis vorab.</p>
+              </div>
+              <div class="feat">
+                <div class="feat-ico">${ICON.mapPin()}</div>
+                <h3>Fahrer aus der Region</h3>
+                <p>Du siehst Fahrer in deinem Umkreis — kurze Wege, faire Anfahrt.</p>
+              </div>
+              <div class="feat">
+                <div class="feat-ico">${ICON.star(true)}</div>
+                <h3>Transparente Profile</h3>
+                <p>Bewertungen, abgeschlossene Fahrten und alle Angaben, bevor du dich entscheidest.</p>
+              </div>
+              <div class="feat">
+                <div class="feat-ico">${ICON.doc()}</div>
+                <h3>Preis vorab</h3>
+                <p>Der Preis steht im Angebot — berechnet aus Anfahrt und Kilometern. Keine Überraschungen.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Transparenz / Vertrauen -->
+        <section class="home-section">
+          <div class="home-wrap narrow">
+            <div class="section-eyebrow">Ehrlich gesagt</div>
+            <h2>Wir vermitteln — fahren tut ihr.</h2>
+            <p class="trust-text">Werpfährtmich? ist eine Vermittlungsplattform. Der Transportvertrag kommt direkt zwischen Pferdebesitzer und Fahrer zustande. Die Angaben und Dokumente der Anbieter prüfen wir grundsätzlich nicht auf ihre rechtliche Gültigkeit — Anbieter sind selbst dafür verantwortlich, die für ihre Transporte geltenden Voraussetzungen zu erfüllen. Diese Klarheit ist uns wichtig: So weißt du genau, worauf du dich verlässt.</p>
+          </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="home-cta">
+          <div class="home-wrap">
+            <h2>Bereit für den nächsten Transport?</h2>
+            <p>Ein Konto genügt — du kannst Pferde transportieren lassen und selbst fahren.</p>
+            <div class="hero-actions">
+              <button class="btn btn-hero-primary" id="ctaSignup">Jetzt Konto erstellen</button>
+              <button class="btn btn-hero-ghost" id="ctaLogin">Anmelden</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="home-footer">
+          <div class="home-wrap footer-inner">
+            <div class="footer-brand"><span class="mark">${ICON.logo()}</span> Werpfährtmich?</div>
+            <div class="footer-links">
+              <a href="#" data-legal="impressum">Impressum</a>
+              <a href="#" data-legal="agb">AGB</a>
+              <a href="#" data-legal="datenschutz">Datenschutz</a>
+            </div>
+            <div class="footer-copy">© ${new Date().getFullYear()} Werpfährtmich?</div>
+          </div>
+        </footer>
+      </div>`;
+
+    // Verdrahtung: alle Wege führen zu Login oder Registrierung
+    const toSignup = () => this.renderAuth('signup');
+    const toLogin = () => this.renderAuth('login');
+    ['homeSignup', 'heroDrive', 'heroFind', 'ctaSignup'].forEach((id) => {
+      const b = document.getElementById(id); if (b) b.addEventListener('click', toSignup);
+    });
+    ['homeLogin', 'ctaLogin'].forEach((id) => {
+      const b = document.getElementById(id); if (b) b.addEventListener('click', toLogin);
+    });
+    // "Transport finden" führt zur Registrierung (Reiter-Konto)
+    const hf = document.getElementById('heroFind'); if (hf) { hf.removeEventListener('click', toSignup); hf.addEventListener('click', toSignup); }
+    // Rechtstext-Links: vorerst Hinweis, dass in Arbeit
+    app.querySelectorAll('[data-legal]').forEach((a) => a.addEventListener('click', (e) => {
+      e.preventDefault();
+      toast('Diese Seite wird noch erstellt.', '');
+    }));
+  },
+
+  /* =============================================================
    * AUTH — Login & Registrierung
    * =========================================================== */
   renderAuth(mode = 'login') {
     const bar = document.getElementById('topbar');
-    if (bar) bar.innerHTML = `<div class="brand"><span class="mark">${ICON.logo()}</span> Werpfährtmich?</div>`;
+    if (bar) bar.innerHTML = `<button class="brand brand-btn" id="authHome"><span class="mark">${ICON.logo()}</span> Werpfährtmich?</button>`;
     const app = document.getElementById('app');
     app.style.display = '';
     const isLogin = mode === 'login';
@@ -270,6 +408,8 @@ const App = {
     const err = document.getElementById('authError');
     const showErr = (m) => { err.textContent = m; err.style.display = 'block'; };
     document.getElementById('auToggle').addEventListener('click', () => this.renderAuth(isLogin ? 'signup' : 'login'));
+    const authHome = document.getElementById('authHome');
+    if (authHome) authHome.addEventListener('click', () => this.renderHome());
 
     const submit = document.getElementById('auSubmit');
     const run = async () => {
