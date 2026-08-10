@@ -81,6 +81,8 @@ function rowToRider(p) {
   return {
     id: p.id, name: p.full_name, phone: p.phone,
     rating: p.rider_rating, trips: p.rider_trips || 0,
+    isAdmin: !!p.is_admin, isBlocked: !!p.is_blocked,
+    blockedUntil: p.blocked_until || null, warnings: p.warnings || 0, offersDisabled: !!p.offers_disabled,
     location: p.location_lat != null
       ? { label: p.location_label, lat: p.location_lat, lng: p.location_lng }
       : { label: '', lat: null, lng: null },
@@ -97,6 +99,11 @@ function rowToDriver(p) {
   return {
     id: p.id, name: p.full_name, phone: p.phone,
     rating: p.driver_rating, trips: p.driver_trips || 0,
+    isAdmin: !!p.is_admin, isBlocked: !!p.is_blocked,
+    blockedUntil: p.blocked_until || null, warnings: p.warnings || 0, offersDisabled: !!p.offers_disabled,
+    providerType: p.provider_type || 'private',
+    company: { name: p.company_name || '', address: p.company_address || '', register: p.company_register || '' },
+    selfDeclaredAt: p.self_declaration_at || null,
     location: p.location_lat != null
       ? { label: p.location_label, lat: p.location_lat, lng: p.location_lng }
       : { label: '', lat: null, lng: null },
@@ -178,18 +185,28 @@ const API = {
   async getMyProfile() {
     const u = await this.currentUser();
     if (!u) return null;
-    const { data, error } = await sb.from('profiles').select('*').eq('id', u.id).single();
+    // maybeSingle: liefert null statt Fehler, wenn (noch) keine Zeile da ist
+    const { data, error } = await sb.from('profiles').select('*').eq('id', u.id).maybeSingle();
     if (error) throw new Error(error.message);
-    return data;
+    if (data) return data;
+    // Kein Profil vorhanden (z. B. Trigger hat nicht gegriffen) -> selbst anlegen
+    const meta = u.user_metadata || {};
+    const { data: created, error: insErr } = await sb.from('profiles').insert({
+      id: u.id,
+      full_name: meta.full_name || '',
+      phone: meta.phone || '',
+    }).select().single();
+    if (insErr) throw new Error(insErr.message);
+    return created;
   },
   async getRider(id) {
-    const { data, error } = await sb.from('profiles').select('*').eq('id', id).single();
-    if (error) return null;
+    const { data, error } = await sb.from('profiles').select('*').eq('id', id).maybeSingle();
+    if (error || !data) return null;
     return rowToRider(data);
   },
   async getDriver(id) {
-    const { data, error } = await sb.from('profiles').select('*').eq('id', id).single();
-    if (error) return null;
+    const { data, error } = await sb.from('profiles').select('*').eq('id', id).maybeSingle();
+    if (error || !data) return null;
     return rowToDriver(data);
   },
   async updateRider(id, patch) {
@@ -226,6 +243,8 @@ const API = {
       Object.assign(row, { av_mon: a.mon, av_tue: a.tue, av_wed: a.wed, av_thu: a.thu, av_fri: a.fri, av_sat: a.sat, av_sun: a.sun, av_from: a.from, av_to: a.to });
     }
     if (patch.payment) { row.pay_cash = patch.payment.cash; row.pay_card = patch.payment.card; row.pay_invoice = patch.payment.invoice; }
+    if (patch.providerType) row.provider_type = patch.providerType;
+    if (patch.company) { row.company_name = patch.company.name; row.company_address = patch.company.address; row.company_register = patch.company.register; }
     row.is_driver = true;
     const { data, error } = await sb.from('profiles').update(row).eq('id', id).select().single();
     if (error) throw new Error(error.message);
@@ -261,13 +280,24 @@ const API = {
   },
 
   /**
-   * Passende offene Anfragen für einen Fahrer. Grob-Filter in SQL
-   * (offen), Feinfilter (Umkreis, Zeit, Kapazität) im Client — bei
-   * größeren Datenmengen später serverseitig via PostGIS/RPC lösen.
+   * Prüft, ob ein Fahrer aktuell keine Angebote abgeben darf.
+   * Gibt null zurück, wenn aktiv, sonst einen Grund-Text.
    */
+  driverBlockReason(driver) {
+    if (!driver) return null;
+    if (driver.isBlocked) return 'Dein Konto wurde dauerhaft gesperrt. Bitte kontaktiere den Betreiber.';
+    if (driver.blockedUntil && new Date(driver.blockedUntil).getTime() > Date.now()) {
+      const bis = new Date(driver.blockedUntil).toLocaleDateString('de-DE');
+      return `Dein Konto ist vorübergehend gesperrt (bis ${bis}).`;
+    }
+    if (driver.offersDisabled) return 'Deine Angebote wurden vom Betreiber vorübergehend deaktiviert.';
+    return null;
+  },
+
   async listRequestsForDriver(driverId) {
     const driver = await this.getDriver(driverId);
     if (!driver || driver.location.lat == null) return [];
+    if (this.driverBlockReason(driver)) return []; // gesperrter/inaktiver Fahrer sieht keine Anfragen
     const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
     const { data: reqs, error } = await sb.from('requests').select('*').eq('status', 'open');
     if (error) throw new Error(error.message);
@@ -291,6 +321,8 @@ const API = {
   /* ==== ANGEBOTE ==== */
   async createOffer({ requestId, driverId }) {
     const driver = await this.getDriver(driverId);
+    const reason = this.driverBlockReason(driver);
+    if (reason) throw new Error(reason);
     const req = await this.getRequest(requestId);
     if (!req) throw new Error('Anfrage nicht gefunden');
     const price = Math.round((driver.basePrice + req.routeKm * driver.pricePerKm) * 100) / 100;
@@ -448,6 +480,84 @@ const API = {
     const { data, error } = await sb.storage.from('documents').createSignedUrl(path, 300); // 5 Min gültig
     if (error) throw new Error(error.message);
     return data.signedUrl;
+  },
+
+  /* ==== SELBSTBESTÄTIGUNG ==== */
+  async saveSelfDeclaration(id) {
+    const { error } = await sb.from('profiles').update({ self_declaration_at: new Date().toISOString() }).eq('id', id);
+    if (error) throw new Error(error.message);
+  },
+
+  /* ==== MELDUNGEN ==== */
+  async createReport({ reportedId, category, message }) {
+    const u = await this.currentUser();
+    if (!u) throw new Error('Nicht angemeldet');
+    const { error } = await sb.from('reports').insert({
+      reporter_id: u.id, reported_id: reportedId,
+      category: category || null, message,
+    });
+    if (error) throw new Error(error.message);
+  },
+
+  /* ==== ADMIN ==== */
+  async amIAdmin() {
+    const p = await this.getMyProfile();
+    return !!(p && p.is_admin);
+  },
+  async listReports() {
+    // Nur Admins bekommen dank RLS Daten zurueck.
+    const { data, error } = await sb.from('reports').select('*').order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    // Anzahl Meldungen je gemeldetem Nutzer vorberechnen
+    const countByReported = {};
+    for (const r of data) countByReported[r.reported_id] = (countByReported[r.reported_id] || 0) + 1;
+    const out = [];
+    for (const r of data) {
+      const reported = await this.getDriver(r.reported_id);
+      out.push({
+        id: r.id, ticketNo: r.ticket_no || null,
+        category: r.category, message: r.message, status: r.status || 'open',
+        at: new Date(r.created_at).getTime(),
+        reportedId: r.reported_id,
+        reportedName: reported ? reported.name : '—',
+        reportedStatus: reported ? {
+          blocked: reported.isBlocked,
+          blockedUntil: reported.blockedUntil,
+          offersDisabled: reported.offersDisabled,
+          warnings: reported.warnings,
+        } : null,
+        // Melder wird anonymisiert dargestellt (Datensparsamkeit)
+        reporterRef: 'Nutzer #' + String(r.reporter_id).slice(0, 6),
+        priorReports: countByReported[r.reported_id] || 1,
+      });
+    }
+    return out;
+  },
+  async setReportStatus(reportId, status) {
+    const { error } = await sb.from('reports').update({ status }).eq('id', reportId);
+    if (error) throw new Error(error.message);
+  },
+  // Admin-Maßnahmen gegen einen Nutzer
+  async warnUser(userId) {
+    const { data: p } = await sb.from('profiles').select('warnings').eq('id', userId).maybeSingle();
+    const next = ((p && p.warnings) || 0) + 1;
+    const { error } = await sb.from('profiles').update({ warnings: next }).eq('id', userId);
+    if (error) throw new Error(error.message);
+    return next;
+  },
+  async setUserBlocked(userId, blocked) {
+    // dauerhafte Sperre (hebt temporaere Sperre mit auf)
+    const { error } = await sb.from('profiles').update({ is_blocked: blocked, blocked_until: null }).eq('id', userId);
+    if (error) throw new Error(error.message);
+  },
+  async setUserBlockedUntil(userId, until) {
+    // voruebergehende Sperre bis Datum (ISO-String) oder null zum Aufheben
+    const { error } = await sb.from('profiles').update({ blocked_until: until }).eq('id', userId);
+    if (error) throw new Error(error.message);
+  },
+  async setOffersDisabled(userId, disabled) {
+    const { error } = await sb.from('profiles').update({ offers_disabled: disabled }).eq('id', userId);
+    if (error) throw new Error(error.message);
   },
 };
 

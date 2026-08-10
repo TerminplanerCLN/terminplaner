@@ -59,11 +59,13 @@ const App = {
   renderChrome() {
     const bar = document.getElementById('topbar');
     if (!bar) return;
+    const isAdmin = !!this.state.profile?.is_admin;
     bar.innerHTML = `
       <div class="brand"><span class="mark">${ICON.logo()}</span> Werpfährtmich?</div>
       <div class="role-switch">
         <button data-role="rider" class="${this.state.role === 'rider' ? 'active' : ''}">Reiter</button>
         <button data-role="driver" class="${this.state.role === 'driver' ? 'active' : ''}">Fahrer</button>
+        ${isAdmin ? `<button data-role="admin" class="${this.state.role === 'admin' ? 'active' : ''}">Admin</button>` : ''}
       </div>
       <span class="topbar-user">${esc(this.state.profile?.full_name || '')}</span>
       <button class="btn-reset" id="logoutBtn">Abmelden</button>`;
@@ -95,8 +97,135 @@ const App = {
   render() {
     this.destroyMaps();
     this._renderToken = (this._renderToken || 0) + 1;
-    if (this.state.role === 'rider') this.renderRider();
+    if (this.state.role === 'admin') this.renderAdmin();
+    else if (this.state.role === 'rider') this.renderRider();
     else this.renderDriver();
+  },
+
+  /* =============================================================
+   * ADMIN — Meldungen als Tabelle, Detailansicht mit Maßnahmen
+   * =========================================================== */
+  async renderAdmin() {
+    const token = this._renderToken;
+    this.el = document.getElementById('app');
+    this.el.innerHTML = `
+      <div class="wrap">
+        <div class="page-head">
+          <div class="eyebrow">Admin</div>
+          <h1>Meldungen</h1>
+          <p>Eingegangene Hinweise von Nutzern. Eine Meldung bedeutet zunächst nur, dass ein Nutzer einen möglichen Verstoß gemeldet hat — nicht, dass er zutrifft. Du entscheidest über die Maßnahme. Endgültiges Löschen eines Kontos erfolgt im Supabase-Dashboard.</p>
+        </div>
+        <div id="adminBody"><div class="empty">Lade Meldungen…</div></div>
+      </div>`;
+    let reports;
+    try { reports = await API.listReports(); }
+    catch (e) { if (token === this._renderToken) document.getElementById('adminBody').innerHTML = `<div class="notice">Fehler beim Laden: ${esc(e.message)}</div>`; return; }
+    if (token !== this._renderToken) return;
+    const body = document.getElementById('adminBody');
+    if (!reports.length) { body.innerHTML = `<div class="empty">Keine Meldungen vorhanden.</div>`; return; }
+    this._reports = reports; // für Detailansicht merken
+
+    const statusLabel = { open: 'Offen', in_review: 'In Prüfung', resolved: 'Erledigt' };
+    const statusBadge = { open: 'badge-amber', in_review: 'badge-accent', resolved: 'badge-gray' };
+    const stateChip = (rs) => {
+      if (!rs) return '';
+      if (rs.blocked) return `<span class="badge" style="background:var(--red-soft);color:var(--red)">Dauerhaft gesperrt</span>`;
+      if (rs.blockedUntil && new Date(rs.blockedUntil).getTime() > Date.now()) return `<span class="badge badge-amber">Temporär gesperrt</span>`;
+      if (rs.offersDisabled) return `<span class="badge badge-amber">Angebote aus</span>`;
+      if (rs.warnings > 0) return `<span class="badge badge-gray">${rs.warnings}× verwarnt</span>`;
+      return '';
+    };
+    body.innerHTML = `
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead><tr><th>Nr.</th><th>Nutzer</th><th>Grund</th><th>Datum</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            ${reports.map((r) => `
+              <tr>
+                <td class="mono">#${r.ticketNo || '—'}</td>
+                <td>${esc(r.reportedName)} ${stateChip(r.reportedStatus)}</td>
+                <td>${esc(r.category || 'Ohne Kategorie')}</td>
+                <td class="nowrap">${fmtDate(r.at)}</td>
+                <td><span class="badge ${statusBadge[r.status] || 'badge-gray'}">${statusLabel[r.status] || r.status}</span></td>
+                <td><button class="btn btn-secondary btn-sm" data-open-report="${r.id}">Öffnen</button></td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+
+    body.querySelectorAll('[data-open-report]').forEach((b) =>
+      b.addEventListener('click', () => this.showReportDetail(b.dataset.openReport)));
+  },
+
+  showReportDetail(reportId) {
+    const r = (this._reports || []).find((x) => x.id === reportId);
+    if (!r) return;
+    const rs = r.reportedStatus || {};
+    const statusLabel = { open: 'Offen', in_review: 'In Prüfung', resolved: 'Erledigt' };
+    const tempSperrOptions = [7, 14, 30];
+    const modal = document.createElement('div');
+    modal.className = 'modal-bg';
+    modal.innerHTML = `<div class="modal modal-lg">
+      <div class="card-head"><h3>Meldung #${r.ticketNo || ''}</h3><button class="btn-reset" data-close>Schließen</button></div>
+      <div class="card-pad">
+        <div class="bs-row"><span>Gemeldeter Nutzer</span><b>${esc(r.reportedName)}</b></div>
+        <div class="bs-row"><span>Melder</span><b>${esc(r.reporterRef)}</b></div>
+        <div class="bs-row"><span>Kategorie</span><b>${esc(r.category || 'Ohne Kategorie')}</b></div>
+        <div class="bs-row"><span>Eingegangen</span><b>${fmtDate(r.at)}</b></div>
+        <div class="bs-row"><span>Bisherige Meldungen gegen diesen Nutzer</span><b>${r.priorReports}</b></div>
+        <div class="bs-row"><span>Aktueller Kontostatus</span><b>${
+          rs.blocked ? 'Dauerhaft gesperrt'
+          : (rs.blockedUntil && new Date(rs.blockedUntil).getTime() > Date.now()) ? 'Temporär gesperrt bis ' + new Date(rs.blockedUntil).toLocaleDateString('de-DE')
+          : rs.offersDisabled ? 'Angebote deaktiviert'
+          : 'Aktiv'}${rs.warnings ? ` · ${rs.warnings}× verwarnt` : ''}</b></div>
+
+        <div class="section-label" style="margin:18px 0 8px">Beschreibung</div>
+        <div class="notice" style="white-space:pre-wrap">${esc(r.message)}</div>
+
+        <div class="section-label" style="margin:18px 0 8px">Meldungsstatus</div>
+        <div class="admin-actions">
+          <button class="btn btn-secondary btn-sm" data-rstatus="in_review" ${r.status === 'in_review' ? 'disabled' : ''}>In Prüfung</button>
+          <button class="btn btn-secondary btn-sm" data-rstatus="resolved" ${r.status === 'resolved' ? 'disabled' : ''}>Meldung schließen</button>
+        </div>
+
+        <div class="section-label" style="margin:18px 0 8px">Maßnahmen gegen den Nutzer</div>
+        <div class="admin-actions">
+          <button class="btn btn-secondary btn-sm" data-warn="${r.reportedId}">Verwarnen</button>
+          ${rs.offersDisabled
+            ? `<button class="btn btn-secondary btn-sm" data-offers="on" data-uid="${r.reportedId}">Angebote wieder aktivieren</button>`
+            : `<button class="btn btn-secondary btn-sm" data-offers="off" data-uid="${r.reportedId}">Angebote deaktivieren</button>`}
+          ${tempSperrOptions.map((d) => `<button class="btn btn-secondary btn-sm" data-tempblock="${d}" data-uid="${r.reportedId}">${d} Tage sperren</button>`).join('')}
+          ${rs.blocked
+            ? `<button class="btn btn-secondary btn-sm" data-unblock="${r.reportedId}">Sperre aufheben</button>`
+            : `<button class="btn btn-danger btn-sm" data-block="${r.reportedId}">Dauerhaft sperren</button>`}
+        </div>
+        <p class="meta" style="font-size:12px;color:var(--ink-3);margin-top:14px">Hinweis: „Verwarnen“, „sperren“ und „deaktivieren“ sind deine Entscheidungen auf Basis deiner Nutzungsbedingungen. Die Meldung selbst trifft keine Aussage über die Wahrheit des Vorwurfs.</p>
+      </div></div>`;
+
+    const close = () => modal.remove();
+    modal.addEventListener('click', (e) => { if (e.target === modal || e.target.hasAttribute('data-close')) close(); });
+
+    const done = (msg) => { toast(msg, 'ok'); close(); this.renderAdmin(); };
+    const wrap = async (fn, msg) => { try { await fn(); done(msg); } catch (e) { toast(e.message, 'err'); } };
+
+    modal.querySelectorAll('[data-rstatus]').forEach((b) => b.addEventListener('click', () =>
+      wrap(() => API.setReportStatus(r.id, b.dataset.rstatus), 'Status aktualisiert')));
+    modal.querySelector('[data-warn]')?.addEventListener('click', () =>
+      wrap(() => API.warnUser(r.reportedId), 'Nutzer verwarnt'));
+    modal.querySelectorAll('[data-offers]').forEach((b) => b.addEventListener('click', () =>
+      wrap(() => API.setOffersDisabled(b.dataset.uid, b.dataset.offers === 'off'), b.dataset.offers === 'off' ? 'Angebote deaktiviert' : 'Angebote aktiviert')));
+    modal.querySelectorAll('[data-tempblock]').forEach((b) => b.addEventListener('click', () => {
+      const until = new Date(Date.now() + (+b.dataset.tempblock) * 86400000).toISOString();
+      wrap(() => API.setUserBlockedUntil(b.dataset.uid, until), `Nutzer für ${b.dataset.tempblock} Tage gesperrt`);
+    }));
+    modal.querySelector('[data-block]')?.addEventListener('click', () => {
+      if (!confirm('Diesen Nutzer dauerhaft sperren?')) return;
+      wrap(() => API.setUserBlocked(r.reportedId, true), 'Nutzer dauerhaft gesperrt');
+    });
+    modal.querySelector('[data-unblock]')?.addEventListener('click', () =>
+      wrap(() => API.setUserBlocked(r.reportedId, false), 'Sperre aufgehoben'));
+
+    document.body.appendChild(modal);
   },
 
   /* =============================================================
@@ -124,6 +253,11 @@ const App = {
             <label class="field"><span>Telefon (Pflicht)</span><input type="tel" id="auPhone" placeholder="+49 …" autocomplete="tel"></label>`}
           <label class="field"><span>E-Mail</span><input type="text" id="auEmail" placeholder="name@beispiel.de" autocomplete="email"></label>
           <label class="field"><span>Passwort</span><input type="password" id="auPass" placeholder="Mindestens 6 Zeichen" autocomplete="${isLogin ? 'current-password' : 'new-password'}"></label>
+          ${isLogin ? '' : `
+            <label class="consent-row">
+              <input type="checkbox" id="auConsent">
+              <span>Ich bestätige, dass meine Angaben richtig sind und dass ich für alle von mir angebotenen Transporte selbst dafür verantwortlich bin, die erforderlichen Fahrerlaubnisse, Genehmigungen, Nachweise und Versicherungen zu besitzen und die geltenden Vorschriften einzuhalten. Hochgeladene Dokumente werden von Werpfährtmich nicht geprüft. Ich akzeptiere die AGB und die Datenschutzerklärung.</span>
+            </label>`}
           <button class="btn btn-primary btn-block" id="auSubmit" style="margin-top:8px">${isLogin ? 'Anmelden' : 'Konto erstellen'}</button>
           <div class="auth-switch">
             ${isLogin
@@ -152,7 +286,10 @@ const App = {
           const name = val('auName').trim();
           const phone = val('auPhone').trim();
           if (!name || !phone) { showErr('Bitte Name und Telefonnummer angeben.'); submit.disabled = false; submit.textContent = 'Konto erstellen'; return; }
+          if (!document.getElementById('auConsent').checked) { showErr('Bitte bestätige die Erklärung, um fortzufahren.'); submit.disabled = false; submit.textContent = 'Konto erstellen'; return; }
           const res = await API.signUp(email, pass, name, phone);
+          // Zustimmungszeitpunkt festhalten (sobald ein Profil existiert)
+          try { const p = await API.getMyProfile(); if (p) await API.saveSelfDeclaration(p.id); } catch (e) {}
           if (!res.session) {
             // E-Mail-Bestätigung ist aktiv
             app.querySelector('.auth-card').innerHTML = `
@@ -202,8 +339,9 @@ const App = {
 
   async riderRequestForm(body) {
     const token = this._renderToken;
-    const rider = await API.getRider(this.state.riderId);
+    let rider = await API.getRider(this.state.riderId);
     if (token !== this._renderToken) return; // zwischenzeitlich neu gerendert
+    if (!rider) rider = { location: { label: '', lat: null, lng: null }, horse: {} };
     // Startadresse aus Profil vorbelegen, falls vorhanden
     if (!this.state.draft.pickup && rider.location && rider.location.lat != null) {
       this.state.draft.pickup = { ...rider.location };
@@ -248,7 +386,6 @@ const App = {
               <div><div class="rs-num" id="rsKm">–</div><div class="rs-lbl">Strecke</div></div>
               <div><div class="rs-num" id="rsMin">–</div><div class="rs-lbl">Fahrzeit</div></div>
             </div>
-            <div class="hint" style="margin-top:16px">Die Strecke wird über OpenStreetMap berechnet und einmal gespeichert. Jeder Fahrer sieht dieselben Kilometer — multipliziert mit seinem eigenen Kilometerpreis.</div>
           </div>
         </div>
       </div>`;
@@ -430,7 +567,7 @@ const App = {
     }
     const blocks = await Promise.all(requests.map((r) => this.riderRequestBlock(r)));
     if (!document.getElementById('reqList')) return;
-    list.innerHTML = blocks.join('');
+    list.innerHTML = transparencyBanner() + blocks.join('');
     // Mini-Karten erst zeichnen, wenn das Layout steht (Container hat Höhe).
     // Fallback-Linie, falls einer Anfrage die gecachte Route fehlt.
     requestAnimationFrame(() => {
@@ -485,15 +622,20 @@ const App = {
   offerCard(offer, isAccepted = false) {
     const d = offer.driver;
     const hasPermit = d.documents && d.documents.transportPermit;
-    const docBadge = hasPermit
-      ? `<span class="badge badge-green" style="margin-left:8px">${ICON.check()} Dokumente</span>`
-      : `<span class="badge badge-amber" style="margin-left:8px">${ICON.alert()} Erlaubnis fehlt</span>`;
+    const hasLicense = d.documents && d.documents.license;
+    // WICHTIG: "hinterlegt" != "geprüft". Kein Suggerieren einer Prüfung.
+    const docBadge = (hasPermit && hasLicense)
+      ? `<span class="badge badge-gray" style="margin-left:8px">${ICON.doc()} Dokumente hinterlegt</span>`
+      : `<span class="badge badge-amber" style="margin-left:8px">${ICON.alert()} Dokumente unvollständig</span>`;
+    const providerBadge = d.providerType === 'commercial'
+      ? `<span class="badge badge-accent" style="margin-left:8px">Gewerblicher Anbieter</span>`
+      : `<span class="badge badge-gray" style="margin-left:8px">Privater Anbieter</span>`;
     const head = `
       <div class="item-head">
         <div class="profile-row">
           <div class="avatar">${initials(d.name)}</div>
           <div>
-            <div style="font-weight:600;display:flex;align-items:center">${esc(d.name)}${docBadge}</div>
+            <div style="font-weight:600;display:flex;align-items:center;flex-wrap:wrap;gap:4px">${esc(d.providerType === 'commercial' && d.company.name ? d.company.name : d.name)}${providerBadge}${docBadge}</div>
             <button class="meta rating-link" data-ratings-driver="${offer.driverId}" data-name="${esc(d.name)}">${starsInline(Math.round(d.rating))} <b>${d.rating}</b> · ${d.trips} Fahrten · Bewertungen ansehen</button>
             <div class="meta">${esc(d.vehicle.make)} ${esc(d.vehicle.model)}</div>
             <div class="pay-row">${paymentBadges(d.payment)}</div>
@@ -508,15 +650,25 @@ const App = {
 
     if (!isAccepted) {
       const lowRating = d.rating && d.rating < 4.0;
+      const providerLabel = d.providerType === 'commercial' ? 'Gewerblicher Anbieter' : 'Privater Anbieter';
+      const providerName = d.providerType === 'commercial' && d.company.name ? d.company.name : d.name;
       return `<div class="item" style="box-shadow:none">
         ${head}
         ${lowRating ? `<div class="notice" style="margin-top:14px;color:var(--red);background:var(--red-soft);border-color:#F0C2C2">${ICON.alert()} Dieser Fahrer hat eine unterdurchschnittliche Bewertung (${d.rating}). Sieh dir die Bewertungen genau an, bevor du annimmst.</div>` : ''}
-        <div class="notice" style="margin-top:14px">Prüfe vor Fahrtantritt selbst Führerschein und Transport-Erlaubnis des Fahrers. Werpfährtmich? prüft diese Dokumente nicht und übernimmt keine Gewähr.</div>
+        <div class="booking-summary">
+          <div class="bs-title">Vor der Annahme</div>
+          <div class="bs-row"><span>Anbieter</span><b>${esc(providerName)}</b></div>
+          <div class="bs-row"><span>Anbieterstatus</span><b>${providerLabel}</b></div>
+          <div class="bs-row"><span>Führerschein</span><b>${hasLicense ? 'hinterlegt' : 'nicht hinterlegt'}</b></div>
+          <div class="bs-row"><span>Transport-Erlaubnis</span><b>${hasPermit ? 'hinterlegt' : 'nicht hinterlegt'}</b></div>
+          <div class="bs-note">Angaben des Fahrers — von Werpfährtmich <b>nicht geprüft</b>. Kontrolliere die Dokumente vor Fahrtantritt selbst. Der Transport wird von ${esc(providerName)} durchgeführt; Werpfährtmich vermittelt nur den Kontakt und ist nicht Vertragspartei.</div>
+        </div>
         <div class="item-actions">
           <button class="btn btn-success btn-sm" data-accept="${offer.id}">Angebot annehmen</button>
           <button class="btn btn-secondary btn-sm" data-ratings-driver="${offer.driverId}" data-name="${esc(d.name)}">${ICON.star(true)} Bewertungen</button>
           ${docBtn}
           <button class="btn btn-danger btn-sm" data-reject="${offer.id}">Ablehnen</button>
+          <button class="btn-report" data-report="${offer.driverId}" data-name="${esc(d.name)}">${ICON.alert()} Problem melden</button>
         </div>
       </div>`;
     }
@@ -669,6 +821,46 @@ const App = {
       b.addEventListener('click', () => this.showRatingsModal('driver', b.dataset.ratingsDriver, b.dataset.name)));
     this.el.querySelectorAll('[data-ratings-rider]').forEach((b) =>
       b.addEventListener('click', () => this.showRatingsModal('rider', b.dataset.ratingsRider, b.dataset.name)));
+    this.el.querySelectorAll('[data-report]').forEach((b) =>
+      b.addEventListener('click', () => this.showReportModal(b.dataset.report, b.dataset.name)));
+  },
+
+  showReportModal(reportedId, name) {
+    const cats = [
+      'Verdacht auf fehlende Genehmigung',
+      'Falsche Angaben zum Anbieterstatus',
+      'Problem mit Fahrzeug oder Anhänger',
+      'Sicherheitsproblem beim Tiertransport',
+      'Betrug oder Zahlungsproblem',
+      'Unangemessenes Verhalten',
+      'Sonstiger Rechtsverstoß',
+    ];
+    const modal = document.createElement('div');
+    modal.className = 'modal-bg';
+    modal.innerHTML = `<div class="modal">
+      <div class="card-head"><h3>Problem melden — ${esc(name || '')}</h3><button class="btn-reset" data-close>Schließen</button></div>
+      <div class="card-pad">
+        <p class="meta" style="font-size:13px;color:var(--ink-3);margin-bottom:14px">Deine Meldung geht vertraulich an den Betreiber und erscheint nicht öffentlich. Beschreibe möglichst konkret, was nicht stimmt.</p>
+        <label class="field"><span>Kategorie</span>
+          <select id="repCat">${cats.map((c) => `<option>${c}</option>`).join('')}</select>
+        </label>
+        <label class="field"><span>Beschreibung</span>
+          <textarea id="repMsg" placeholder="Was ist das Problem? Je konkreter, desto besser." style="min-height:110px"></textarea>
+        </label>
+        <button class="btn btn-primary btn-block" id="repSend">Meldung absenden</button>
+      </div></div>`;
+    modal.addEventListener('click', (e) => { if (e.target === modal || e.target.hasAttribute('data-close')) modal.remove(); });
+    modal.querySelector('#repSend').addEventListener('click', async () => {
+      const msg = modal.querySelector('#repMsg').value.trim();
+      if (!msg) { toast('Bitte beschreibe das Problem', 'err'); return; }
+      const btn = modal.querySelector('#repSend'); btn.disabled = true; btn.textContent = 'Sende…';
+      try {
+        await API.createReport({ reportedId, category: modal.querySelector('#repCat').value, message: msg });
+        modal.remove();
+        toast('Meldung gesendet — danke für den Hinweis', 'ok');
+      } catch (e) { toast(e.message, 'err'); btn.disabled = false; btn.textContent = 'Meldung absenden'; }
+    });
+    document.body.appendChild(modal);
   },
 
   async showRatingsModal(kind, id, name) {
@@ -699,9 +891,10 @@ const App = {
 
   async riderProfile(body) {
     const token = this._renderToken;
-    const rider = await API.getRider(this.state.riderId);
+    let rider = await API.getRider(this.state.riderId);
     if (token !== this._renderToken) return;
-    const h = rider.horse;
+    if (!rider) rider = { name: '', phone: '', location: { label: '', lat: null, lng: null }, horse: {} };
+    const h = rider.horse || {};
     body.innerHTML = `
       <div class="grid grid-2">
         <div class="card">
@@ -923,9 +1116,10 @@ const App = {
 
   async driverProfile(body) {
     const token = this._renderToken;
-    const d = await API.getDriver(this.state.driverId);
+    let d = await API.getDriver(this.state.driverId);
     if (token !== this._renderToken) return;
-    const av = d.availability;
+    if (!d) d = { name: '', phone: '', location: { label: '', lat: null, lng: null }, vehicle: {}, availability: {}, payment: {}, documents: {} };
+    const av = d.availability || {};
     const days = [['mon', 'Mo'], ['tue', 'Di'], ['wed', 'Mi'], ['thu', 'Do'], ['fri', 'Fr'], ['sat', 'Sa'], ['sun', 'So']];
     body.innerHTML = `
       <div class="grid grid-2">
@@ -937,6 +1131,18 @@ const App = {
             <label class="field"><span>Name</span><input type="text" id="dName" value="${esc(d.name)}"></label>
             <label class="field"><span>Telefon (Pflicht)</span><input type="tel" id="dPhone" value="${esc(d.phone)}"></label>
             ${addrField('dloc', 'Standort', d.location.label, 'Adresse eingeben')}
+            <hr class="divider">
+            <div class="section-label" style="margin-bottom:8px">In welcher Eigenschaft bietest du an?</div>
+            <div class="provider-picker">
+              <button type="button" class="prov-opt ${d.providerType !== 'commercial' ? 'on' : ''}" data-prov="private">Privatperson</button>
+              <button type="button" class="prov-opt ${d.providerType === 'commercial' ? 'on' : ''}" data-prov="commercial">Gewerblicher Anbieter</button>
+            </div>
+            <p class="meta" style="font-size:12px;color:var(--ink-3);margin:8px 0 0">Deine Auswahl muss deiner tatsächlichen Tätigkeit entsprechen. Ändert sie sich, aktualisiere den Status.</p>
+            <div id="companyFields" style="margin-top:14px;${d.providerType === 'commercial' ? '' : 'display:none'}">
+              <label class="field"><span>Unternehmensname</span><input type="text" id="cName" value="${esc(d.company.name)}"></label>
+              <label class="field"><span>Geschäftsanschrift</span><input type="text" id="cAddr" value="${esc(d.company.address)}"></label>
+              <label class="field"><span>Registernummer (falls vorhanden)</span><input type="text" id="cReg" value="${esc(d.company.register)}"></label>
+            </div>
           </div>
         </div>
         <div class="card">
@@ -994,6 +1200,13 @@ const App = {
     ['pKm', 'pBase'].forEach((id) => document.getElementById(id).addEventListener('input', recalc));
     body.querySelectorAll('[data-day]').forEach((btn) => btn.addEventListener('click', () => btn.classList.toggle('on')));
     body.querySelectorAll('[data-pay]').forEach((btn) => btn.addEventListener('click', () => btn.classList.toggle('on')));
+    // Anbieterstatus-Umschalter (exklusiv) + Firmenfelder ein-/ausblenden
+    body.querySelectorAll('[data-prov]').forEach((btn) => btn.addEventListener('click', () => {
+      body.querySelectorAll('[data-prov]').forEach((x) => x.classList.remove('on'));
+      btn.classList.add('on');
+      const cf = document.getElementById('companyFields');
+      if (cf) cf.style.display = btn.dataset.prov === 'commercial' ? '' : 'none';
+    }));
     body.querySelectorAll('[data-upload]').forEach((inp) => inp.addEventListener('change', async () => {
       const file = inp.files[0]; if (!file) return;
       const st = body.querySelector(`[data-doc-row="${inp.dataset.upload}"] .doc-status`);
@@ -1013,6 +1226,8 @@ const App = {
       body.querySelectorAll('[data-day]').forEach((b) => { availability[b.dataset.day] = b.classList.contains('on'); });
       const payment = { cash: false, card: false, invoice: false };
       body.querySelectorAll('[data-pay]').forEach((b) => { payment[b.dataset.pay] = b.classList.contains('on'); });
+      const provBtn = body.querySelector('[data-prov].on');
+      const providerType = provBtn ? provBtn.dataset.prov : 'private';
       if (!payment.cash && !payment.card && !payment.invoice) {
         toast('Bitte mindestens eine Zahlungsart wählen', 'err');
         btn.disabled = false; btn.textContent = 'Änderungen speichern'; return;
@@ -1021,11 +1236,17 @@ const App = {
         toast('Bitte einen Standort wählen — Reiter finden dich über den Umkreis', 'err');
         btn.disabled = false; btn.textContent = 'Änderungen speichern'; return;
       }
+      if (providerType === 'commercial' && !val('cName').trim()) {
+        toast('Bitte den Unternehmensnamen angeben', 'err');
+        btn.disabled = false; btn.textContent = 'Änderungen speichern'; return;
+      }
       try {
         await API.updateDriver(this.state.driverId, {
           name: val('dName'), phone: val('dPhone'), location: this.state.draft._dloc,
           vehicle: { make: val('vMake'), model: val('vModel'), trailer: val('vTrailer'), capacity: +val('vCap'), plate: val('vPlate') },
           pricePerKm: +val('pKm'), basePrice: +val('pBase'), maxRadiusKm: +val('pRadius'), availability, payment,
+          providerType,
+          company: providerType === 'commercial' ? { name: val('cName'), address: val('cAddr'), register: val('cReg') } : { name: '', address: '', register: '' },
         });
         this.state.profile = await API.getMyProfile();
         this.renderChrome(); this.bindTopbar();
@@ -1061,6 +1282,12 @@ function paymentBadges(p) {
 }
 function skeletonList(n) { return Array.from({ length: n }).map(() => `<div class="item"><div class="skeleton" style="height:18px;width:55%;margin-bottom:14px"></div><div class="skeleton" style="height:180px;width:100%;border-radius:8px"></div></div>`).join(''); }
 function emptyState(ico, title, sub) { return `<div class="empty"><div class="ico">${ico}</div><h3>${title}</h3><p>${sub}</p></div>`; }
+function transparencyBanner() {
+  return `<div class="transparency-note">
+    <div class="tn-title">Transparente Anbieterprofile</div>
+    <p>Informiere dich anhand von Anbieterangaben, hinterlegten Informationen und Bewertungen anderer Nutzer. <b>Werpfährtmich prüft die von Anbietern gemachten Angaben und bereitgestellten Dokumente grundsätzlich nicht auf ihre rechtliche Gültigkeit. Anbieter sind selbst für die Einhaltung der für ihre Transportleistungen geltenden gesetzlichen Voraussetzungen verantwortlich.</b></p>
+  </div>`;
+}
 function addrField(key, label, value, ph) {
   return `<label class="field"><span>${label}</span>
     <div class="addr-wrap">

@@ -256,3 +256,138 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.5; }
 .auth-switch { text-align: center; font-size: 13.5px; color: var(--ink-3); margin-top: 20px; }
 .link-btn { border: 0; background: transparent; font: inherit; font-size: 13.5px; font-weight: 600; color: var(--accent); cursor: pointer; padding: 0; }
 .link-btn:hover { text-decoration: underline; }
+
+/* =====================================================================
+   MOBIL-FEINSCHLIFF (Smartphones, schmale Bildschirme)
+   ===================================================================== */
+@media (max-width: 640px) {
+  /* Topbar: kompakter, damit alles nebeneinander passt */
+  .topbar { padding: 0 12px; gap: 8px; height: 56px; }
+  .brand { font-size: 15px; gap: 7px; }
+  .brand .mark { width: 34px; height: 27px; }
+  .role-switch { gap: 1px; padding: 2px; }
+  .role-switch button { padding: 6px 10px; font-size: 12.5px; }
+  .topbar-user { display: none; }           /* Name ausblenden, spart Platz */
+  .btn-reset { padding: 6px 9px; font-size: 12px; }
+
+  /* Seitenränder und Abstände enger */
+  .wrap { padding: 22px 16px 72px; }
+  .page-head { margin-bottom: 20px; }
+  .page-head h1 { font-size: 23px; }
+  .page-head p { font-size: 14px; }
+  .card-pad { padding: 18px; }
+  .card-head { padding: 16px 18px; }
+
+  /* Tabs horizontal scrollbar statt umbrechen */
+  .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tabs button { margin-right: 20px; white-space: nowrap; flex-shrink: 0; }
+
+  /* Fahrt-/Angebots-Karten: Kopf untereinander statt gequetscht */
+  .item { padding: 16px; }
+  .item-head { flex-direction: column; align-items: stretch; gap: 12px; }
+  .item-head > div[style*="text-align:right"],
+  .item-head > div[style*="text-align: right"] { text-align: left !important; }
+  .price-tag { font-size: 20px; }
+
+  /* Route-Zeile darf umbrechen, Pfeil bleibt lesbar */
+  .route-line { font-size: 13.5px; gap: 7px; }
+
+  /* Meta-Angaben (km, Zeit, Pferde) mit etwas mehr Zeilenabstand */
+  .item-meta { gap: 6px 14px; }
+
+  /* Karten etwas niedriger, damit mehr aufs Display passt */
+  .map { height: 220px; }
+  .map-sm { height: 160px; }
+
+  /* Profil-Kopf und Buttons */
+  .btn { padding: 11px 16px; }
+  .btn-block { width: 100%; }
+
+  /* Lebenszyklus-Stepper kompakter */
+  .lc-step { font-size: 11.5px; }
+  .lc-steps { gap: 5px; }
+
+  /* Modals nutzen fast volle Breite */
+  .modal { max-width: 100%; }
+  .modal-bg { padding: 12px; }
+
+  /* Adress-Vorschläge: größere Tap-Fläche */
+  .addr-item { padding: 12px; }
+
+  /* Auth-Karte auf Handy */
+  .auth-card { padding: 26px 20px; }
+  .auth-wrap { padding: 24px 14px; }
+
+  /* Sicherheits-Grid einspaltig */
+  .safety-grid { grid-template-columns: 1fr; }
+
+  /* Filterleiste (Fahrer) darf umbrechen */
+  .filter-bar { gap: 8px 10px; }
+}
+
+/* Sehr schmale Geräte (kleine Phones) */
+@media (max-width: 380px) {
+  .role-switch button { padding: 6px 9px; font-size: 12px; }
+  .page-head h1 { font-size: 21px; }
+  .brand { font-size: 14px; }
+}
+
+/* =====================================================================
+   COMPLIANCE-ELEMENTE (Selbstbestätigung, Buchung, Meldung, Anbieter)
+   ===================================================================== */
+/* Einwilligungs-Zeile bei Registrierung */
+.consent-row { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0 8px; font-size: 12.5px; line-height: 1.5; color: var(--ink-2); cursor: pointer; }
+.consent-row input[type="checkbox"] { margin-top: 2px; width: 16px; height: 16px; flex-shrink: 0; accent-color: var(--accent); cursor: pointer; }
+
+/* Buchungs-Zusammenfassung vor Annahme */
+.booking-summary { margin-top: 14px; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; background: var(--bg-2); }
+.bs-title { font-size: 11.5px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 10px; }
+.bs-row { display: flex; justify-content: space-between; gap: 12px; padding: 5px 0; font-size: 13.5px; border-bottom: 1px solid var(--line); }
+.bs-row:last-of-type { border-bottom: 0; }
+.bs-row span { color: var(--ink-3); }
+.bs-row b { color: var(--ink-1); font-weight: 600; text-align: right; }
+.bs-note { margin-top: 10px; font-size: 12px; line-height: 1.5; color: var(--ink-3); }
+.bs-note b { color: var(--ink-2); }
+
+/* "Problem melden"-Button (dezent, nicht alarmierend) */
+.btn-report { border: 0; background: transparent; color: var(--ink-3); font: inherit; font-size: 12.5px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; padding: 8px 10px; border-radius: var(--radius); }
+.btn-report:hover { color: var(--red); background: var(--red-soft); }
+.btn-report svg { width: 14px; height: 14px; }
+
+/* Anbieterstatus-Auswahl (Privat / Gewerblich) */
+.provider-picker { display: flex; gap: 8px; }
+.prov-opt { flex: 1; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); font: inherit; font-size: 13px; font-weight: 500; color: var(--ink-2); cursor: pointer; transition: all .12s; }
+.prov-opt:hover { border-color: var(--accent); }
+.prov-opt.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* =====================================================================
+   ADMIN-TABELLE, DETAIL-MODAL, TRANSPARENZ-HINWEIS
+   ===================================================================== */
+/* Admin-Meldungstabelle */
+.admin-table-wrap { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.admin-table thead th { text-align: left; font-size: 11.5px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: var(--ink-3); padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--bg-2); }
+.admin-table tbody td { padding: 14px 16px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.admin-table tbody tr:last-child td { border-bottom: 0; }
+.admin-table tbody tr:hover { background: var(--bg-2); }
+.admin-table .mono { font-variant-numeric: tabular-nums; color: var(--ink-3); font-weight: 600; }
+.admin-table .nowrap { white-space: nowrap; color: var(--ink-3); }
+.admin-table td .badge { margin-left: 6px; }
+
+/* großes Modal für Meldungsdetail */
+.modal-lg { max-width: 560px; }
+.admin-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+/* Transparenz-Hinweis über den Angeboten */
+.transparency-note { background: var(--accent-soft); border: 1px solid #D8D9F5; border-radius: var(--radius); padding: 16px 18px; margin-bottom: 18px; }
+.tn-title { font-weight: 600; font-size: 14.5px; color: var(--accent); margin-bottom: 6px; }
+.transparency-note p { font-size: 13px; line-height: 1.55; color: var(--ink-2); }
+.transparency-note b { color: var(--ink-1); font-weight: 600; }
+
+/* Admin-Tabelle auf Handy: horizontal scrollbar */
+@media (max-width: 640px) {
+  .admin-table-wrap { overflow-x: auto; }
+  .admin-table { min-width: 560px; }
+  .modal-lg { max-width: 100%; }
+}

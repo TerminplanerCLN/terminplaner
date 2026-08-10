@@ -17,6 +17,7 @@
 -- Wenn du bereits Echtdaten hast, die du behalten willst, entferne
 -- diesen Block (Zeilen bis "-- 1. PROFILE") vor dem Ausfuehren!
 -- ---------------------------------------------------------------------
+drop table if exists public.reports cascade;
 drop table if exists public.offers cascade;
 drop table if exists public.requests cascade;
 drop table if exists public.profiles cascade;
@@ -89,6 +90,20 @@ create table if not exists public.profiles (
   horse_temperament text,
   horse_loading_ok boolean default true,
   horse_notes text,
+
+  -- Rolle & Status auf der Plattform
+  is_admin boolean not null default false,          -- darf Meldungen sehen und sperren
+  is_blocked boolean not null default false,        -- dauerhaft gesperrt
+  blocked_until timestamptz,                        -- voruebergehend gesperrt bis (optional)
+  warnings integer not null default 0,              -- Anzahl Verwarnungen
+  offers_disabled boolean not null default false,   -- Angebote deaktiviert (mildere Massnahme)
+  provider_type text default 'private',             -- 'private' | 'commercial'
+  -- gewerbliche Anbieter (optional)
+  company_name text,
+  company_address text,
+  company_register text,
+  -- Selbstbestaetigung des Fahrers (Zeitpunkt der Zustimmung)
+  self_declaration_at timestamptz,
 
   created_at timestamptz not null default now()
 );
@@ -169,6 +184,26 @@ create index if not exists offers_request_idx on public.offers(request_id);
 create index if not exists offers_driver_idx on public.offers(driver_id);
 
 -- ---------------------------------------------------------------------
+-- 3b. MELDUNGEN (reports)
+-- Nutzer melden Probleme mit einem Fahrer/Anbieter. Nicht oeffentlich,
+-- nur fuer Admins sichtbar.
+-- ---------------------------------------------------------------------
+create table if not exists public.reports (
+  id uuid primary key default gen_random_uuid(),
+  ticket_no bigint generated always as identity,  -- fortlaufende Nummer fuer Anzeige (#1042)
+  reporter_id uuid not null references public.profiles(id) on delete cascade,
+  reported_id uuid not null references public.profiles(id) on delete cascade,  -- gemeldeter Fahrer
+  category text,                 -- optionale Kategorie
+  message text not null,         -- Freitext-Beschreibung
+  status text not null default 'open',  -- open -> in_review -> resolved
+  created_at timestamptz not null default now()
+);
+-- Meldungsnummern beginnen bei 1000, damit sie wie echte Ticketnummern aussehen
+alter table public.reports alter column ticket_no restart with 1000;
+create index if not exists reports_status_idx on public.reports(status);
+create index if not exists reports_reported_idx on public.reports(reported_id);
+
+-- ---------------------------------------------------------------------
 -- 4. Profil automatisch anlegen, sobald sich ein Nutzer registriert
 -- ---------------------------------------------------------------------
 create or replace function public.handle_new_user()
@@ -197,6 +232,7 @@ create trigger on_auth_user_created
 alter table public.profiles enable row level security;
 alter table public.requests enable row level security;
 alter table public.offers   enable row level security;
+alter table public.reports  enable row level security;
 
 -- --- PROFILE ---
 -- Jeder eingeloggte Nutzer darf alle Profile LESEN (noetig, damit Reiter
@@ -206,10 +242,23 @@ create policy "Profile lesbar fuer eingeloggte"
   on public.profiles for select
   to authenticated using (true);
 
+-- Hilfsfunktion: ist der aktuelle Nutzer Admin?
+-- security definer umgeht RLS bei der internen Abfrage und verhindert
+-- so eine Endlos-Rekursion in den Policies.
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer set search_path = public
+stable
+as $$
+  select coalesce((select is_admin from public.profiles where id = auth.uid()), false);
+$$;
+
 drop policy if exists "Eigenes Profil aendern" on public.profiles;
 create policy "Eigenes Profil aendern"
   on public.profiles for update
-  to authenticated using (auth.uid() = id) with check (auth.uid() = id);
+  to authenticated using (auth.uid() = id or public.is_admin())
+  with check (auth.uid() = id or public.is_admin());
 
 drop policy if exists "Eigenes Profil anlegen" on public.profiles;
 create policy "Eigenes Profil anlegen"
@@ -264,6 +313,24 @@ create policy "Angebot aenderbar durch Beteiligte"
     auth.uid() = driver_id
     or exists (select 1 from public.requests r where r.id = offers.request_id and r.rider_id = auth.uid())
   );
+
+-- --- MELDUNGEN ---
+-- Jeder eingeloggte Nutzer darf eine Meldung erstellen. Lesen duerfen sie
+-- nur Admins (und der Melder seine eigene). Aendern (Status) nur Admins.
+drop policy if exists "Meldung erstellen" on public.reports;
+create policy "Meldung erstellen"
+  on public.reports for insert
+  to authenticated with check (auth.uid() = reporter_id);
+
+drop policy if exists "Meldungen lesen (Admin oder eigene)" on public.reports;
+create policy "Meldungen lesen (Admin oder eigene)"
+  on public.reports for select
+  to authenticated using (auth.uid() = reporter_id or public.is_admin());
+
+drop policy if exists "Meldung aendern (nur Admin)" on public.reports;
+create policy "Meldung aendern (nur Admin)"
+  on public.reports for update
+  to authenticated using (public.is_admin());
 
 -- =====================================================================
 -- 6. STORAGE-BUCKET fuer Dokumente (Fuehrerschein, Transport-Erlaubnis)
