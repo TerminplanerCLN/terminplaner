@@ -353,7 +353,7 @@ const App = {
               <details class="faq-item">
                 <summary>Prüft Werpfährtmich? die Anbieter und ihre Dokumente?</summary>
                 <div class="faq-body">
-                  <p>Im Anbieterprofil findest du die hinterlegten Angaben und Dokumente. Prüfe die für den konkreten Transport relevanten Unterlagen vor der Übergabe.</p>
+                  <p>Im Anbieterprofil finden Sie die hinterlegten Angaben und Dokumente. Bitte prüfen Sie die für den konkreten Transport relevanten Unterlagen vor der Übergabe. Werpfährtmich? prüft diese nicht auf ihre rechtliche Gültigkeit; die Verantwortung dafür liegt bei den Anbietern.</p>
                   <p>Sollten Ihnen ungültige oder fehlerhafte Unterlagen auffallen, können Sie uns diese über die Meldefunktion mitteilen. Wir gehen jedem Hinweis nach und sperren den betreffenden Anbieter, sofern es erforderlich ist.</p>
                 </div>
               </details>
@@ -779,7 +779,7 @@ const App = {
     }
     const blocks = await Promise.all(requests.map((r) => this.riderRequestBlock(r)));
     if (!document.getElementById('reqList')) return;
-    list.innerHTML = transparencyBanner() + blocks.join('');
+    list.innerHTML = blocks.join('');
     // Mini-Karten erst zeichnen, wenn das Layout steht (Container hat Höhe).
     // Fallback-Linie, falls einer Anfrage die gecachte Route fehlt.
     requestAnimationFrame(() => {
@@ -1502,6 +1502,11 @@ const App = {
       if (!(+val('vCap') > 0)) { toast('Bitte die Anhänger-Kapazität angeben', 'err'); btn.disabled = false; btn.textContent = 'Änderungen speichern'; return; }
       const currentDriver = await API.getDriver(this.state.driverId);
       if (!currentDriver?.documents?.license || !currentDriver?.documents?.transportPermit) { toast('Bitte Führerschein und Transport-Nachweis hochladen, bevor du Fahrten anbietest.', 'err'); btn.disabled = false; btn.textContent = 'Änderungen speichern'; return; }
+      const cancelStages = [val('cancel_more48'), val('cancel_24_48'), val('cancel_6_24'), val('cancel_under6')];
+      if (cancelStages.includes('custom') && !val('cancelCustom').trim()) {
+        toast('Bitte beschreibe deine individuelle Stornoregel im Textfeld.', 'err');
+        btn.disabled = false; btn.textContent = 'Änderungen speichern'; return;
+      }
       try {
         await API.updateDriver(this.state.driverId, {
           name: val('dName'), phone: val('dPhone'), location: this.state.draft._dloc,
