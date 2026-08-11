@@ -246,9 +246,9 @@ const App = {
         <!-- Hero -->
         <section class="hero">
           <div class="hero-inner">
-            <div class="hero-logo">${ICON.logoArt('#fff', 'var(--sky)')}</div>
+            <div class="hero-logo"><img src="logo.png" alt="Werpfährtmich?"></div>
             <h1>Pferdetransport,<br>von Mensch zu Mensch.</h1>
-            <p class="hero-sub">Werpfährtmich? bringt Pferdebesitzer und Fahrer mit Anhänger zusammen. Du stellst eine Anfrage, Fahrer aus deiner Region machen dir ein Angebot — mit Preis, Bewertung und allen Infos vorab.</p>
+            <p class="hero-sub">Werpfährtmich? verbindet Pferdehalter mit Anhängeranbietern in der Region. Sie stellen eine Anfrage, passende Fahrer melden sich mit ihrem Angebot — mit Preis, Bewertung und allen Infos vorab.</p>
             <div class="hero-actions">
               <button class="btn btn-hero-primary" id="heroFind">Transport finden</button>
               <button class="btn btn-hero-ghost" id="heroDrive">Als Fahrer anbieten</button>
@@ -277,7 +277,7 @@ const App = {
                 <div class="how-label">Für Pferdebesitzer</div>
                 <ol class="how-steps">
                   <li><b>Anfrage stellen.</b> Abhol- und Zieladresse, Datum und Anzahl der Pferde eingeben.</li>
-                  <li><b>Angebote erhalten.</b> Fahrer aus deiner Umgebung melden sich mit ihrem Preis.</li>
+                  <li><b>Angebote erhalten.</b> Fahrer aus Ihrer Umgebung melden sich mit ihrem Preis.</li>
                   <li><b>Fahrer wählen.</b> Bewertungen und Angaben vergleichen und annehmen.</li>
                 </ol>
               </div>
@@ -285,8 +285,8 @@ const App = {
                 <div class="how-label">Für Fahrer</div>
                 <ol class="how-steps">
                   <li><b>Profil anlegen.</b> Fahrzeug, Anhänger, Preise und Verfügbarkeit festlegen.</li>
-                  <li><b>Passende Anfragen sehen.</b> Nur Anfragen in deinem Umkreis und deiner Zeit.</li>
-                  <li><b>Angebot abgeben.</b> Du entscheidest selbst, wann und zu welchem Preis.</li>
+                  <li><b>Passende Anfragen sehen.</b> Nur Anfragen in Ihrem Umkreis und Ihrer Zeit.</li>
+                  <li><b>Angebot abgeben.</b> Sie entscheiden selbst, wann und zu welchem Preis.</li>
                 </ol>
               </div>
             </div>
@@ -302,17 +302,17 @@ const App = {
               <div class="feat">
                 <div class="feat-ico">${ICON.users()}</div>
                 <h3>Echte Angebote</h3>
-                <p>Keine automatische Zuteilung. Jeder Fahrer entscheidet selbst und nennt dir seinen Preis vorab.</p>
+                <p>Keine automatische Zuteilung. Jeder Fahrer entscheidet selbst und nennt Ihnen seinen Preis vorab.</p>
               </div>
               <div class="feat">
                 <div class="feat-ico">${ICON.mapPin()}</div>
                 <h3>Fahrer aus der Region</h3>
-                <p>Du siehst Fahrer in deinem Umkreis — kurze Wege, faire Anfahrt.</p>
+                <p>Sie sehen Fahrer in Ihrem Umkreis — kurze Wege, faire Anfahrt.</p>
               </div>
               <div class="feat">
                 <div class="feat-ico">${ICON.star(true)}</div>
                 <h3>Transparente Profile</h3>
-                <p>Bewertungen, abgeschlossene Fahrten und alle Angaben, bevor du dich entscheidest.</p>
+                <p>Bewertungen, abgeschlossene Fahrten und alle Angaben, bevor Sie sich entscheiden.</p>
               </div>
               <div class="feat">
                 <div class="feat-ico">${ICON.doc()}</div>
@@ -323,12 +323,52 @@ const App = {
           </div>
         </section>
 
-        <!-- Transparenz / Vertrauen -->
+        <!-- FAQ -->
         <section class="home-section">
           <div class="home-wrap narrow">
-            <div class="section-eyebrow">Ehrlich gesagt</div>
-            <h2>Wir vermitteln — fahren tut ihr.</h2>
-            <p class="trust-text">Werpfährtmich? ist eine Vermittlungsplattform. Der Transportvertrag kommt direkt zwischen Pferdebesitzer und Fahrer zustande. Die Angaben und Dokumente der Anbieter prüfen wir grundsätzlich nicht auf ihre rechtliche Gültigkeit — Anbieter sind selbst dafür verantwortlich, die für ihre Transporte geltenden Voraussetzungen zu erfüllen. Diese Klarheit ist uns wichtig: So weißt du genau, worauf du dich verlässt.</p>
+            <div class="section-eyebrow">Häufige Fragen</div>
+            <h2>Gut zu wissen</h2>
+            <div class="faq">
+              <details class="faq-item">
+                <summary>Was brauche ich, um als Fahrer anzubieten?</summary>
+                <div class="faq-body">
+                  <p>Sie benötigen ein geeignetes Zugfahrzeug mit Pferdeanhänger oder einen Pferdetransporter sowie die passende Ausstattung für einen sicheren Transport.</p>
+                  <p>Dazu kommen die erforderlichen Unterlagen: die zum Gespann passende Führerscheinklasse (in der Regel B mit Anhänger bzw. BE) und – bei Transporten in Verbindung mit einer wirtschaftlichen Tätigkeit – die nach der EU-Tiertransportverordnung (EG) Nr. 1/2005 vorgeschriebenen Nachweise. Für gewerbliche Fahrten über 65 km gehören dazu insbesondere die Zulassung als Transportunternehmer und ein Befähigungsnachweis.</p>
+                  <p>Welche Voraussetzungen in Ihrem konkreten Fall gelten, hängt von Zweck, Entfernung und Dauer der Fahrt ab. Bitte informieren Sie sich eigenständig bei Ihrem zuständigen Veterinäramt. Werpfährtmich? prüft diese Voraussetzungen nicht – die Verantwortung dafür liegt bei Ihnen als Anbieter.</p>
+                </div>
+              </details>
+              <details class="faq-item">
+                <summary>Was brauche ich als Pferdebesitzer?</summary>
+                <div class="faq-body">
+                  <p>Im Grunde nur Ihr Pferd und einen Termin, zu dem es abgeholt werden soll. Sie stellen eine Anfrage mit Start, Ziel und Zeitpunkt, und passende Fahrer melden sich mit ihrem Angebot.</p>
+                  <p>Planen Sie ausreichend Zeit ein und begegnen Sie den Fahrern respektvoll – ein guter Transport ist Teamarbeit. Prüfen Sie vor der Übergabe selbst die Angaben und Unterlagen des Fahrers.</p>
+                </div>
+              </details>
+              <details class="faq-item">
+                <summary>Wer ist mein Vertragspartner?</summary>
+                <div class="faq-body">
+                  <p>Der Transportvertrag kommt direkt zwischen Ihnen und dem Fahrer zustande. Werpfährtmich? ist eine Vermittlungsplattform und führt die Transporte nicht selbst durch. Wir stellen den Kontakt her – gefahren wird von den Anbietern.</p>
+                </div>
+              </details>
+              <details class="faq-item">
+                <summary>Prüft Werpfährtmich? die Anbieter und ihre Dokumente?</summary>
+                <div class="faq-body">
+                  <p>Nein. Die Angaben und hinterlegten Dokumente der Anbieter prüfen wir grundsätzlich nicht auf ihre rechtliche Gültigkeit. Anbieter sind selbst dafür verantwortlich, die für ihre Transporte geltenden gesetzlichen Voraussetzungen zu erfüllen. Auf jedem Profil sehen Sie, welche Angaben Selbstauskunft sind – so können Sie sich vor der Buchung ein eigenes Bild machen.</p>
+                </div>
+              </details>
+              <details class="faq-item">
+                <summary>Wie wird der Preis bestimmt?</summary>
+                <div class="faq-body">
+                  <p>Jeder Fahrer legt seine Konditionen selbst fest – üblicherweise aus einer Anfahrtspauschale und einem Preis pro Kilometer. Den Gesamtpreis sehen Sie im Angebot, bevor Sie es annehmen. So gibt es keine Überraschungen.</p>
+                </div>
+              </details>
+              <details class="faq-item">
+                <summary>Wie weit reichen die Fahrten?</summary>
+                <div class="faq-body">
+                  <p>Fahrer legen selbst fest, in welchem Umkreis sie Transporte anbieten. Der maximale Umkreis auf Werpfährtmich? beträgt 65 km – die Entfernung, bis zu der nach der EU-Tiertransportverordnung geringere Anforderungen gelten. Für weiter reichende oder besonders lange Transporte gelten zusätzliche gesetzliche Vorgaben.</p>
+                </div>
+              </details>
+            </div>
           </div>
         </section>
 
@@ -336,7 +376,7 @@ const App = {
         <section class="home-cta">
           <div class="home-wrap">
             <h2>Bereit für den nächsten Transport?</h2>
-            <p>Ein Konto genügt — du kannst Pferde transportieren lassen und selbst fahren.</p>
+            <p>Ein Konto genügt — Sie können Pferde transportieren lassen und selbst fahren.</p>
             <div class="hero-actions">
               <button class="btn btn-hero-primary" id="ctaSignup">Jetzt Konto erstellen</button>
               <button class="btn btn-hero-ghost" id="ctaLogin">Anmelden</button>
@@ -1330,7 +1370,7 @@ const App = {
           <div class="field-row-3">
             <label class="field"><span>Kilometerpreis (€)</span><input type="number" step="0.1" id="pKm" value="${d.pricePerKm}"></label>
             <label class="field"><span>Anfahrtspauschale (€)</span><input type="number" step="1" id="pBase" value="${d.basePrice}"></label>
-            <label class="field"><span>Max. Umkreis (km)</span><input type="number" id="pRadius" value="${d.maxRadiusKm}"></label>
+            <label class="field"><span>Max. Umkreis (km)</span><input type="number" id="pRadius" value="${Math.min(d.maxRadiusKm, 65)}" min="1" max="65"><span class="field-hint">Höchstens 65 km — bis zu dieser Entfernung gelten nach der EU-Tiertransportverordnung geringere Anforderungen.</span></label>
           </div>
           <div class="section-label" style="margin-top:6px">Verfügbare Tage</div>
           <div class="day-picker" id="dayPicker" style="margin-bottom:18px">${days.map(([k, l]) => `<button type="button" class="day-btn ${av[k] ? 'on' : ''}" data-day="${k}">${l}</button>`).join('')}</div>
@@ -1408,7 +1448,7 @@ const App = {
         await API.updateDriver(this.state.driverId, {
           name: val('dName'), phone: val('dPhone'), location: this.state.draft._dloc,
           vehicle: { make: val('vMake'), model: val('vModel'), trailer: val('vTrailer'), capacity: +val('vCap'), plate: val('vPlate') },
-          pricePerKm: +val('pKm'), basePrice: +val('pBase'), maxRadiusKm: +val('pRadius'), availability, payment,
+          pricePerKm: +val('pKm'), basePrice: +val('pBase'), maxRadiusKm: Math.min(Math.max(+val('pRadius') || 1, 1), 65), availability, payment,
           providerType,
           company: providerType === 'commercial' ? { name: val('cName'), address: val('cAddr'), register: val('cReg') } : { name: '', address: '', register: '' },
         });

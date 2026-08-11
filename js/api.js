@@ -237,7 +237,7 @@ const API = {
     }
     if (patch.pricePerKm != null) row.price_per_km = patch.pricePerKm;
     if (patch.basePrice != null) row.base_price = patch.basePrice;
-    if (patch.maxRadiusKm != null) row.max_radius_km = patch.maxRadiusKm;
+    if (patch.maxRadiusKm != null) row.max_radius_km = Math.min(Math.max(patch.maxRadiusKm, 1), 65);
     if (patch.availability) {
       const a = patch.availability;
       Object.assign(row, { av_mon: a.mon, av_tue: a.tue, av_wed: a.wed, av_thu: a.thu, av_fri: a.fri, av_sat: a.sat, av_sun: a.sun, av_from: a.from, av_to: a.to });

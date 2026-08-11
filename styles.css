@@ -405,7 +405,8 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.5; }
 /* Hero mit hellblauem Verlauf */
 .hero { background: linear-gradient(160deg, var(--sky) 0%, var(--sky-dk) 100%); color: #fff; text-align: center; padding: 72px 28px 80px; }
 .hero-inner { max-width: 760px; margin: 0 auto; }
-.hero-logo { width: 120px; height: 94px; margin: 0 auto 28px; background: rgba(255,255,255,.14); border-radius: 20px; padding: 12px; }
+.hero-logo { width: 132px; height: 104px; margin: 0 auto 28px; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 28px rgba(0,0,0,.18); }
+.hero-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .hero h1 { color: #fff; font-size: 44px; line-height: 1.08; letter-spacing: -0.03em; margin-bottom: 20px; }
 .hero-sub { font-size: 17px; line-height: 1.6; color: rgba(255,255,255,.92); max-width: 620px; margin: 0 auto 32px; }
 .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
@@ -499,4 +500,28 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.5; }
 /* Wer Bewegung reduziert haben möchte, bekommt kein Gleiten */
 @media (prefers-reduced-motion: reduce) {
   .reveal { transition: opacity .4s ease; transform: none; }
+}
+
+/* =====================================================================
+   FAQ (aufklappbare Fragen) + Feld-Hinweis
+   ===================================================================== */
+.faq { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.faq-item { background: var(--paper); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; transition: border-color .15s; }
+.faq-item[open] { border-color: var(--sky); }
+.faq-item summary { list-style: none; cursor: pointer; padding: 18px 20px; font-size: 16px; font-weight: 600; color: var(--ink); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after { content: "+"; font-size: 22px; font-weight: 400; color: var(--sky-dk); flex-shrink: 0; transition: transform .2s; line-height: 1; }
+.faq-item[open] summary::after { transform: rotate(45deg); }
+.faq-item summary:hover { color: var(--sky-dk); }
+.faq-body { padding: 0 20px 20px; }
+.faq-body p { font-size: 14.5px; line-height: 1.6; color: var(--ink-2); margin-bottom: 10px; }
+.faq-body p:last-child { margin-bottom: 0; }
+
+/* Feld-Hinweis unter Eingabefeldern */
+.field-hint { display: block; font-size: 12px; line-height: 1.45; color: var(--ink-3); margin-top: 6px; }
+
+/* FAQ auf Handy */
+@media (max-width: 640px) {
+  .faq-item summary { font-size: 15px; padding: 15px 16px; }
+  .faq-body { padding: 0 16px 16px; }
 }
