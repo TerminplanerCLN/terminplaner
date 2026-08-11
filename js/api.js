@@ -123,6 +123,13 @@ function rowToDriver(p) {
       license: p.doc_license_path ? { fileName: p.doc_license_name, path: p.doc_license_path } : null,
       transportPermit: p.doc_permit_path ? { fileName: p.doc_permit_name, path: p.doc_permit_path } : null,
     },
+    cancellationPolicy: {
+      more48: p.cancel_more48 || 'free',
+      h24_48: p.cancel_24_48 || 'free',
+      h6_24: p.cancel_6_24 || 'base_fee',
+      under6: p.cancel_under6 || 'base_fee',
+      customText: p.cancel_custom_text || '',
+    },
   };
 }
 function rowToRequest(r) {
@@ -146,6 +153,10 @@ function rowToOffer(o) {
     routeKm: Number(o.route_km), status: o.status,
     acceptedAt: o.accepted_at ? new Date(o.accepted_at).getTime() : null,
     cancelWindowMs: o.cancel_window_ms,
+    cancellationPolicy: o.cancellation_policy || null,
+    cancellationCategory: o.cancellation_category || null,
+    cancellationReason: o.cancellation_reason || '',
+    cancellationMutual: !!o.cancellation_mutual,
     cancelledBy: o.cancelled_by, cancelledAt: o.cancelled_at ? new Date(o.cancelled_at).getTime() : null,
     riderCompleted: o.rider_completed, driverCompleted: o.driver_completed,
     completedAt: o.completed_at ? new Date(o.completed_at).getTime() : null,
@@ -243,6 +254,13 @@ const API = {
       Object.assign(row, { av_mon: a.mon, av_tue: a.tue, av_wed: a.wed, av_thu: a.thu, av_fri: a.fri, av_sat: a.sat, av_sun: a.sun, av_from: a.from, av_to: a.to });
     }
     if (patch.payment) { row.pay_cash = patch.payment.cash; row.pay_card = patch.payment.card; row.pay_invoice = patch.payment.invoice; }
+    if (patch.cancellationPolicy) {
+      row.cancel_more48 = patch.cancellationPolicy.more48;
+      row.cancel_24_48 = patch.cancellationPolicy.h24_48;
+      row.cancel_6_24 = patch.cancellationPolicy.h6_24;
+      row.cancel_under6 = patch.cancellationPolicy.under6;
+      row.cancel_custom_text = patch.cancellationPolicy.customText || '';
+    }
     if (patch.providerType) row.provider_type = patch.providerType;
     if (patch.company) { row.company_name = patch.company.name; row.company_address = patch.company.address; row.company_register = patch.company.register; }
     row.is_driver = true;
@@ -326,9 +344,16 @@ const API = {
     const req = await this.getRequest(requestId);
     if (!req) throw new Error('Anfrage nicht gefunden');
     const price = Math.round((driver.basePrice + req.routeKm * driver.pricePerKm) * 100) / 100;
+    const missing = [];
+    if (!driver.vehicle.make || !driver.vehicle.model || !driver.vehicle.trailer || !driver.vehicle.plate || !(Number(driver.vehicle.capacity) > 0)) missing.push('Fahrzeug- und Anhängerdaten');
+    if (!driver.documents?.license) missing.push('Führerschein');
+    if (!driver.documents?.transportPermit) missing.push('Transport-Nachweis');
+    if (!driver.location?.lat) missing.push('Standort');
+    if (missing.length) throw new Error(`Dein Fahrerprofil ist noch nicht vollständig: ${missing.join(', ')}.`);
     const row = {
       request_id: requestId, driver_id: driverId, price,
       price_per_km: driver.pricePerKm, base_price: driver.basePrice, route_km: req.routeKm,
+      cancellation_policy: driver.cancellationPolicy || null,
       status: 'pending', cancel_window_ms: 600000,
     };
     const { data, error } = await sb.from('offers').insert(row).select().single();
@@ -343,15 +368,21 @@ const API = {
     const { data, error } = await sb.from('offers').select('*').eq('request_id', requestId).order('created_at', { ascending: true });
     if (error) throw new Error(error.message);
     const offers = data.map(rowToOffer);
-    // Fahrer-Objekt anhängen (wie im Prototyp erwartet)
-    for (const o of offers) o.driver = await this.getDriver(o.driverId);
+    // Fahrer-Objekt + kompakte Zuverlässigkeitszahl
+    for (const o of offers) {
+      o.driver = await this.getDriver(o.driverId);
+      o.reliability = await this.getReliability(o.driverId, 'driver');
+    }
     return offers;
   },
   async listOffersForDriver(driverId) {
     const { data, error } = await sb.from('offers').select('*').eq('driver_id', driverId).order('created_at', { ascending: false });
     if (error) throw new Error(error.message);
     const offers = data.map(rowToOffer);
-    for (const o of offers) o.request = await this.getRequest(o.requestId);
+    for (const o of offers) {
+      o.request = await this.getRequest(o.requestId);
+      if (o.request) o.reliability = await this.getReliability(o.request.riderId, 'rider');
+    }
     return offers;
   },
 
@@ -374,20 +405,31 @@ const API = {
     if (error) throw new Error(error.message);
   },
 
+  async getOffer(offerId) {
+    const { data, error } = await sb.from('offers').select('*').eq('id', offerId).single();
+    if (error) throw new Error(error.message);
+    return rowToOffer(data);
+  },
   cancelInfo(offer) {
     if (!offer.acceptedAt) return { open: false, remainingMs: 0 };
     const remainingMs = Math.max(0, offer.cancelWindowMs - (Date.now() - offer.acceptedAt));
     return { open: remainingMs > 0, remainingMs };
   },
-  async cancelTrip(offerId, by) {
+  async cancelTrip(offerId, by, category = null, reason = '', mutual = false) {
     const { data: offerRow, error } = await sb.from('offers').select('*').eq('id', offerId).single();
     if (error) throw new Error(error.message);
     const offer = rowToOffer(offerRow);
     if (offer.status !== 'accepted') throw new Error('Keine aktive Fahrt');
-    if (!this.cancelInfo(offer).open) throw new Error('Stornofenster abgelaufen — bitte die andere Seite telefonisch kontaktieren.');
-    await sb.from('offers').update({ status: 'rejected', cancelled_by: by, cancelled_at: new Date().toISOString() }).eq('id', offerId);
+    const info = this.cancelInfo(offer);
+    if (!info.open && (!category || !String(reason).trim())) throw new Error('Nach Ablauf der ersten 10 Minuten ist eine Begründung erforderlich.');
+    const patch = { status: 'rejected', cancelled_by: by, cancelled_at: new Date().toISOString(), cancellation_category: info.open ? 'grace_period' : category };
+    if (!info.open) {
+      patch.cancellation_category = category;
+      patch.cancellation_reason = String(reason).trim();
+      patch.cancellation_mutual = !!mutual;
+    }
+    await sb.from('offers').update(patch).eq('id', offerId);
     await sb.from('requests').update({ status: 'open', accepted_offer_id: null }).eq('id', offer.requestId);
-    // zurückgestellte Angebote reaktivieren
     await sb.from('offers').update({ status: 'pending' }).eq('request_id', offer.requestId).eq('status', 'on_hold');
   },
 
@@ -425,6 +467,38 @@ const API = {
       if (req) await this._recalcRating(req.riderId, 'rider', s);
     }
   },
+  async getReliability(profileId, role = 'driver') {
+    let rows = [];
+    if (role === 'driver') {
+      const { data, error } = await sb.from('offers').select('accepted_at,completed_at,cancelled_at,cancellation_category,cancellation_mutual').eq('driver_id', profileId).not('accepted_at', 'is', null);
+      if (error) throw new Error(error.message);
+      rows = data || [];
+    } else {
+      const { data: reqs, error: re } = await sb.from('requests').select('id').eq('rider_id', profileId);
+      if (re) throw new Error(re.message);
+      const ids = (reqs || []).map(r => r.id);
+      if (ids.length) {
+        const { data, error } = await sb.from('offers').select('accepted_at,completed_at,cancelled_at,cancellation_category,cancellation_mutual').in('request_id', ids).not('accepted_at', 'is', null);
+        if (error) throw new Error(error.message);
+        rows = data || [];
+      }
+    }
+    const out = { agreed: rows.length, completed: 0, early: 0, cancelled: 0, short: 0, veryShort: 0, mutual: 0, noShow: 0 };
+    for (const r of rows) {
+      if (r.completed_at) { out.completed++; continue; }
+      if (r.cancellation_category === 'grace_period') continue;
+      if (r.cancellation_mutual || r.cancellation_category === 'mutual') { out.mutual++; continue; }
+      if (r.cancellation_category === 'not_arrived') { out.noShow++; continue; }
+      if (!r.cancelled_at) continue;
+      const hours = (new Date(r.cancelled_at).getTime() - new Date(r.accepted_at).getTime()) / 3600000;
+      if (hours > 48) out.early++;
+      else if (hours > 24) out.cancelled++;
+      else if (hours > 6) out.short++;
+      else out.veryShort++;
+    }
+    return out;
+  },
+
   async _recalcRating(profileId, role, newStars) {
     const { data: p } = await sb.from('profiles').select('*').eq('id', profileId).single();
     if (!p) return;

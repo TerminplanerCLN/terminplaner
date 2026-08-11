@@ -525,3 +525,7 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.5; }
   .faq-item summary { font-size: 15px; padding: 15px 16px; }
   .faq-body { padding: 0 16px 16px; }
 }
+
+.reliability-box{border:1px solid var(--line);background:var(--bg-2);border-radius:var(--radius);padding:14px}.reliability-main{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:8px 0 12px}.reliability-main span{color:var(--ink-2);font-size:13px}.reliability-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.reliability-grid>div{padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:10px}.reliability-grid b{display:block;font-size:16px}.reliability-grid span{display:block;color:var(--ink-3);font-size:11px;line-height:1.35;margin-top:2px}@media (max-width:700px){.reliability-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.field.required input:focus,.field.required select:focus,.field.required textarea:focus{border-color:var(--accent)}

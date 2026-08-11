@@ -248,7 +248,7 @@ const App = {
           <div class="hero-inner">
             <div class="hero-logo"><img src="logo.png" alt="Werpfährtmich?"></div>
             <h1>Pferdetransport,<br>von Mensch zu Mensch.</h1>
-            <p class="hero-sub">Werpfährtmich? verbindet Pferdehalter mit Anhängeranbietern in der Region. Sie stellen eine Anfrage, passende Fahrer melden sich mit ihrem Angebot — mit Preis, Bewertung und allen Infos vorab.</p>
+            <p class="hero-sub">Werpfährtmich? verbindet Pferdehalter mit Anhängeranbietern in der Region. Sie stellen eine Anfrage und erhalten passende Angebote mit Preis, Bewertung und allen Informationen vorab.</p>
             <div class="hero-actions">
               <button class="btn btn-hero-primary" id="heroFind">Transport finden</button>
               <button class="btn btn-hero-ghost" id="heroDrive">Als Fahrer anbieten</button>
@@ -307,7 +307,7 @@ const App = {
               <div class="feat">
                 <div class="feat-ico">${ICON.mapPin()}</div>
                 <h3>Fahrer aus der Region</h3>
-                <p>Sie sehen Fahrer in Ihrem Umkreis — kurze Wege, faire Anfahrt.</p>
+                <p>Sie sehen Fahrer in Ihrem Umkreis. Das bedeutet kurze Wege und eine faire Anfahrt.</p>
               </div>
               <div class="feat">
                 <div class="feat-ico">${ICON.star(true)}</div>
@@ -317,7 +317,7 @@ const App = {
               <div class="feat">
                 <div class="feat-ico">${ICON.doc()}</div>
                 <h3>Preis vorab</h3>
-                <p>Der Preis steht im Angebot — berechnet aus Anfahrt und Kilometern. Keine Überraschungen.</p>
+                <p>Der Preis steht im Angebot, berechnet aus Anfahrt und Kilometern. So entstehen keine unerwarteten Kosten.</p>
               </div>
             </div>
           </div>
@@ -330,42 +330,50 @@ const App = {
             <h2>Gut zu wissen</h2>
             <div class="faq">
               <details class="faq-item">
-                <summary>Was brauche ich, um als Fahrer anzubieten?</summary>
+                <summary>Was benötige ich, um als Fahrer Transporte anzubieten?</summary>
                 <div class="faq-body">
                   <p>Sie benötigen ein geeignetes Zugfahrzeug mit Pferdeanhänger oder einen Pferdetransporter sowie die passende Ausstattung für einen sicheren Transport.</p>
-                  <p>Dazu kommen die erforderlichen Unterlagen: die zum Gespann passende Führerscheinklasse (in der Regel B mit Anhänger bzw. BE) und – bei Transporten in Verbindung mit einer wirtschaftlichen Tätigkeit – die nach der EU-Tiertransportverordnung (EG) Nr. 1/2005 vorgeschriebenen Nachweise. Für gewerbliche Fahrten über 65 km gehören dazu insbesondere die Zulassung als Transportunternehmer und ein Befähigungsnachweis.</p>
-                  <p>Welche Voraussetzungen in Ihrem konkreten Fall gelten, hängt von Zweck, Entfernung und Dauer der Fahrt ab. Bitte informieren Sie sich eigenständig bei Ihrem zuständigen Veterinäramt. Werpfährtmich? prüft diese Voraussetzungen nicht – die Verantwortung dafür liegt bei Ihnen als Anbieter.</p>
+                  <p>Hinzu kommen die erforderlichen Unterlagen: die zum Gespann passende Führerscheinklasse (in der Regel B mit Anhänger beziehungsweise BE) sowie, bei Transporten im Zusammenhang mit einer wirtschaftlichen Tätigkeit, die nach der EU-Tiertransportverordnung (EG) Nr. 1/2005 vorgeschriebenen Nachweise.</p>
+                  <p>Welche Voraussetzungen in Ihrem konkreten Fall gelten, hängt von Zweck, Entfernung und Dauer der Fahrt ab. Bitte stellen Sie die Gültigkeit Ihrer Dokumente vor dem Hochladen sicher und schwärzen Sie private Angaben wie etwa Ihre Adresse. Als Fahrer haften Sie für die Richtigkeit Ihrer Angaben.</p>
                 </div>
               </details>
               <details class="faq-item">
-                <summary>Was brauche ich als Pferdebesitzer?</summary>
+                <summary>Was benötige ich als Pferdebesitzer?</summary>
                 <div class="faq-body">
-                  <p>Im Grunde nur Ihr Pferd und einen Termin, zu dem es abgeholt werden soll. Sie stellen eine Anfrage mit Start, Ziel und Zeitpunkt, und passende Fahrer melden sich mit ihrem Angebot.</p>
-                  <p>Planen Sie ausreichend Zeit ein und begegnen Sie den Fahrern respektvoll – ein guter Transport ist Teamarbeit. Prüfen Sie vor der Übergabe selbst die Angaben und Unterlagen des Fahrers.</p>
+                  <p>Im Wesentlichen benötigen Sie Ihr Pferd sowie einen Termin, zu dem es abgeholt werden soll. Sie stellen eine Anfrage mit Start, Ziel und Zeitpunkt, woraufhin sich passende Fahrer mit ihrem Angebot bei Ihnen melden.</p>
+                  <p>Planen Sie ausreichend Zeit ein und begegnen Sie den Fahrern respektvoll, denn ein gelungener Transport ist Teamarbeit. Prüfen Sie die Angaben und Unterlagen des Fahrers vor der Übergabe.</p>
                 </div>
               </details>
               <details class="faq-item">
                 <summary>Wer ist mein Vertragspartner?</summary>
                 <div class="faq-body">
-                  <p>Der Transportvertrag kommt direkt zwischen Ihnen und dem Fahrer zustande. Werpfährtmich? ist eine Vermittlungsplattform und führt die Transporte nicht selbst durch. Wir stellen den Kontakt her – gefahren wird von den Anbietern.</p>
+                  <p>Der Transportvertrag kommt unmittelbar zwischen Ihnen und dem Fahrer zustande. Werpfährtmich? ist eine Vermittlungsplattform und führt die Transporte nicht selbst durch. Wir stellen den Kontakt zwischen Pferdebesitzern und Anbietern her; die Durchführung liegt bei den Fahrern.</p>
                 </div>
               </details>
               <details class="faq-item">
                 <summary>Prüft Werpfährtmich? die Anbieter und ihre Dokumente?</summary>
                 <div class="faq-body">
-                  <p>Nein. Die Angaben und hinterlegten Dokumente der Anbieter prüfen wir grundsätzlich nicht auf ihre rechtliche Gültigkeit. Anbieter sind selbst dafür verantwortlich, die für ihre Transporte geltenden gesetzlichen Voraussetzungen zu erfüllen. Auf jedem Profil sehen Sie, welche Angaben Selbstauskunft sind – so können Sie sich vor der Buchung ein eigenes Bild machen.</p>
+                  <p>Im Anbieterprofil findest du die hinterlegten Angaben und Dokumente. Prüfe die für den konkreten Transport relevanten Unterlagen vor der Übergabe.</p>
+                  <p>Sollten Ihnen ungültige oder fehlerhafte Unterlagen auffallen, können Sie uns diese über die Meldefunktion mitteilen. Wir gehen jedem Hinweis nach und sperren den betreffenden Anbieter, sofern es erforderlich ist.</p>
+                </div>
+              </details>
+              <details class="faq-item">
+                <summary>Was kann ich tun, wenn etwas nicht stimmt?</summary>
+                <div class="faq-body">
+                  <p>Auf jedem Anbieterprofil finden Sie eine Meldefunktion, etwa bei Zweifeln an den Angaben, an den Dokumenten oder am Verhalten. Ihre Meldung wird vertraulich behandelt und erscheint nicht öffentlich.</p>
+                  <p>Zusätzlich können Sie nach einem abgeschlossenen Transport eine Bewertung abgeben und so anderen Nutzern bei ihrer Entscheidung helfen. Eingegangene Hinweise sehen wir uns an und entscheiden über geeignete Maßnahmen, die von einer Verwarnung bis zur Sperrung reichen können.</p>
                 </div>
               </details>
               <details class="faq-item">
                 <summary>Wie wird der Preis bestimmt?</summary>
                 <div class="faq-body">
-                  <p>Jeder Fahrer legt seine Konditionen selbst fest – üblicherweise aus einer Anfahrtspauschale und einem Preis pro Kilometer. Den Gesamtpreis sehen Sie im Angebot, bevor Sie es annehmen. So gibt es keine Überraschungen.</p>
+                  <p>Jeder Fahrer legt seine Konditionen selbst fest, üblicherweise zusammengesetzt aus einer Anfahrtspauschale und einem Preis pro Kilometer. Den Gesamtpreis sehen Sie im Angebot, bevor Sie es annehmen. So entstehen keine unerwarteten Kosten.</p>
                 </div>
               </details>
               <details class="faq-item">
                 <summary>Wie weit reichen die Fahrten?</summary>
                 <div class="faq-body">
-                  <p>Fahrer legen selbst fest, in welchem Umkreis sie Transporte anbieten. Der maximale Umkreis auf Werpfährtmich? beträgt 65 km – die Entfernung, bis zu der nach der EU-Tiertransportverordnung geringere Anforderungen gelten. Für weiter reichende oder besonders lange Transporte gelten zusätzliche gesetzliche Vorgaben.</p>
+                  <p>Fahrer legen selbst fest, in welchem Umkreis sie Transporte anbieten. Der maximale Umkreis auf Werpfährtmich? beträgt derzeit 65 Kilometer. Für weiter reichende oder besonders lange Transporte gelten zusätzliche gesetzliche Vorgaben. Entsprechende Angebote planen wir für die Zukunft.</p>
                 </div>
               </details>
             </div>
@@ -376,7 +384,7 @@ const App = {
         <section class="home-cta">
           <div class="home-wrap">
             <h2>Bereit für den nächsten Transport?</h2>
-            <p>Ein Konto genügt — Sie können Pferde transportieren lassen und selbst fahren.</p>
+            <p>Ein Konto genügt. Sie können Pferde transportieren lassen und selbst als Fahrer anbieten.</p>
             <div class="hero-actions">
               <button class="btn btn-hero-primary" id="ctaSignup">Jetzt Konto erstellen</button>
               <button class="btn btn-hero-ghost" id="ctaLogin">Anmelden</button>
@@ -840,7 +848,7 @@ const App = {
           <div class="avatar">${initials(d.name)}</div>
           <div>
             <div style="font-weight:600;display:flex;align-items:center;flex-wrap:wrap;gap:4px">${esc(d.providerType === 'commercial' && d.company.name ? d.company.name : d.name)}${providerBadge}${docBadge}</div>
-            <button class="meta rating-link" data-ratings-driver="${offer.driverId}" data-name="${esc(d.name)}">${starsInline(Math.round(d.rating))} <b>${d.rating}</b> · ${d.trips} Fahrten · Bewertungen ansehen</button>
+            <button class="meta rating-link" data-ratings-driver="${offer.driverId}" data-name="${esc(d.name)}">${starsInline(Math.round(d.rating))} <b>${d.rating}</b> · ${(offer.reliability?.agreed ?? d.trips ?? 0)} vereinbarte Fahrten · Bewertungen ansehen</button>
             <div class="meta">${esc(d.vehicle.make)} ${esc(d.vehicle.model)}</div>
             <div class="pay-row">${paymentBadges(d.payment)}</div>
           </div>
@@ -864,8 +872,9 @@ const App = {
           <div class="bs-row"><span>Anbieter</span><b>${esc(providerName)}</b></div>
           <div class="bs-row"><span>Anbieterstatus</span><b>${providerLabel}</b></div>
           <div class="bs-row"><span>Führerschein</span><b>${hasLicense ? 'hinterlegt' : 'nicht hinterlegt'}</b></div>
-          <div class="bs-row"><span>Transport-Erlaubnis</span><b>${hasPermit ? 'hinterlegt' : 'nicht hinterlegt'}</b></div>
-          <div class="bs-note">Angaben des Fahrers — von Werpfährtmich <b>nicht geprüft</b>. Kontrolliere die Dokumente vor Fahrtantritt selbst. Der Transport wird von ${esc(providerName)} durchgeführt; Werpfährtmich vermittelt nur den Kontakt und ist nicht Vertragspartei.</div>
+          <div class="bs-row"><span>Transport-Nachweis</span><b>${hasPermit ? 'hinterlegt' : 'nicht hinterlegt'}</b></div>
+          <div class="bs-row"><span>Stornobedingungen</span><b>${formatOfferPolicy(offer)}</b></div>
+          <div class="bs-note"><b>Transparente Anbieterangaben:</b> Angaben und hinterlegte Dokumente des Anbieters werden von Werpfährtmich nicht auf ihre rechtliche Gültigkeit geprüft. Bitte prüfe die Unterlagen vor der Übergabe selbst. Der Transport wird von ${esc(providerName)} durchgeführt; Werpfährtmich vermittelt den Kontakt und ist nicht Vertragspartei.</div>
         </div>
         <div class="item-actions">
           <button class="btn btn-success btn-sm" data-accept="${offer.id}">Angebot annehmen</button>
@@ -927,10 +936,10 @@ const App = {
         ${ratingWidget(offer.id)}</div>`;
     }
     return `<div class="lifecycle">${steps(2)}
-      <p class="meta" style="font-size:13px;color:var(--ink-3);margin-bottom:14px">Das Stornofenster ist abgelaufen, die Fahrt ist verbindlich. Nach der Fahrt bestätigen beide Seiten den Abschluss.</p>
+      <p class="meta" style="font-size:13px;color:var(--ink-3);margin-bottom:14px">Die ersten 10 Minuten sind abgelaufen. Die Fahrt ist vereinbart. Änderungen und Absagen sind weiterhin möglich, nach Ablauf des Fensters jedoch nur mit Begründung.</p>
       ${myDone
         ? `<div class="hint" style="color:var(--green)">${ICON.check()} Du hast bestätigt. Warte auf ${otherLabel}.</div>`
-        : `<button class="btn btn-success btn-sm" data-complete="${offer.id}">Fahrt erfolgreich abgeschlossen</button>`}
+        : `<div class="item-actions" style="margin:0"><button class="btn btn-success btn-sm" data-complete="${offer.id}">Fahrt erfolgreich abgeschlossen</button><button class="btn btn-danger btn-sm" data-cancel="${offer.id}">Fahrt absagen</button></div>`}
       ${otherDone && !myDone ? `<p class="meta" style="margin-top:8px;font-size:13px">${otherLabel} hat bereits bestätigt.</p>` : ''}
     </div>`;
   },
@@ -947,13 +956,41 @@ const App = {
       b.addEventListener('click', async () => { await API.rejectOffer(b.dataset.reject); toast('Angebot abgelehnt'); this.renderRider(); }));
   },
 
+  showCancelModal(offerId, viewpoint, rerender, offer) {
+    const cats=[['horse','Pferd krank oder verletzt'],['schedule','Terminänderung'],['not_needed','Transport nicht mehr erforderlich'],['vehicle','Fahrzeug oder Anhänger nicht verfügbar'],['safety','Sicherheitsbedenken'],['emergency','Persönlicher Notfall'],['not_arrived','Nicht erschienen'],['mutual','Einvernehmliche Absage'],['other','Sonstiger Grund']];
+    const m=document.createElement('div'); m.className='modal-bg';
+    m.innerHTML=`<div class="modal"><div class="card-head"><h3>Fahrt absagen</h3><button class="btn-reset" data-close>Schließen</button></div><div class="card-pad">
+      <div class="notice-neutral" style="margin-bottom:16px"><b>Die ersten 10 Minuten sind abgelaufen.</b> Bitte begründe deine Absage. Zeitpunkt und Grund werden für die Zuverlässigkeitsstatistik dokumentiert.</div>
+      <label class="field"><span>Grund</span><select id="cancelCat">${cats.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label>
+      <label class="field"><span>Begründung *</span><textarea id="cancelReason" placeholder="Beschreibe kurz, was passiert ist." style="min-height:110px"></textarea></label>
+      <label class="consent-row"><input type="checkbox" id="cancelMutual"><span>Die Absage wurde mit der anderen Seite abgestimmt.</span></label>
+      <div class="notice-neutral" style="margin-top:10px"><b>Vereinbarte Stornobedingung:</b> ${formatCancelRule(offer)}</div>
+      <button class="btn btn-danger btn-block" id="confirmCancel">Fahrt absagen</button>
+    </div></div>`;
+    m.addEventListener('click',e=>{if(e.target===m||e.target.hasAttribute('data-close'))m.remove();});
+    m.querySelector('#cancelCat').addEventListener('change',e=>{m.querySelector('#cancelMutual').checked=e.target.value==='mutual';});
+    m.querySelector('#confirmCancel').addEventListener('click',async()=>{
+      const reason=m.querySelector('#cancelReason').value.trim(), cat=m.querySelector('#cancelCat').value, mutual=m.querySelector('#cancelMutual').checked||cat==='mutual';
+      if(!reason){toast('Bitte begründe die Absage','err');return;}
+      const btn=m.querySelector('#confirmCancel'); btn.disabled=true; btn.textContent='Wird gespeichert…';
+      try{await API.cancelTrip(offerId,viewpoint,cat,reason,mutual);m.remove();toast(mutual?'Einvernehmliche Absage gespeichert':'Fahrt abgesagt','ok');rerender();}
+      catch(e){toast(e.message,'err');btn.disabled=false;btn.textContent='Fahrt absagen';}
+    });
+    document.body.appendChild(m);
+  },
+
   wireLifecycleButtons(rerender, viewpoint) {
     this.startCountdowns(rerender);
     this.el.querySelectorAll('[data-cancel]').forEach((b) =>
       b.addEventListener('click', async () => {
-        b.disabled = true;
-        try { await API.cancelTrip(b.dataset.cancel, viewpoint); toast('Fahrt abgesagt', 'ok'); rerender(); }
-        catch (e) { toast(e.message, 'err'); rerender(); }
+        const offer = await API.getOffer(b.dataset.cancel);
+        if (API.cancelInfo(offer).open) {
+          b.disabled = true;
+          try { await API.cancelTrip(b.dataset.cancel, viewpoint); toast('Fahrt abgesagt', 'ok'); rerender(); }
+          catch (e) { toast(e.message, 'err'); rerender(); }
+        } else {
+          this.showCancelModal(b.dataset.cancel, viewpoint, rerender, offer);
+        }
       }));
     this.el.querySelectorAll('[data-complete]').forEach((b) =>
       b.addEventListener('click', async () => {
@@ -1007,7 +1044,6 @@ const App = {
     modal.innerHTML = `<div class="modal">
       <div class="card-head"><h3>Dokumente — ${esc(d.name)}</h3><button class="btn-reset" data-close>Schließen</button></div>
       <div class="card-pad">
-        <div class="notice" style="margin-bottom:16px">Werpfährtmich? prüft diese Dokumente nicht. Kontrolliere selbst, ob Führerschein und Transport-Erlaubnis gültig und auf den Fahrer ausgestellt sind, bevor du dein Pferd übergibst.</div>
         ${row('Führerschein', d.documents?.license)}
         ${row('Pferdetransport-Erlaubnis', d.documents?.transportPermit)}
       </div></div>`;
@@ -1099,12 +1135,14 @@ const App = {
     if (token !== this._renderToken) return;
     if (!rider) rider = { name: '', phone: '', location: { label: '', lat: null, lng: null }, horse: {} };
     const h = rider.horse || {};
+    const rel = await API.getReliability(this.state.riderId, 'rider');
     body.innerHTML = `
       <div class="grid grid-2">
         <div class="card">
           <div class="card-head"><h2>Reiter</h2><span class="badge badge-gray">Person</span></div>
           <div class="card-pad">
             <div class="profile-row" style="margin-bottom:20px"><div class="avatar">${initials(rider.name)}</div><div><div style="font-weight:600">${esc(rider.name)}</div><div class="meta">${esc(rider.phone)}</div></div></div>
+            <div class="reliability-box" style="margin-bottom:18px"><div class="section-label">Zuverlässigkeit</div><div class="reliability-main"><b>${rel.agreed} vereinbarte Fahrten</b><span>${rel.completed} durchgeführt</span></div><div class="reliability-grid"><div><b>${rel.early}</b><span>frühzeitig abgesagt</span></div><div><b>${rel.cancelled}</b><span>abgesagt</span></div><div><b>${rel.short}</b><span>kurzfristig abgesagt</span></div><div><b>${rel.veryShort}</b><span>sehr kurzfristig abgesagt</span></div><div><b>${rel.mutual}</b><span>einvernehmlich abgesagt</span></div><div><b>${rel.noShow}</b><span>nicht erschienen</span></div></div></div>
             <label class="field"><span>Name</span><input type="text" id="rName" value="${esc(rider.name)}"></label>
             <label class="field"><span>Telefon (Pflicht)</span><input type="tel" id="rPhone" value="${esc(rider.phone)}"></label>
             ${addrField('rloc', 'Standort / Stall', rider.location.label, 'Adresse eingeben')}
@@ -1306,7 +1344,7 @@ const App = {
       const r = o.request, rider = riders[r.riderId];
       const st = { pending: '<span class="badge badge-accent badge-dot">Wartet auf Reiter</span>', on_hold: '<span class="badge badge-gray">Zurückgestellt</span>', accepted: '<span class="badge badge-green badge-dot">Angenommen</span>', rejected: o.cancelledBy ? '<span class="badge badge-red">Storniert</span>' : '<span class="badge badge-gray">Abgelehnt</span>' }[o.status];
       const lifecycle = o.status === 'accepted'
-        ? `<hr class="divider"><div class="item-actions" style="margin-top:0;margin-bottom:14px"><span class="meta">Reiter: <b>${esc(rider.name)}</b> · Kontakt: <b>${esc(rider.phone)}</b></span></div>${this.lifecyclePanel(o, 'driver')}`
+        ? `<hr class="divider"><div class="item-actions" style="margin-top:0;margin-bottom:14px"><span class="meta">Reiter: <b>${esc(rider.name)}</b> · ${starsInline(Math.round(rider.rating || 0))} ${rider.rating || 'neu'} · ${o.reliability?.agreed ?? rider.trips ?? 0} vereinbarte Fahrten · Kontakt: <b>${esc(rider.phone)}</b></span></div>${this.lifecyclePanel(o, 'driver')}`
         : '';
       return `<div class="item">
         <div class="item-head">
@@ -1322,15 +1360,18 @@ const App = {
     const token = this._renderToken;
     let d = await API.getDriver(this.state.driverId);
     if (token !== this._renderToken) return;
-    if (!d) d = { name: '', phone: '', location: { label: '', lat: null, lng: null }, vehicle: {}, availability: {}, payment: {}, documents: {} };
+    if (!d) d = { name: '', phone: '', location: { label: '', lat: null, lng: null }, vehicle: {}, availability: {}, payment: {}, documents: {}, cancellationPolicy: {} };
     const av = d.availability || {};
+    const rel = await API.getReliability(this.state.driverId, 'driver');
+    const cp = d.cancellationPolicy || { more48: 'free', h24_48: 'free', h6_24: 'base_fee', under6: 'base_fee', customText: '' };
     const days = [['mon', 'Mo'], ['tue', 'Di'], ['wed', 'Mi'], ['thu', 'Do'], ['fri', 'Fr'], ['sat', 'Sa'], ['sun', 'So']];
     body.innerHTML = `
       <div class="grid grid-2">
         <div class="card">
           <div class="card-head"><h2>Fahrer</h2><span class="badge badge-gray">Person</span></div>
           <div class="card-pad">
-            <div class="profile-row" style="margin-bottom:16px"><div class="avatar">${initials(d.name)}</div><div><div style="font-weight:600">${esc(d.name)}</div><div class="meta">${starsInline(Math.round(d.rating))} ${d.rating} · ${d.trips} Fahrten</div></div></div>
+            <div class="profile-row" style="margin-bottom:16px"><div class="avatar">${initials(d.name)}</div><div><div style="font-weight:600">${esc(d.name)}</div><div class="meta">${starsInline(Math.round(d.rating))} ${d.rating} · ${rel.agreed} vereinbarte Fahrten</div></div></div>
+            <div class="reliability-box" style="margin-bottom:18px"><div class="section-label">Zuverlässigkeit</div><div class="reliability-main"><b>${rel.agreed} vereinbarte Fahrten</b><span>${rel.completed} durchgeführt</span></div><div class="reliability-grid"><div><b>${rel.early}</b><span>frühzeitig abgesagt</span></div><div><b>${rel.cancelled}</b><span>abgesagt</span></div><div><b>${rel.short}</b><span>kurzfristig abgesagt</span></div><div><b>${rel.veryShort}</b><span>sehr kurzfristig abgesagt</span></div><div><b>${rel.mutual}</b><span>einvernehmlich abgesagt</span></div><div><b>${rel.noShow}</b><span>nicht erschienen</span></div></div></div>
             <hr class="divider">
             <label class="field"><span>Name</span><input type="text" id="dName" value="${esc(d.name)}"></label>
             <label class="field"><span>Telefon (Pflicht)</span><input type="tel" id="dPhone" value="${esc(d.phone)}"></label>
@@ -1353,13 +1394,13 @@ const App = {
           <div class="card-head"><h2>Fahrzeug &amp; Anhänger</h2><span class="badge badge-gray">Gespann</span></div>
           <div class="card-pad">
             <div class="field-row">
-              <label class="field"><span>Marke</span><input type="text" id="vMake" value="${esc(d.vehicle.make)}"></label>
-              <label class="field"><span>Modell</span><input type="text" id="vModel" value="${esc(d.vehicle.model)}"></label>
+              <label class="field required"><span>Marke *</span><input type="text" id="vMake" value="${esc(d.vehicle.make)}"></label>
+              <label class="field required"><span>Modell *</span><input type="text" id="vModel" value="${esc(d.vehicle.model)}"></label>
             </div>
-            <label class="field"><span>Anhänger</span><input type="text" id="vTrailer" value="${esc(d.vehicle.trailer)}"></label>
+            <label class="field required"><span>Anhänger *</span><input type="text" id="vTrailer" value="${esc(d.vehicle.trailer)}"></label>
             <div class="field-row">
-              <label class="field"><span>Kapazität (Pferde)</span><input type="number" id="vCap" value="${d.vehicle.capacity}"></label>
-              <label class="field"><span>Kennzeichen</span><input type="text" id="vPlate" value="${esc(d.vehicle.plate)}"></label>
+              <label class="field required"><span>Kapazität (Pferde) *</span><input type="number" min="1" id="vCap" value="${d.vehicle.capacity}"></label>
+              <label class="field required"><span>Kennzeichen *</span><input type="text" id="vPlate" value="${esc(d.vehicle.plate)}"></label>
             </div>
           </div>
         </div>
@@ -1389,11 +1430,22 @@ const App = {
         </div>
       </div>
       <div class="card" style="margin-top:20px">
-        <div class="card-head"><h2>Dokumente</h2><span class="badge badge-gray">Reiter prüft vor Fahrt</span></div>
+        <div class="card-head"><h2>Pflichtunterlagen</h2><span class="badge badge-amber">Pflicht</span></div>
         <div class="card-pad">
-          <div class="notice-neutral" style="margin-bottom:16px">Lade Führerschein und deine Pferdetransport-Erlaubnis hoch. Reiter sehen diese unter deinem Angebot und prüfen sie vor Fahrtantritt selbst.</div>
-          ${docUploadRow('license', 'Führerschein', d.documents?.license)}
-          ${docUploadRow('transportPermit', 'Pferdetransport-Erlaubnis', d.documents?.transportPermit)}
+          <div class="notice-neutral" style="margin-bottom:16px">Für ein aktives Fahrerprofil müssen Führerschein und Transport-Nachweis hinterlegt sein.</div>
+          ${docUploadRow('license', 'Führerschein *', d.documents?.license)}
+          ${docUploadRow('transportPermit', 'Transport-Nachweis *', d.documents?.transportPermit)}
+        </div>
+      </div>
+      <div class="card" style="margin-top:20px">
+        <div class="card-head"><h2>Stornobedingungen</h2><span class="badge badge-gray">Deine Regeln</span></div>
+        <div class="card-pad">
+          <p class="meta" style="font-size:12.5px;color:var(--ink-3);margin:-4px 0 14px">Lege fest, was bei einer Absage nach Ablauf des 10-Minuten-Fensters gilt. Deine Bedingungen werden vor der Annahme des Angebots angezeigt und für die Buchung gespeichert.</p>
+          ${cancelPolicyField('more48', 'Mehr als 48 Stunden vorher', cp.more48)}
+          ${cancelPolicyField('h24_48', '24 bis 48 Stunden vorher', cp.h24_48)}
+          ${cancelPolicyField('h6_24', '6 bis 24 Stunden vorher', cp.h6_24)}
+          ${cancelPolicyField('under6', 'Unter 6 Stunden vorher', cp.under6)}
+          <label class="field" style="margin-top:12px"><span>Zusätzliche Bedingungen</span><textarea id="cancelCustom" placeholder="Zum Beispiel: Bei Absage unter 24 Stunden fällt die Anfahrtspauschale an.">${esc(cp.customText)}</textarea></label>
         </div>
       </div>
       <div style="margin-top:22px"><button class="btn btn-primary" id="saveDriver">Änderungen speichern</button></div>`;
@@ -1444,12 +1496,18 @@ const App = {
         toast('Bitte den Unternehmensnamen angeben', 'err');
         btn.disabled = false; btn.textContent = 'Änderungen speichern'; return;
       }
+      const vehicleReq = [['vMake','Fahrzeugmarke'],['vModel','Fahrzeugmodell'],['vTrailer','Anhänger'],['vPlate','Kennzeichen']];
+      for (const [id,label] of vehicleReq) { if (!val(id).trim()) { toast(`${label} ist erforderlich`, 'err'); btn.disabled = false; btn.textContent = 'Änderungen speichern'; return; } }
+      if (!(+val('vCap') > 0)) { toast('Bitte die Anhänger-Kapazität angeben', 'err'); btn.disabled = false; btn.textContent = 'Änderungen speichern'; return; }
+      const currentDriver = await API.getDriver(this.state.driverId);
+      if (!currentDriver?.documents?.license || !currentDriver?.documents?.transportPermit) { toast('Bitte Führerschein und Transport-Nachweis hochladen, bevor du Fahrten anbietest.', 'err'); btn.disabled = false; btn.textContent = 'Änderungen speichern'; return; }
       try {
         await API.updateDriver(this.state.driverId, {
           name: val('dName'), phone: val('dPhone'), location: this.state.draft._dloc,
           vehicle: { make: val('vMake'), model: val('vModel'), trailer: val('vTrailer'), capacity: +val('vCap'), plate: val('vPlate') },
           pricePerKm: +val('pKm'), basePrice: +val('pBase'), maxRadiusKm: Math.min(Math.max(+val('pRadius') || 1, 1), 65), availability, payment,
           providerType,
+          cancellationPolicy: { more48: val('cancel_more48'), h24_48: val('cancel_24_48'), h6_24: val('cancel_6_24'), under6: val('cancel_under6'), customText: val('cancelCustom') },
           company: providerType === 'commercial' ? { name: val('cName'), address: val('cAddr'), register: val('cReg') } : { name: '', address: '', register: '' },
         });
         this.state.profile = await API.getMyProfile();
@@ -1464,6 +1522,18 @@ const App = {
 /* ===============================================================
  * Utilities
  * ============================================================= */
+function formatOfferPolicy(offer) {
+  const p = offer.cancellationPolicy || {};
+  const label = (v) => ({free:'kostenfrei',base_fee:'Anfahrtspauschale',custom:'individuelle Regel'}[v] || 'individuelle Regel');
+  const custom = p.customText ? ` ${p.customText}` : '';
+  return `>48 h: ${label(p.more48)} · 24–48 h: ${label(p.h24_48)} · 6–24 h: ${label(p.h6_24)} · <6 h: ${label(p.under6)}${custom}`;
+}
+function formatCancelRule(offer) {
+  const p=offer.cancellationPolicy||{}; const accepted=offer.acceptedAt||Date.now(); const h=(Date.now()-accepted)/3600000; const rule=h>48?p.more48:h>24?p.h24_48:h>6?p.h6_24:p.under6;
+  return {free:'kostenfrei',base_fee:'Anfahrtspauschale',custom:'individuelle Regel'}[rule]||'individuelle Regel';
+}
+function cancelPolicyField(id,label,value){ const opts=[['free','Kostenfrei'],['base_fee','Anfahrtspauschale'],['custom','Individuelle Regel']]; return `<label class="field"><span>${label}</span><select id="cancel_${id}">${opts.map(([v,l])=>`<option value="${v}" ${v===value?'selected':''}>${l}</option>`).join('')}</select></label>`; }
+
 function val(id) { return document.getElementById(id).value; }
 function esc(s) { return String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 function initials(name) { return (name || '?').split(' ').filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase() || '?'; }
@@ -1489,7 +1559,7 @@ function emptyState(ico, title, sub) { return `<div class="empty"><div class="ic
 function transparencyBanner() {
   return `<div class="transparency-note">
     <div class="tn-title">Transparente Anbieterprofile</div>
-    <p>Informiere dich anhand von Anbieterangaben, hinterlegten Informationen und Bewertungen anderer Nutzer. <b>Werpfährtmich prüft die von Anbietern gemachten Angaben und bereitgestellten Dokumente grundsätzlich nicht auf ihre rechtliche Gültigkeit. Anbieter sind selbst für die Einhaltung der für ihre Transportleistungen geltenden gesetzlichen Voraussetzungen verantwortlich.</b></p>
+    <p>Informiere dich anhand von Anbieterangaben, hinterlegten Informationen und Bewertungen anderer Nutzer. Die relevanten Unterlagen und Angaben findest du direkt im jeweiligen Angebot.</p>
   </div>`;
 }
 function addrField(key, label, value, ph) {

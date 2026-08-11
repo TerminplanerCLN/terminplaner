@@ -105,6 +105,13 @@ create table if not exists public.profiles (
   -- Selbstbestaetigung des Fahrers (Zeitpunkt der Zustimmung)
   self_declaration_at timestamptz,
 
+  -- Fahrer: individuelle Stornobedingungen
+  cancel_more48 text not null default 'free',
+  cancel_24_48 text not null default 'free',
+  cancel_6_24 text not null default 'base_fee',
+  cancel_under6 text not null default 'base_fee',
+  cancel_custom_text text not null default '',
+
   created_at timestamptz not null default now()
 );
 
@@ -160,9 +167,13 @@ create table if not exists public.offers (
   status text not null default 'pending',
 
   accepted_at timestamptz,
-  cancel_window_ms integer not null default 600000,   -- 10 Minuten live
+  cancel_window_ms integer not null default 600000,
+  cancellation_policy jsonb,
   cancelled_by text,
   cancelled_at timestamptz,
+  cancellation_category text,
+  cancellation_reason text,
+  cancellation_mutual boolean not null default false,
 
   rider_completed boolean not null default false,
   driver_completed boolean not null default false,
