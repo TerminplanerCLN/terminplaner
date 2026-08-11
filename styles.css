@@ -476,3 +476,27 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.5; }
 .btn-home-nav.ghost:hover { border-color: var(--sky); color: var(--sky-dk); }
 .btn-home-nav.solid { background: var(--sky); border: 1px solid var(--sky); color: #fff; }
 .btn-home-nav.solid:hover { background: var(--sky-dk); border-color: var(--sky-dk); }
+
+/* =====================================================================
+   HOMEPAGE-BILDER mit Fade-in
+   ===================================================================== */
+.photo-band { padding: 56px 0 8px; background: var(--paper); }
+.photo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 1000px; margin: 0 auto; }
+.photo { margin: 0; border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow); aspect-ratio: 3 / 2; }
+.photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* Fade-in: unsichtbar + leicht nach unten versetzt, gleitet beim Sichtbarwerden ein */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .7s ease, transform .7s ease; }
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+/* zweites Bild minimal verzögert für eleganten Staffel-Effekt */
+.photo-grid .photo:nth-child(2).reveal { transition-delay: .12s; }
+
+@media (max-width: 760px) {
+  .photo-band { padding: 36px 0 0; }
+  .photo-grid { grid-template-columns: 1fr; gap: 16px; }
+}
+
+/* Wer Bewegung reduziert haben möchte, bekommt kein Gleiten */
+@media (prefers-reduced-motion: reduce) {
+  .reveal { transition: opacity .4s ease; transform: none; }
+}

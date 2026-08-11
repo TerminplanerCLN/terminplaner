@@ -257,6 +257,16 @@ const App = {
           </div>
         </section>
 
+        <!-- Bild-Galerie mit Fade-in -->
+        <section class="photo-band">
+          <div class="home-wrap">
+            <div class="photo-grid">
+              <figure class="photo reveal"><img src="foto-transport-1.jpg" alt="Zwei Pferde blicken aus einem Pferdeanhänger" loading="lazy"></figure>
+              <figure class="photo reveal"><img src="foto-transport-2.jpg" alt="Geöffneter Pferdetransporter mit Auffahrrampe" loading="lazy"></figure>
+            </div>
+          </div>
+        </section>
+
         <!-- So funktioniert's -->
         <section class="home-section">
           <div class="home-wrap">
@@ -364,6 +374,20 @@ const App = {
       e.preventDefault();
       toast('Diese Seite wird noch erstellt.', '');
     }));
+
+    // Fade-in beim Scrollen: Elemente mit .reveal einblenden, sobald sichtbar
+    const revealEls = app.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window && revealEls.length) {
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) { entry.target.classList.add('is-visible'); obs.unobserve(entry.target); }
+        });
+      }, { threshold: 0.15 });
+      revealEls.forEach((el) => obs.observe(el));
+    } else {
+      // Fallback: falls kein Observer, direkt sichtbar
+      revealEls.forEach((el) => el.classList.add('is-visible'));
+    }
   },
 
   /* =============================================================
