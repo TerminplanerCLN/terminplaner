@@ -1363,7 +1363,14 @@ const App = {
     if (!d) d = { name: '', phone: '', location: { label: '', lat: null, lng: null }, vehicle: {}, availability: {}, payment: {}, documents: {}, cancellationPolicy: {} };
     const av = d.availability || {};
     const rel = await API.getReliability(this.state.driverId, 'driver');
-    const cp = d.cancellationPolicy || { more48: 'free', h24_48: 'free', h6_24: 'base_fee', under6: 'base_fee', customText: '' };
+    const cpRaw = d.cancellationPolicy || {};
+    const cp = {
+      more48: cpRaw.more48 || 'free',
+      h24_48: cpRaw.h24_48 || 'free',
+      h6_24: cpRaw.h6_24 || 'base_fee',
+      under6: cpRaw.under6 || 'base_fee',
+      customText: cpRaw.customText || '',
+    };
     const days = [['mon', 'Mo'], ['tue', 'Di'], ['wed', 'Mi'], ['thu', 'Do'], ['fri', 'Fr'], ['sat', 'Sa'], ['sun', 'So']];
     body.innerHTML = `
       <div class="grid grid-2">
@@ -1540,7 +1547,7 @@ function formatCancelRule(offer) {
 }
 function cancelPolicyField(id,label,value){ const opts=[['free','Kostenfrei'],['base_fee','Anfahrtspauschale'],['custom','Individuelle Regel']]; return `<label class="field"><span>${label}</span><select id="cancel_${id}">${opts.map(([v,l])=>`<option value="${v}" ${v===value?'selected':''}>${l}</option>`).join('')}</select></label>`; }
 
-function val(id) { return document.getElementById(id).value; }
+function val(id) { const el = document.getElementById(id); return el ? el.value : ''; }
 function esc(s) { return String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
 function initials(name) { return (name || '?').split(' ').filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase() || '?'; }
 function money(n) { return Number(n).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' }); }
