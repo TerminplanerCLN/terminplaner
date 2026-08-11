@@ -1427,6 +1427,18 @@ const App = {
             <button type="button" class="pay-opt ${d.payment?.invoice ? 'on' : ''}" data-pay="invoice">${ICON.invoice()} Rechnung</button>
           </div>
           <div class="hint" style="margin-top:18px">Beispiel: Eine 30-km-Fahrt kostet beim aktuellen Tarif <b id="exCalc">${money(d.basePrice + 30 * d.pricePerKm)}</b>.</div>
+          <hr class="divider" style="margin:24px 0 20px">
+          <div class="section-label" style="margin-bottom:6px">Stornobedingungen</div>
+          <p class="meta" style="font-size:12.5px;color:var(--ink-3);margin:0 0 14px">Lege fest, was bei einer Absage nach Ablauf des 10-Minuten-Fensters gilt. Diese Bedingungen werden dem Pferdebesitzer vor Annahme deines Angebots angezeigt.</p>
+          <div class="field-row">
+            ${cancelPolicyField('more48', 'Mehr als 48 Stunden vorher', cp.more48)}
+            ${cancelPolicyField('h24_48', '24 bis 48 Stunden vorher', cp.h24_48)}
+          </div>
+          <div class="field-row">
+            ${cancelPolicyField('h6_24', '6 bis 24 Stunden vorher', cp.h6_24)}
+            ${cancelPolicyField('under6', 'Unter 6 Stunden vorher', cp.under6)}
+          </div>
+          <label class="field" style="margin-top:12px"><span>Zusätzliche Bedingungen</span><textarea id="cancelCustom" placeholder="Zum Beispiel: Bei Absage unter 24 Stunden fällt die Anfahrtspauschale an.">${esc(cp.customText)}</textarea></label>
         </div>
       </div>
       <div class="card" style="margin-top:20px">
@@ -1435,17 +1447,6 @@ const App = {
           <div class="notice-neutral" style="margin-bottom:16px">Für ein aktives Fahrerprofil müssen Führerschein und Transport-Nachweis hinterlegt sein.</div>
           ${docUploadRow('license', 'Führerschein *', d.documents?.license)}
           ${docUploadRow('transportPermit', 'Transport-Nachweis *', d.documents?.transportPermit)}
-        </div>
-      </div>
-      <div class="card" style="margin-top:20px">
-        <div class="card-head"><h2>Stornobedingungen</h2><span class="badge badge-gray">Deine Regeln</span></div>
-        <div class="card-pad">
-          <p class="meta" style="font-size:12.5px;color:var(--ink-3);margin:-4px 0 14px">Lege fest, was bei einer Absage nach Ablauf des 10-Minuten-Fensters gilt. Deine Bedingungen werden vor der Annahme des Angebots angezeigt und für die Buchung gespeichert.</p>
-          ${cancelPolicyField('more48', 'Mehr als 48 Stunden vorher', cp.more48)}
-          ${cancelPolicyField('h24_48', '24 bis 48 Stunden vorher', cp.h24_48)}
-          ${cancelPolicyField('h6_24', '6 bis 24 Stunden vorher', cp.h6_24)}
-          ${cancelPolicyField('under6', 'Unter 6 Stunden vorher', cp.under6)}
-          <label class="field" style="margin-top:12px"><span>Zusätzliche Bedingungen</span><textarea id="cancelCustom" placeholder="Zum Beispiel: Bei Absage unter 24 Stunden fällt die Anfahrtspauschale an.">${esc(cp.customText)}</textarea></label>
         </div>
       </div>
       <div style="margin-top:22px"><button class="btn btn-primary" id="saveDriver">Änderungen speichern</button></div>`;
