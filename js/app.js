@@ -63,8 +63,8 @@ const App = {
     bar.innerHTML = `
       <div class="brand"><span class="mark">${ICON.logo()}</span> Werpfährtmich?</div>
       <div class="role-switch">
-        <button data-role="rider" class="${this.state.role === 'rider' ? 'active' : ''}">Reiter</button>
-        <button data-role="driver" class="${this.state.role === 'driver' ? 'active' : ''}">Fahrer</button>
+        <button data-role="rider" class="${this.state.role === 'rider' ? 'active' : ''}">Pferdebesitzer</button>
+        <button data-role="driver" class="${this.state.role === 'driver' ? 'active' : ''}">Transporteur</button>
         ${isAdmin ? `<button data-role="admin" class="${this.state.role === 'admin' ? 'active' : ''}">Admin</button>` : ''}
       </div>
       <span class="topbar-user">${esc(this.state.profile?.full_name || '')}</span>
@@ -247,13 +247,13 @@ const App = {
         <section class="hero">
           <div class="hero-inner">
             <div class="hero-logo"><img src="logo.png" alt="Werpfährtmich?"></div>
-            <h1>Pferdetransport,<br>von Mensch zu Mensch.</h1>
-            <p class="hero-sub">Werpfährtmich? verbindet Pferdehalter mit Anhängeranbietern in der Region. Sie stellen eine Anfrage und erhalten passende Angebote mit Preis, Bewertung und allen Informationen vorab.</p>
+            <h1>Lokale Pferdetransporte,<br>schnell organisiert.</h1>
+            <p class="hero-sub">Werpfährtmich? verbindet Pferdebesitzer mit Transporteuren in der Region. Sie stellen eine Anfrage und erhalten passende Angebote von Transporteuren in der Nähe vorab.</p>
             <div class="hero-actions">
-              <button class="btn btn-hero-primary" id="heroFind">Transport finden</button>
-              <button class="btn btn-hero-ghost" id="heroDrive">Als Fahrer anbieten</button>
+              <button class="btn btn-hero-primary" id="heroFind">Transport anfragen</button>
+              <button class="btn btn-hero-ghost" id="heroDrive">Als Transporteur anbieten</button>
             </div>
-            <div class="hero-tagline">Mitfahrgelegenheiten für Pferde.</div>
+            <div class="hero-tagline">Die smarte Plattform für kurze und flexible Pferdetransporte.</div>
           </div>
         </section>
 
@@ -271,22 +271,22 @@ const App = {
         <section class="home-section">
           <div class="home-wrap">
             <div class="section-eyebrow">So funktioniert's</div>
-            <h2>In wenigen Schritten zum Transport</h2>
+            <h2>In drei Schritten zum passenden Transport</h2>
             <div class="how-grid">
               <div class="how-col">
                 <div class="how-label">Für Pferdebesitzer</div>
                 <ol class="how-steps">
-                  <li><b>Anfrage stellen.</b> Abhol- und Zieladresse, Datum und Anzahl der Pferde eingeben.</li>
-                  <li><b>Angebote erhalten.</b> Fahrer aus Ihrer Umgebung melden sich mit ihrem Preis.</li>
-                  <li><b>Fahrer wählen.</b> Bewertungen und Angaben vergleichen und annehmen.</li>
+                  <li><b>Anfrage erstellen.</b> Start, Ziel, Termin und die wichtigsten Transportdetails angeben.</li>
+                  <li><b>Angebote vergleichen.</b> Passende Transporteure senden ihre Konditionen und Verfügbarkeit.</li>
+                  <li><b>Direkt entscheiden.</b> Das passende Angebot auswählen und die Fahrt abstimmen.</li>
                 </ol>
               </div>
               <div class="how-col">
-                <div class="how-label">Für Fahrer</div>
+                <div class="how-label">Für Transporteure</div>
                 <ol class="how-steps">
-                  <li><b>Profil anlegen.</b> Fahrzeug, Anhänger, Preise und Verfügbarkeit festlegen.</li>
-                  <li><b>Passende Anfragen sehen.</b> Nur Anfragen in Ihrem Umkreis und Ihrer Zeit.</li>
-                  <li><b>Angebot abgeben.</b> Sie entscheiden selbst, wann und zu welchem Preis.</li>
+                  <li><b>Profil anlegen.</b> Fahrzeug, Anhänger, Region und Verfügbarkeit hinterlegen.</li>
+                  <li><b>Anfragen erhalten.</b> Nur passende Transporte in Ihrem Umkreis sehen.</li>
+                  <li><b>Angebot abgeben.</b> Preis und Bedingungen selbst festlegen.</li>
                 </ol>
               </div>
             </div>
@@ -297,22 +297,22 @@ const App = {
         <section class="home-section alt">
           <div class="home-wrap">
             <div class="section-eyebrow">Warum Werpfährtmich?</div>
-            <h2>Kein Automatismus. Echte Menschen.</h2>
+            <h2>Kein Automatismus. Angebote aus der Umgebung.</h2>
             <div class="feat-grid">
               <div class="feat">
                 <div class="feat-ico">${ICON.users()}</div>
-                <h3>Echte Angebote</h3>
-                <p>Keine automatische Zuteilung. Jeder Fahrer entscheidet selbst und nennt Ihnen seinen Preis vorab.</p>
+                <h3>Persönliche Angebote</h3>
+                <p>Keine automatische Zuteilung. Jeder Transporteur entscheidet selbst und nennt Ihnen seinen Preis vorab.</p>
               </div>
               <div class="feat">
                 <div class="feat-ico">${ICON.mapPin()}</div>
-                <h3>Fahrer aus der Region</h3>
-                <p>Sie sehen Fahrer in Ihrem Umkreis. Das bedeutet kurze Wege und eine faire Anfahrt.</p>
+                <h3>Transporteure aus der Region</h3>
+                <p>Sie sehen Anbieter in Ihrem Umkreis. Das bedeutet kurze Wege und eine faire Anfahrt.</p>
               </div>
               <div class="feat">
                 <div class="feat-ico">${ICON.star(true)}</div>
                 <h3>Transparente Profile</h3>
-                <p>Bewertungen, abgeschlossene Fahrten und alle Angaben, bevor Sie sich entscheiden.</p>
+                <p>Bewertungen und alle wichtigen Angaben, bevor Sie sich entscheiden.</p>
               </div>
               <div class="feat">
                 <div class="feat-ico">${ICON.doc()}</div>
@@ -330,50 +330,50 @@ const App = {
             <h2>Gut zu wissen</h2>
             <div class="faq">
               <details class="faq-item">
-                <summary>Was benötige ich, um als Fahrer Transporte anzubieten?</summary>
+                <summary>Was benötige ich, um als Transporteur Transporte anzubieten — und macht es einen Unterschied, ob ich privat oder gewerblich fahre?</summary>
                 <div class="faq-body">
-                  <p>Sie benötigen ein geeignetes Zugfahrzeug mit Pferdeanhänger oder einen Pferdetransporter sowie die passende Ausstattung für einen sicheren Transport.</p>
-                  <p>Hinzu kommen die erforderlichen Unterlagen: die zum Gespann passende Führerscheinklasse (in der Regel B mit Anhänger beziehungsweise BE) sowie, bei Transporten im Zusammenhang mit einer wirtschaftlichen Tätigkeit, die nach der EU-Tiertransportverordnung (EG) Nr. 1/2005 vorgeschriebenen Nachweise.</p>
-                  <p>Welche Voraussetzungen in Ihrem konkreten Fall gelten, hängt von Zweck, Entfernung und Dauer der Fahrt ab. Bitte stellen Sie die Gültigkeit Ihrer Dokumente vor dem Hochladen sicher und schwärzen Sie private Angaben wie etwa Ihre Adresse. Als Fahrer haften Sie für die Richtigkeit Ihrer Angaben.</p>
+                  <p>Sie benötigen ein geeignetes Zugfahrzeug mit Pferdeanhänger oder einen Pferdetransporter, die passende Ausstattung für einen sicheren Transport sowie die zum Gespann passende Führerscheinklasse (in der Regel B mit Anhänger beziehungsweise BE).</p>
+                  <p>Ob Sie <b>privat</b> oder <b>gewerblich</b> unterwegs sind, geben Sie in Ihrem Profil an und macht rechtlich einen Unterschied: Für den gelegentlichen, nicht wirtschaftlichen Transport des eigenen Pferdebestands gelten geringere Anforderungen. Sobald Sie im Zusammenhang mit einer wirtschaftlichen Tätigkeit transportieren, sind zusätzlich die Nachweise nach der EU-Tiertransportverordnung (EG) Nr. 1/2005 erforderlich. Den vollständigen Verordnungstext finden Sie bei <a href="https://eur-lex.europa.eu/legal-content/DE/TXT/?uri=CELEX:32005R0001" target="_blank" rel="noopener">EUR-Lex</a>.</p>
+                  <p>Statt Dokumente hochzuladen, bestätigen Sie die relevanten Punkte in Ihrem Profil per Selbstauskunft (gültige Fahrerlaubnis, verkehrssicheres Gespann und, wo einschlägig, Nachweise nach EU-VO 1/2005 sowie Anhänger-Haftpflicht). Welche Voraussetzungen im Einzelfall gelten, hängt von Zweck, Entfernung und Dauer der Fahrt ab. Als Transporteur haften Sie für die Richtigkeit Ihrer Angaben.</p>
                 </div>
               </details>
               <details class="faq-item">
                 <summary>Was benötige ich als Pferdebesitzer?</summary>
                 <div class="faq-body">
-                  <p>Im Wesentlichen benötigen Sie Ihr Pferd sowie einen Termin, zu dem es abgeholt werden soll. Sie stellen eine Anfrage mit Start, Ziel und Zeitpunkt, woraufhin sich passende Fahrer mit ihrem Angebot bei Ihnen melden.</p>
-                  <p>Planen Sie ausreichend Zeit ein und begegnen Sie den Fahrern respektvoll, denn ein gelungener Transport ist Teamarbeit. Prüfen Sie die Angaben und Unterlagen des Fahrers vor der Übergabe.</p>
+                  <p>Im Wesentlichen benötigen Sie Ihr Pferd sowie einen Termin, zu dem es abgeholt werden soll. Sie stellen eine Anfrage mit Start, Ziel und Zeitpunkt, woraufhin sich passende Transporteure mit ihrem Angebot bei Ihnen melden.</p>
+                  <p>Planen Sie ausreichend Zeit ein und begegnen Sie den Transporteuren respektvoll, denn ein gelungener Transport ist Teamarbeit. Prüfen Sie die Angaben des Transporteurs vor der Übergabe.</p>
                 </div>
               </details>
               <details class="faq-item">
                 <summary>Wer ist mein Vertragspartner?</summary>
                 <div class="faq-body">
-                  <p>Der Transportvertrag kommt unmittelbar zwischen Ihnen und dem Fahrer zustande. Werpfährtmich? ist eine Vermittlungsplattform und führt die Transporte nicht selbst durch. Wir stellen den Kontakt zwischen Pferdebesitzern und Anbietern her; die Durchführung liegt bei den Fahrern.</p>
+                  <p>Der Transportvertrag kommt unmittelbar zwischen Ihnen und dem Transporteur zustande. Werpfährtmich? ist eine Vermittlungsplattform und führt die Transporte nicht selbst durch. Wir stellen den Kontakt zwischen Pferdebesitzern und Transporteuren her; die Durchführung liegt bei den Transporteuren.</p>
                 </div>
               </details>
               <details class="faq-item">
-                <summary>Prüft Werpfährtmich? die Anbieter und ihre Dokumente?</summary>
+                <summary>Prüft Werpfährtmich? die Angaben der Transporteure, und was kann ich bei Zweifeln tun?</summary>
                 <div class="faq-body">
-                  <p>Im Anbieterprofil finden Sie die hinterlegten Angaben und Dokumente. Bitte prüfen Sie die für den konkreten Transport relevanten Unterlagen vor der Übergabe. Werpfährtmich? prüft diese nicht auf ihre rechtliche Gültigkeit; die Verantwortung dafür liegt bei den Anbietern.</p>
-                  <p>Sollten Ihnen ungültige oder fehlerhafte Unterlagen auffallen, können Sie uns diese über die Meldefunktion mitteilen. Wir gehen jedem Hinweis nach und sperren den betreffenden Anbieter, sofern es erforderlich ist.</p>
+                  <p>Im Transporteur-Profil finden Sie die hinterlegten Angaben und Selbstauskünfte. Werpfährtmich? prüft diese nicht auf ihre rechtliche Gültigkeit; die Verantwortung dafür liegt bei den Transporteuren. Bitte verschaffen Sie sich vor der Übergabe selbst einen Eindruck, etwa anhand von Fahrzeug, Kennzeichen und Auftreten.</p>
+                  <p>Auf jedem Transporteur-Profil finden Sie eine Meldefunktion, etwa bei Zweifeln an den Angaben oder am Verhalten. Ihre Meldung wird vertraulich behandelt und erscheint nicht öffentlich. Zusätzlich können Sie nach einem abgeschlossenen Transport eine Bewertung abgeben und so anderen Nutzern bei ihrer Entscheidung helfen. Eingegangene Hinweise sehen wir uns an und entscheiden über geeignete Maßnahmen, die von einer Verwarnung bis zur Sperrung reichen können.</p>
                 </div>
               </details>
               <details class="faq-item">
-                <summary>Was kann ich tun, wenn etwas nicht stimmt?</summary>
+                <summary>Ist mein Pferd während des Transports versichert?</summary>
                 <div class="faq-body">
-                  <p>Auf jedem Anbieterprofil finden Sie eine Meldefunktion, etwa bei Zweifeln an den Angaben, an den Dokumenten oder am Verhalten. Ihre Meldung wird vertraulich behandelt und erscheint nicht öffentlich.</p>
-                  <p>Zusätzlich können Sie nach einem abgeschlossenen Transport eine Bewertung abgeben und so anderen Nutzern bei ihrer Entscheidung helfen. Eingegangene Hinweise sehen wir uns an und entscheiden über geeignete Maßnahmen, die von einer Verwarnung bis zur Sperrung reichen können.</p>
+                  <p>Werpfährtmich? bietet selbst keine Transport- oder Tierversicherung an. Transporteure bestätigen in ihrem Profil unter anderem eine bestehende Anhänger-Haftpflichtversicherung, die Schäden am Anhänger und an Dritten abdeckt.</p>
+                  <p>Ob und in welchem Umfang Ihr Pferd selbst während des Transports abgesichert ist, hängt von Ihrer eigenen Tierhalterhaftpflicht- beziehungsweise Pferdeversicherung ab. Prüfen Sie vor der Übergabe, ob Ihre Versicherung den Transport durch Dritte einschließt, und klären Sie offene Fragen direkt mit Ihrem Versicherer.</p>
                 </div>
               </details>
               <details class="faq-item">
                 <summary>Wie wird der Preis bestimmt?</summary>
                 <div class="faq-body">
-                  <p>Jeder Fahrer legt seine Konditionen selbst fest, üblicherweise zusammengesetzt aus einer Anfahrtspauschale und einem Preis pro Kilometer. Den Gesamtpreis sehen Sie im Angebot, bevor Sie es annehmen. So entstehen keine unerwarteten Kosten.</p>
+                  <p>Jeder Transporteur legt seine Konditionen selbst fest — entweder automatisch berechnet aus einer Anfahrtspauschale und einem Preis pro Kilometer, oder als selbst gewählter Gesamtpreis für die Fahrt. Den Gesamtpreis sehen Sie in jedem Fall im Angebot, bevor Sie es annehmen. So entstehen keine unerwarteten Kosten.</p>
                 </div>
               </details>
               <details class="faq-item">
                 <summary>Wie weit reichen die Fahrten?</summary>
                 <div class="faq-body">
-                  <p>Fahrer legen selbst fest, in welchem Umkreis sie Transporte anbieten. Der maximale Umkreis auf Werpfährtmich? beträgt derzeit 65 Kilometer. Für weiter reichende oder besonders lange Transporte gelten zusätzliche gesetzliche Vorgaben. Entsprechende Angebote planen wir für die Zukunft.</p>
+                  <p>Transporteure legen selbst fest, in welchem Umkreis sie Transporte anbieten. Der maximale Umkreis auf Werpfährtmich? beträgt derzeit 65 Kilometer. Für weiter reichende oder besonders lange Transporte gelten zusätzliche gesetzliche Vorgaben. Entsprechende Angebote planen wir für die Zukunft.</p>
                 </div>
               </details>
             </div>
@@ -383,8 +383,8 @@ const App = {
         <!-- Call to Action -->
         <section class="home-cta">
           <div class="home-wrap">
-            <h2>Bereit für den nächsten Transport?</h2>
-            <p>Ein Konto genügt. Sie können Pferde transportieren lassen und selbst als Fahrer anbieten.</p>
+            <h2>Sie brauchen einen Transport? Schauen Sie bei Werpfährtmich? vorbei.</h2>
+            <p>Keine mühsame Suche nach Anbietern und kein Verlassen auf Empfehlungen aus dem Stall. Finden Sie unkompliziert einen Transporteur für Ihr Pferd, ganz ohne lokalen Buschfunk und Facebookgruppen.</p>
             <div class="hero-actions">
               <button class="btn btn-hero-primary" id="ctaSignup">Jetzt Konto erstellen</button>
               <button class="btn btn-hero-ghost" id="ctaLogin">Anmelden</button>
@@ -415,7 +415,7 @@ const App = {
     ['homeLogin', 'ctaLogin'].forEach((id) => {
       const b = document.getElementById(id); if (b) b.addEventListener('click', toLogin);
     });
-    // "Transport finden" führt zur Registrierung (Reiter-Konto)
+    // "Transport finden" führt zur Registrierung (Pferdebesitzer-Konto)
     const hf = document.getElementById('heroFind'); if (hf) { hf.removeEventListener('click', toSignup); hf.addEventListener('click', toSignup); }
     // Rechtstext-Links: vorerst Hinweis, dass in Arbeit
     app.querySelectorAll('[data-legal]').forEach((a) => a.addEventListener('click', (e) => {
@@ -528,9 +528,9 @@ const App = {
     this.el.innerHTML = `
       <div class="wrap">
         <div class="page-head">
-          <div class="eyebrow">Reiter</div>
+          <div class="eyebrow">Pferdebesitzer</div>
           <h1>Transport für dein Pferd finden</h1>
-          <p>Stell eine Anfrage an Fahrer in deiner Nähe. Du erhältst nur echte Angebote — jeder Fahrer entscheidet selbst und nennt dir vorab seinen Preis.</p>
+          <p>Stell eine Anfrage an Transporteure in deiner Nähe. Du erhältst nur echte Angebote — jeder Transporteur entscheidet selbst und nennt dir vorab seinen Preis.</p>
         </div>
         <div class="tabs" id="riderTabs">
           <button data-tab="anfrage">Anfrage stellen</button>
@@ -807,7 +807,7 @@ const App = {
     if (req.status === 'open') {
       offersHtml = pending.length
         ? `<div class="section-label" style="margin-top:20px">Angebote (${pending.length})</div><div class="list">${pending.map((o) => this.offerCard(o)).join('')}</div>`
-        : `<div class="hint" style="margin-top:18px">Deine Anfrage ist aktiv. Sobald ein Fahrer ein Angebot abgibt, erscheint es hier.</div>`;
+        : `<div class="hint" style="margin-top:18px">Deine Anfrage ist aktiv. Sobald ein Transporteur ein Angebot abgibt, erscheint es hier.</div>`;
     } else if (accepted) {
       offersHtml = `<div class="section-label" style="margin-top:20px">Angenommenes Angebot</div><div class="list">${this.offerCard(accepted, true)}</div>`;
     }
@@ -833,53 +833,55 @@ const App = {
 
   offerCard(offer, isAccepted = false) {
     const d = offer.driver;
-    const hasPermit = d.documents && d.documents.transportPermit;
-    const hasLicense = d.documents && d.documents.license;
-    // WICHTIG: "hinterlegt" != "geprüft". Kein Suggerieren einer Prüfung.
-    const docBadge = (hasPermit && hasLicense)
-      ? `<span class="badge badge-gray" style="margin-left:8px">${ICON.doc()} Dokumente hinterlegt</span>`
-      : `<span class="badge badge-amber" style="margin-left:8px">${ICON.alert()} Dokumente unvollständig</span>`;
+    const decl = d.declarations || {};
+    const declItems = [
+      decl.license && 'Gültige Fahrerlaubnis bestätigt',
+      decl.vehicle && 'Fahrzeug/Anhänger verkehrssicher bestätigt',
+      decl.eu1_2005 && 'Nachweise nach EU-VO (EG) Nr. 1/2005 bestätigt',
+      decl.trailerInsurance && 'Anhänger-Haftpflicht bestätigt',
+    ].filter(Boolean);
     const providerBadge = d.providerType === 'commercial'
       ? `<span class="badge badge-accent" style="margin-left:8px">Gewerblicher Anbieter</span>`
       : `<span class="badge badge-gray" style="margin-left:8px">Privater Anbieter</span>`;
+    const rating = offer.adjustedRating ?? d.rating;
+    const priceSub = offer.priceMode === 'flat'
+      ? `Pauschalpreis (${offer.routeKm} km)`
+      : `${offer.routeKm} km × ${money(offer.pricePerKm)} + ${money(offer.basePrice)}`;
     const head = `
       <div class="item-head">
         <div class="profile-row">
           <div class="avatar">${initials(d.name)}</div>
           <div>
-            <div style="font-weight:600;display:flex;align-items:center;flex-wrap:wrap;gap:4px">${esc(d.providerType === 'commercial' && d.company.name ? d.company.name : d.name)}${providerBadge}${docBadge}</div>
-            <button class="meta rating-link" data-ratings-driver="${offer.driverId}" data-name="${esc(d.name)}">${starsInline(Math.round(d.rating))} <b>${d.rating}</b> · ${(offer.reliability?.agreed ?? d.trips ?? 0)} vereinbarte Fahrten · Bewertungen ansehen</button>
+            <div style="font-weight:600;display:flex;align-items:center;flex-wrap:wrap;gap:4px">${esc(d.providerType === 'commercial' && d.company.name ? d.company.name : d.name)}${providerBadge}</div>
+            <button class="meta rating-link" data-ratings-driver="${offer.driverId}" data-name="${esc(d.name)}">${starsInline(Math.round(rating))} <b>${rating}</b> · Bewertungen ansehen</button>
             <div class="meta">${esc(d.vehicle.make)} ${esc(d.vehicle.model)}</div>
             <div class="pay-row">${paymentBadges(d.payment)}</div>
           </div>
         </div>
         <div style="text-align:right">
           <div class="price-tag">${money(offer.price)}</div>
-          <div class="price-sub">${offer.routeKm} km × ${money(offer.pricePerKm)} + ${money(offer.basePrice)}</div>
+          <div class="price-sub">${priceSub}</div>
         </div>
       </div>`;
-    const docBtn = `<button class="btn btn-secondary btn-sm" data-docs="${offer.driverId}">${ICON.doc()} Fahrer-Dokumente prüfen</button>`;
 
     if (!isAccepted) {
-      const lowRating = d.rating && d.rating < 4.0;
+      const lowRating = rating && rating < 4.0;
       const providerLabel = d.providerType === 'commercial' ? 'Gewerblicher Anbieter' : 'Privater Anbieter';
       const providerName = d.providerType === 'commercial' && d.company.name ? d.company.name : d.name;
       return `<div class="item" style="box-shadow:none">
         ${head}
-        ${lowRating ? `<div class="notice" style="margin-top:14px;color:var(--red);background:var(--red-soft);border-color:#F0C2C2">${ICON.alert()} Dieser Fahrer hat eine unterdurchschnittliche Bewertung (${d.rating}). Sieh dir die Bewertungen genau an, bevor du annimmst.</div>` : ''}
+        ${lowRating ? `<div class="notice" style="margin-top:14px;color:var(--red);background:var(--red-soft);border-color:#F0C2C2">${ICON.alert()} Dieser Transporteur hat eine unterdurchschnittliche Bewertung (${rating}). Sieh dir die Bewertungen genau an, bevor du annimmst.</div>` : ''}
         <div class="booking-summary">
           <div class="bs-title">Vor der Annahme</div>
           <div class="bs-row"><span>Anbieter</span><b>${esc(providerName)}</b></div>
           <div class="bs-row"><span>Anbieterstatus</span><b>${providerLabel}</b></div>
-          <div class="bs-row"><span>Führerschein</span><b>${hasLicense ? 'hinterlegt' : 'nicht hinterlegt'}</b></div>
-          <div class="bs-row"><span>Transport-Nachweis</span><b>${hasPermit ? 'hinterlegt' : 'nicht hinterlegt'}</b></div>
+          ${declItems.length ? `<div class="bs-row" style="align-items:flex-start"><span>Selbstauskunft</span><b>${declItems.map((t) => esc(t)).join('<br>')}</b></div>` : ''}
           <div class="bs-row"><span>Stornobedingungen</span><b>${formatOfferPolicy(offer)}</b></div>
-          <div class="bs-note"><b>Transparente Anbieterangaben:</b> Angaben und hinterlegte Dokumente des Anbieters werden von Werpfährtmich nicht auf ihre rechtliche Gültigkeit geprüft. Bitte prüfe die Unterlagen vor der Übergabe selbst. Der Transport wird von ${esc(providerName)} durchgeführt; Werpfährtmich vermittelt den Kontakt und ist nicht Vertragspartei.</div>
+          <div class="bs-note"><b>Transparente Anbieterangaben:</b> Angaben des Anbieters werden von Werpfährtmich nicht auf ihre rechtliche Gültigkeit geprüft. Bitte verschaffe dir vor der Übergabe selbst einen Eindruck. Der Transport wird von ${esc(providerName)} durchgeführt; Werpfährtmich vermittelt den Kontakt und ist nicht Vertragspartei.</div>
         </div>
         <div class="item-actions">
           <button class="btn btn-success btn-sm" data-accept="${offer.id}">Angebot annehmen</button>
           <button class="btn btn-secondary btn-sm" data-ratings-driver="${offer.driverId}" data-name="${esc(d.name)}">${ICON.star(true)} Bewertungen</button>
-          ${docBtn}
           <button class="btn btn-danger btn-sm" data-reject="${offer.id}">Ablehnen</button>
           <button class="btn-report" data-report="${offer.driverId}" data-name="${esc(d.name)}">${ICON.alert()} Problem melden</button>
         </div>
@@ -889,15 +891,15 @@ const App = {
       ${head}
       <div class="safety-box">
         <div class="safety-head">${ICON.alert()} Sicherheitscheck vor der Übergabe</div>
-        <p class="safety-lead">Uns liegt das Wohl Ihres Pferdes am Herzen. Machen Sie am besten ein Foto vom Kennzeichen des Fahrers und gleichen Sie Fahrzeug und Person mit den folgenden Angaben ab, bevor Sie Ihr Pferd übergeben.</p>
+        <p class="safety-lead">Uns liegt das Wohl Ihres Pferdes am Herzen. Machen Sie am besten ein Foto vom Kennzeichen des Transporteurs und gleichen Sie Fahrzeug und Person mit den folgenden Angaben ab, bevor Sie Ihr Pferd übergeben.</p>
         <div class="safety-grid">
           <div class="safety-cell"><div class="sc-lbl">Kennzeichen</div><div class="sc-val plate">${esc(d.vehicle.plate)}</div></div>
           <div class="safety-cell"><div class="sc-lbl">Fahrzeug</div><div class="sc-val">${esc(d.vehicle.make)} ${esc(d.vehicle.model)}</div></div>
           <div class="safety-cell"><div class="sc-lbl">Anhänger</div><div class="sc-val">${esc(d.vehicle.trailer)}</div></div>
-          <div class="safety-cell"><div class="sc-lbl">Fahrer</div><div class="sc-val">${esc(d.name)}</div></div>
+          <div class="safety-cell"><div class="sc-lbl">Transporteur</div><div class="sc-val">${esc(d.name)}</div></div>
         </div>
       </div>
-      <div class="item-actions" style="margin-top:14px">${docBtn}<span class="meta">Kontakt: <b>${esc(d.phone)}</b></span></div>
+      <div class="item-actions" style="margin-top:14px"><span class="meta">Kontakt: <b>${esc(d.phone)}</b></span></div>
       <hr class="divider">
       ${this.lifecyclePanel(offer, 'rider')}
     </div>`;
@@ -907,7 +909,7 @@ const App = {
     const info = API.cancelInfo(offer);
     const myDone = viewpoint === 'rider' ? offer.riderCompleted : offer.driverCompleted;
     const otherDone = viewpoint === 'rider' ? offer.driverCompleted : offer.riderCompleted;
-    const otherLabel = viewpoint === 'rider' ? 'Fahrer' : 'Reiter';
+    const otherLabel = viewpoint === 'rider' ? 'Transporteur' : 'Pferdebesitzer';
 
     const steps = (active) => `
       <div class="lc-steps">
@@ -932,7 +934,7 @@ const App = {
           <div class="hint">Deine Bewertung: ${starsInline(myRating.stars)} ${myRating.comment ? '· „' + esc(myRating.comment) + '"' : ''}</div></div>`;
       }
       return `<div class="lifecycle">${steps(3)}
-        <p style="font-size:14px;font-weight:500;margin-bottom:10px">Wie war die Fahrt? Bewerte ${viewpoint === 'rider' ? 'den Fahrer' : 'den Reiter'}.</p>
+        <p style="font-size:14px;font-weight:500;margin-bottom:10px">Wie war die Fahrt? Bewerte ${viewpoint === 'rider' ? 'den Transporteur' : 'den Pferdebesitzer'}.</p>
         ${ratingWidget(offer.id)}</div>`;
     }
     return `<div class="lifecycle">${steps(2)}
@@ -998,8 +1000,6 @@ const App = {
         try { await API.confirmCompletion(b.dataset.complete, viewpoint); toast('Abschluss bestätigt', 'ok'); rerender(); }
         catch (e) { toast(e.message, 'err'); rerender(); }
       }));
-    this.el.querySelectorAll('[data-docs]').forEach((b) =>
-      b.addEventListener('click', () => this.showDocsModal(b.dataset.docs)));
     this.wireRatingButtons();
     this.el.querySelectorAll('[data-rate]').forEach((btn) =>
       btn.addEventListener('click', async () => {
@@ -1032,28 +1032,6 @@ const App = {
       if (expired) { clearInterval(this._cdTimer); rerender(); }
     };
     tick(); this._cdTimer = setInterval(tick, 1000);
-  },
-
-  async showDocsModal(driverId) {
-    const d = await API.getDriver(driverId);
-    const row = (label, entry) => entry
-      ? `<div class="doc-item"><div class="doc-info"><b>${label}</b><div class="doc-status">${esc(entry.fileName)}</div></div><button class="btn btn-secondary btn-sm" data-view-doc="${esc(entry.path)}">${ICON.doc()} Ansehen</button></div>`
-      : `<div class="doc-item missing"><div class="doc-info"><b>${label}</b><div class="doc-status">Nicht hochgeladen</div></div><div>${ICON.alert()}</div></div>`;
-    const modal = document.createElement('div');
-    modal.className = 'modal-bg';
-    modal.innerHTML = `<div class="modal">
-      <div class="card-head"><h3>Dokumente — ${esc(d.name)}</h3><button class="btn-reset" data-close>Schließen</button></div>
-      <div class="card-pad">
-        ${row('Führerschein', d.documents?.license)}
-        ${row('Pferdetransport-Erlaubnis', d.documents?.transportPermit)}
-      </div></div>`;
-    modal.addEventListener('click', (e) => { if (e.target === modal || e.target.hasAttribute('data-close')) modal.remove(); });
-    modal.querySelectorAll('[data-view-doc]').forEach((b) => b.addEventListener('click', async () => {
-      b.disabled = true; b.textContent = 'Öffne…';
-      try { const url = await API.getDocumentUrl(b.dataset.viewDoc); window.open(url, '_blank'); b.innerHTML = `${ICON.doc()} Ansehen`; b.disabled = false; }
-      catch (e) { toast('Dokument nicht abrufbar', 'err'); b.disabled = false; }
-    }));
-    document.body.appendChild(modal);
   },
 
   wireRatingButtons() {
@@ -1108,7 +1086,7 @@ const App = {
     const person = isDriver ? await API.getDriver(id) : await API.getRider(id);
     const ratings = isDriver ? await API.listRatingsForDriver(id) : await API.listRatingsForRider(id);
     const avg = person.rating
-      ? `<div class="rating-summary"><div class="rs-big">${person.rating}</div><div>${starsInline(Math.round(person.rating))}<div class="meta">${person.trips || 0} bewertete Fahrten</div></div></div>`
+      ? `<div class="rating-summary"><div class="rs-big">${person.rating}</div><div>${starsInline(Math.round(person.rating))}</div></div>`
       : `<div class="hint">Diese Person ist neu und hat noch keine Bewertungen.</div>`;
     const list = ratings.length
       ? ratings.map((r) => `<div class="review">
@@ -1122,7 +1100,7 @@ const App = {
       <div class="card-head"><h3>Bewertungen — ${esc(name || person.name)}</h3><button class="btn-reset" data-close>Schließen</button></div>
       <div class="card-pad">
         ${avg}
-        <div class="section-label" style="margin-top:20px;margin-bottom:12px">${isDriver ? 'Was Reiter über diesen Fahrer sagen' : 'Was Fahrer über diesen Reiter sagen'}</div>
+        <div class="section-label" style="margin-top:20px;margin-bottom:12px">${isDriver ? 'Was Pferdebesitzer über diesen Transporteur sagen' : 'Was Transporteure über diesen Pferdebesitzer sagen'}</div>
         ${list}
       </div></div>`;
     modal.addEventListener('click', (e) => { if (e.target === modal || e.target.hasAttribute('data-close')) modal.remove(); });
@@ -1139,7 +1117,7 @@ const App = {
     body.innerHTML = `
       <div class="grid grid-2">
         <div class="card">
-          <div class="card-head"><h2>Reiter</h2><span class="badge badge-gray">Person</span></div>
+          <div class="card-head"><h2>Pferdebesitzer</h2><span class="badge badge-gray">Person</span></div>
           <div class="card-pad">
             <div class="profile-row" style="margin-bottom:20px"><div class="avatar">${initials(rider.name)}</div><div><div style="font-weight:600">${esc(rider.name)}</div><div class="meta">${esc(rider.phone)}</div></div></div>
             <div class="reliability-box" style="margin-bottom:18px"><div class="section-label">Zuverlässigkeit</div><div class="reliability-main"><b>${rel.agreed} vereinbarte Fahrten</b><span>${rel.completed} durchgeführt</span></div><div class="reliability-grid"><div><b>${rel.early}</b><span>frühzeitig abgesagt</span></div><div><b>${rel.cancelled}</b><span>abgesagt</span></div><div><b>${rel.short}</b><span>kurzfristig abgesagt</span></div><div><b>${rel.veryShort}</b><span>sehr kurzfristig abgesagt</span></div><div><b>${rel.mutual}</b><span>einvernehmlich abgesagt</span></div><div><b>${rel.noShow}</b><span>nicht erschienen</span></div></div></div>
@@ -1159,7 +1137,7 @@ const App = {
             </div>
             <label class="field"><span>Temperament</span><select id="hTemp">${['ruhig', 'ausgeglichen', 'nervös', 'jung/unerfahren'].map((t) => `<option ${t === h.temperament ? 'selected' : ''}>${t}</option>`).join('')}</select></label>
             <div class="switch-row"><div><div class="switch-label">Verlädt problemlos</div></div><label class="switch"><input type="checkbox" id="hLoad" ${h.loadingOk ? 'checked' : ''}><span class="track"></span></label></div>
-            <label class="field" style="margin-top:8px"><span>Hinweise für den Fahrer</span><textarea id="hNotes">${esc(h.notes)}</textarea></label>
+            <label class="field" style="margin-top:8px"><span>Hinweise für den Transporteur</span><textarea id="hNotes">${esc(h.notes)}</textarea></label>
           </div>
         </div>
       </div>
@@ -1220,7 +1198,7 @@ const App = {
     this.el.innerHTML = `
       <div class="wrap">
         <div class="page-head">
-          <div class="eyebrow">Fahrer</div>
+          <div class="eyebrow">Transporteur</div>
           <h1>Anfragen aus deiner Umgebung</h1>
           <p>Du siehst nur Anfragen, die in deinen Radius passen, zu deinen Verfügbarkeitszeiten und deiner Anhänger-Kapazität. Du entscheidest aktiv, ob du ein Angebot abgibst.</p>
         </div>
@@ -1255,10 +1233,10 @@ const App = {
     const list = document.getElementById('drReqList');
     if (!list) return;
     if (!matches.length) {
-      list.innerHTML = emptyState(ICON.inbox(), 'Keine passenden Anfragen', 'Sobald ein Reiter in deinem Umkreis zu einer passenden Zeit anfragt, erscheint die Anfrage hier.');
+      list.innerHTML = emptyState(ICON.inbox(), 'Keine passenden Anfragen', 'Sobald ein Pferdebesitzer in deinem Umkreis zu einer passenden Zeit anfragt, erscheint die Anfrage hier.');
       return;
     }
-    // Reiter-Profile für die passenden Anfragen laden (für Reputation)
+    // Pferdebesitzer-Profile für die passenden Anfragen laden (für Reputation)
     const riders = {};
     for (const m of matches) {
       if (!riders[m.req.riderId]) riders[m.req.riderId] = await API.getRider(m.req.riderId);
@@ -1284,7 +1262,7 @@ const App = {
     const { req, distToPickup } = match;
     const rRating = rider && rider.rating;
     const riderRep = rider
-      ? `<button class="meta rating-link" data-ratings-rider="${rider.id}" data-name="${esc(rider.name)}">${esc(rider.name)} · ${rRating ? starsInline(Math.round(rRating)) + ' <b>' + rRating + '</b> · ' + (rider.trips || 0) + ' Fahrten' : 'Neu, noch keine Bewertung'} · ansehen</button>`
+      ? `<button class="meta rating-link" data-ratings-rider="${rider.id}" data-name="${esc(rider.name)}">${esc(rider.name)} · ${rRating ? starsInline(Math.round(rRating)) + ' <b>' + rRating + '</b>' : 'Neu, noch keine Bewertung'} · ansehen</button>`
       : '';
     const lowRider = rRating && rRating < 4.0;
     return `
@@ -1304,28 +1282,61 @@ const App = {
           </div>
           <div style="text-align:right">
             <div class="price-sub">Dein Angebot</div>
-            <div class="price-tag">${money(price)}</div>
+            <div class="price-tag" data-calc-price>${money(price)}</div>
             <div class="price-sub">${req.routeKm} km × ${money(driver.pricePerKm)} + ${money(driver.basePrice)}</div>
             <div class="pay-row" style="justify-content:flex-end;margin-top:6px">${paymentBadges(driver.payment)}</div>
           </div>
         </div>
-        ${lowRider ? `<div class="notice" style="margin-top:14px;color:var(--red);background:var(--red-soft);border-color:#F0C2C2">${ICON.alert()} Dieser Reiter hat eine unterdurchschnittliche Bewertung (${rRating}). Sieh dir die Bewertungen an, bevor du ein Angebot abgibst.</div>` : ''}
+        ${lowRider ? `<div class="notice" style="margin-top:14px;color:var(--red);background:var(--red-soft);border-color:#F0C2C2">${ICON.alert()} Dieser Pferdebesitzer hat eine unterdurchschnittliche Bewertung (${rRating}). Sieh dir die Bewertungen an, bevor du ein Angebot abgibst.</div>` : ''}
         <div class="map-sm" id="map-${req.id}" style="margin-top:16px"></div>
+        <div class="flat-price-box" data-flat-box="${req.id}">
+          <label class="flat-toggle"><input type="checkbox" data-flat-toggle="${req.id}"><span>Eigenen Gesamtpreis eingeben (statt Kilometerpreis)</span></label>
+          <div class="flat-input-row" data-flat-row="${req.id}" style="display:none">
+            <label class="field" style="margin-bottom:0"><span>Gesamtpreis (€)</span><input type="number" min="1" step="1" data-flat-input="${req.id}" value="${Math.round(price)}"></label>
+          </div>
+        </div>
         <div class="item-actions">
-          <button class="btn btn-success btn-sm" data-offer="${req.id}">Angebot abgeben — ${money(price)}</button>
-          ${rider ? `<button class="btn btn-secondary btn-sm" data-ratings-rider="${rider.id}" data-name="${esc(rider.name)}">${ICON.star(true)} Reiter-Bewertungen</button>` : ''}
+          <button class="btn btn-success btn-sm" data-offer="${req.id}" data-calc-price-value="${price}">Angebot abgeben — ${money(price)}</button>
+          ${rider ? `<button class="btn btn-secondary btn-sm" data-ratings-rider="${rider.id}" data-name="${esc(rider.name)}">${ICON.star(true)} Pferdebesitzer-Bewertungen</button>` : ''}
         </div>
       </div>`;
   },
 
   wireDriverOfferButtons() {
     this.wireRatingButtons();
+    this.el.querySelectorAll('[data-flat-toggle]').forEach((cb) =>
+      cb.addEventListener('change', () => {
+        const row = this.el.querySelector(`[data-flat-row="${cb.dataset.flatToggle}"]`);
+        const btn = this.el.querySelector(`[data-offer="${cb.dataset.flatToggle}"]`);
+        if (row) row.style.display = cb.checked ? '' : 'none';
+        if (btn) this.updateOfferButtonPrice(cb.dataset.flatToggle);
+      }));
+    this.el.querySelectorAll('[data-flat-input]').forEach((inp) =>
+      inp.addEventListener('input', () => this.updateOfferButtonPrice(inp.dataset.flatInput)));
     this.el.querySelectorAll('[data-offer]').forEach((b) =>
       b.addEventListener('click', async () => {
+        const reqId = b.dataset.offer;
+        const toggle = this.el.querySelector(`[data-flat-toggle="${reqId}"]`);
+        const flatInput = this.el.querySelector(`[data-flat-input="${reqId}"]`);
+        const useFlat = toggle && toggle.checked;
+        const flatPrice = useFlat && flatInput ? +flatInput.value : null;
+        if (useFlat && !(flatPrice > 0)) { toast('Bitte einen gültigen Gesamtpreis eingeben', 'err'); return; }
         b.disabled = true; b.textContent = 'Sende Angebot…';
-        try { await API.createOffer({ requestId: b.dataset.offer, driverId: this.state.driverId }); toast('Angebot abgegeben', 'ok'); this.driverRequests(document.getElementById('driverBody')); }
+        try { await API.createOffer({ requestId: reqId, driverId: this.state.driverId, flatPrice }); toast('Angebot abgegeben', 'ok'); this.driverRequests(document.getElementById('driverBody')); }
         catch (e) { toast(e.message, 'err'); this.driverRequests(document.getElementById('driverBody')); }
       }));
+  },
+
+  updateOfferButtonPrice(reqId) {
+    const btn = this.el.querySelector(`[data-offer="${reqId}"]`);
+    const priceTag = btn ? btn.closest('.item').querySelector('[data-calc-price]') : null;
+    if (!btn) return;
+    const calcPrice = +btn.dataset.calcPriceValue;
+    const toggle = this.el.querySelector(`[data-flat-toggle="${reqId}"]`);
+    const flatInput = this.el.querySelector(`[data-flat-input="${reqId}"]`);
+    const useFlat = toggle && toggle.checked;
+    const shown = useFlat && flatInput && +flatInput.value > 0 ? +flatInput.value : calcPrice;
+    btn.textContent = `Angebot abgeben — ${money(shown)}`;
   },
 
   async driverOffers(body) {
@@ -1342,9 +1353,9 @@ const App = {
     if (!document.getElementById('drOffList')) return;
     list.innerHTML = offers.map((o) => {
       const r = o.request, rider = riders[r.riderId];
-      const st = { pending: '<span class="badge badge-accent badge-dot">Wartet auf Reiter</span>', on_hold: '<span class="badge badge-gray">Zurückgestellt</span>', accepted: '<span class="badge badge-green badge-dot">Angenommen</span>', rejected: o.cancelledBy ? '<span class="badge badge-red">Storniert</span>' : '<span class="badge badge-gray">Abgelehnt</span>' }[o.status];
+      const st = { pending: '<span class="badge badge-accent badge-dot">Wartet auf Pferdebesitzer</span>', on_hold: '<span class="badge badge-gray">Zurückgestellt</span>', accepted: '<span class="badge badge-green badge-dot">Angenommen</span>', rejected: o.cancelledBy ? '<span class="badge badge-red">Storniert</span>' : '<span class="badge badge-gray">Abgelehnt</span>' }[o.status];
       const lifecycle = o.status === 'accepted'
-        ? `<hr class="divider"><div class="item-actions" style="margin-top:0;margin-bottom:14px"><span class="meta">Reiter: <b>${esc(rider.name)}</b> · ${starsInline(Math.round(rider.rating || 0))} ${rider.rating || 'neu'} · ${o.reliability?.agreed ?? rider.trips ?? 0} vereinbarte Fahrten · Kontakt: <b>${esc(rider.phone)}</b></span></div>${this.lifecyclePanel(o, 'driver')}`
+        ? `<hr class="divider"><div class="item-actions" style="margin-top:0;margin-bottom:14px"><span class="meta">Pferdebesitzer: <b>${esc(rider.name)}</b> · ${starsInline(Math.round(o.adjustedRating ?? rider.rating ?? 0))} ${o.adjustedRating ?? (rider.rating || 'neu')} · Kontakt: <b>${esc(rider.phone)}</b></span></div>${this.lifecyclePanel(o, 'driver')}`
         : '';
       return `<div class="item">
         <div class="item-head">
@@ -1360,7 +1371,7 @@ const App = {
     const token = this._renderToken;
     let d = await API.getDriver(this.state.driverId);
     if (token !== this._renderToken) return;
-    if (!d) d = { name: '', phone: '', location: { label: '', lat: null, lng: null }, vehicle: {}, availability: {}, payment: {}, documents: {}, cancellationPolicy: {} };
+    if (!d) d = { name: '', phone: '', location: { label: '', lat: null, lng: null }, vehicle: {}, availability: {}, payment: {}, documents: {}, declarations: {}, cancellationPolicy: {} };
     const av = d.availability || {};
     const rel = await API.getReliability(this.state.driverId, 'driver');
     const cpRaw = d.cancellationPolicy || {};
@@ -1375,9 +1386,9 @@ const App = {
     body.innerHTML = `
       <div class="grid grid-2">
         <div class="card">
-          <div class="card-head"><h2>Fahrer</h2><span class="badge badge-gray">Person</span></div>
+          <div class="card-head"><h2>Transporteur</h2><span class="badge badge-gray">Person</span></div>
           <div class="card-pad">
-            <div class="profile-row" style="margin-bottom:16px"><div class="avatar">${initials(d.name)}</div><div><div style="font-weight:600">${esc(d.name)}</div><div class="meta">${starsInline(Math.round(d.rating))} ${d.rating} · ${rel.agreed} vereinbarte Fahrten</div></div></div>
+            <div class="profile-row" style="margin-bottom:16px"><div class="avatar">${initials(d.name)}</div><div><div style="font-weight:600">${esc(d.name)}</div><div class="meta">${starsInline(Math.round(d.rating))} ${d.rating}</div></div></div>
             <div class="reliability-box" style="margin-bottom:18px"><div class="section-label">Zuverlässigkeit</div><div class="reliability-main"><b>${rel.agreed} vereinbarte Fahrten</b><span>${rel.completed} durchgeführt</span></div><div class="reliability-grid"><div><b>${rel.early}</b><span>frühzeitig abgesagt</span></div><div><b>${rel.cancelled}</b><span>abgesagt</span></div><div><b>${rel.short}</b><span>kurzfristig abgesagt</span></div><div><b>${rel.veryShort}</b><span>sehr kurzfristig abgesagt</span></div><div><b>${rel.mutual}</b><span>einvernehmlich abgesagt</span></div><div><b>${rel.noShow}</b><span>nicht erschienen</span></div></div></div>
             <hr class="divider">
             <label class="field"><span>Name</span><input type="text" id="dName" value="${esc(d.name)}"></label>
@@ -1427,7 +1438,7 @@ const App = {
             <label class="field"><span>Verfügbar bis</span><input type="time" id="avTo" value="${av.to}"></label>
           </div>
           <div class="section-label" style="margin-top:6px">Akzeptierte Zahlungsarten</div>
-          <p class="meta" style="font-size:12.5px;color:var(--ink-3);margin:-6px 0 12px">Wähle, wie du bezahlt werden möchtest. Reiter sehen das vor der Annahme.</p>
+          <p class="meta" style="font-size:12.5px;color:var(--ink-3);margin:-6px 0 12px">Wähle, wie du bezahlt werden möchtest. Pferdebesitzer sehen das vor der Annahme.</p>
           <div class="pay-picker" id="payPicker">
             <button type="button" class="pay-opt ${d.payment?.cash ? 'on' : ''}" data-pay="cash">${ICON.cash()} Bar</button>
             <button type="button" class="pay-opt ${d.payment?.card ? 'on' : ''}" data-pay="card">${ICON.card()} Karte</button>
@@ -1449,11 +1460,13 @@ const App = {
         </div>
       </div>
       <div class="card" style="margin-top:20px">
-        <div class="card-head"><h2>Pflichtunterlagen</h2><span class="badge badge-amber">Pflicht</span></div>
+        <div class="card-head"><h2>Selbstauskunft</h2><span class="badge badge-amber">Pflicht</span></div>
         <div class="card-pad">
-          <div class="notice-neutral" style="margin-bottom:16px">Für ein aktives Fahrerprofil müssen Führerschein und Transport-Nachweis hinterlegt sein.</div>
-          ${docUploadRow('license', 'Führerschein *', d.documents?.license)}
-          ${docUploadRow('transportPermit', 'Transport-Nachweis *', d.documents?.transportPermit)}
+          <div class="notice-neutral" style="margin-bottom:16px">Statt Dokumente hochzuladen, bestätigen Sie hier die für Ihre Transporte relevanten Punkte. Ihre Angaben werden nicht auf ihre rechtliche Gültigkeit geprüft — Sie haften für ihre Richtigkeit. Für ein aktives Transporteur-Profil müssen mindestens Fahrerlaubnis und Fahrzeugsicherheit bestätigt sein.</div>
+          ${declRow('declLicense', 'Ich bestätige, dass ich eine gültige Fahrerlaubnis für dieses Gespann besitze. *', d.declarations?.license)}
+          ${declRow('declVehicle', 'Ich bestätige, dass Fahrzeug und Anhänger verkehrssicher sind. *', d.declarations?.vehicle)}
+          ${declRow('declEu1_2005', 'Ich bestätige, dass die erforderlichen Nachweise nach der EU-Tiertransportverordnung (EG) Nr. 1/2005 vorliegen, soweit diese für meine Transporte einschlägig ist.', d.declarations?.eu1_2005)}
+          ${declRow('declTrailerInsurance', 'Ich bestätige, dass eine Anhänger-Haftpflichtversicherung besteht.', d.declarations?.trailerInsurance)}
         </div>
       </div>
       <div style="margin-top:22px"><button class="btn btn-primary" id="saveDriver">Änderungen speichern</button></div>`;
@@ -1471,19 +1484,6 @@ const App = {
       const cf = document.getElementById('companyFields');
       if (cf) cf.style.display = btn.dataset.prov === 'commercial' ? '' : 'none';
     }));
-    body.querySelectorAll('[data-upload]').forEach((inp) => inp.addEventListener('change', async () => {
-      const file = inp.files[0]; if (!file) return;
-      const st = body.querySelector(`[data-doc-row="${inp.dataset.upload}"] .doc-status`);
-      if (st) st.textContent = 'Wird hochgeladen…';
-      try {
-        await API.uploadDocument(this.state.driverId, inp.dataset.upload, file);
-        if (st) st.textContent = file.name;
-        toast('Dokument hochgeladen', 'ok');
-      } catch (e) {
-        if (st) st.textContent = 'Upload fehlgeschlagen';
-        toast(e.message, 'err');
-      }
-    }));
     document.getElementById('saveDriver').addEventListener('click', async () => {
       const btn = document.getElementById('saveDriver'); btn.disabled = true; btn.textContent = 'Speichere…';
       const availability = { from: val('avFrom'), to: val('avTo') };
@@ -1497,7 +1497,7 @@ const App = {
         btn.disabled = false; btn.textContent = 'Änderungen speichern'; return;
       }
       if (!this.state.draft._dloc || this.state.draft._dloc.lat == null) {
-        toast('Bitte einen Standort wählen — Reiter finden dich über den Umkreis', 'err');
+        toast('Bitte einen Standort wählen — Pferdebesitzer finden dich über den Umkreis', 'err');
         btn.disabled = false; btn.textContent = 'Änderungen speichern'; return;
       }
       if (providerType === 'commercial' && !val('cName').trim()) {
@@ -1507,8 +1507,11 @@ const App = {
       const vehicleReq = [['vMake','Fahrzeugmarke'],['vModel','Fahrzeugmodell'],['vTrailer','Anhänger'],['vPlate','Kennzeichen']];
       for (const [id,label] of vehicleReq) { if (!val(id).trim()) { toast(`${label} ist erforderlich`, 'err'); btn.disabled = false; btn.textContent = 'Änderungen speichern'; return; } }
       if (!(+val('vCap') > 0)) { toast('Bitte die Anhänger-Kapazität angeben', 'err'); btn.disabled = false; btn.textContent = 'Änderungen speichern'; return; }
-      const currentDriver = await API.getDriver(this.state.driverId);
-      if (!currentDriver?.documents?.license || !currentDriver?.documents?.transportPermit) { toast('Bitte Führerschein und Transport-Nachweis hochladen, bevor du Fahrten anbietest.', 'err'); btn.disabled = false; btn.textContent = 'Änderungen speichern'; return; }
+      const declLicense = document.getElementById('declLicense').checked;
+      const declVehicle = document.getElementById('declVehicle').checked;
+      const declEu1_2005 = document.getElementById('declEu1_2005').checked;
+      const declTrailerInsurance = document.getElementById('declTrailerInsurance').checked;
+      if (!declLicense || !declVehicle) { toast('Bitte bestätige mindestens Fahrerlaubnis und Fahrzeugsicherheit, bevor du Fahrten anbietest.', 'err'); btn.disabled = false; btn.textContent = 'Änderungen speichern'; return; }
       const cancelStages = [val('cancel_more48'), val('cancel_24_48'), val('cancel_6_24'), val('cancel_under6')];
       if (cancelStages.includes('custom') && !val('cancelCustom').trim()) {
         toast('Bitte beschreibe deine individuelle Stornoregel im Textfeld.', 'err');
@@ -1522,10 +1525,11 @@ const App = {
           providerType,
           cancellationPolicy: { more48: val('cancel_more48'), h24_48: val('cancel_24_48'), h6_24: val('cancel_6_24'), under6: val('cancel_under6'), customText: val('cancelCustom') },
           company: providerType === 'commercial' ? { name: val('cName'), address: val('cAddr'), register: val('cReg') } : { name: '', address: '', register: '' },
+          declarations: { license: declLicense, vehicle: declVehicle, eu1_2005: declEu1_2005, trailerInsurance: declTrailerInsurance },
         });
         this.state.profile = await API.getMyProfile();
         this.renderChrome(); this.bindTopbar();
-        toast('Fahrerprofil gespeichert', 'ok');
+        toast('Transporteur-Profil gespeichert', 'ok');
         this.driverProfile(body);
       } catch (e) { toast(e.message, 'err'); btn.disabled = false; btn.textContent = 'Änderungen speichern'; }
     });
@@ -1585,11 +1589,8 @@ function addrField(key, label, value, ph) {
 function stepperField(id, value, min, max) {
   return `<div class="stepper" data-stepper="${id}"><button type="button" data-dec>−</button><input type="number" id="${id}" value="${value}" min="${min}" max="${max}" readonly><button type="button" data-inc>+</button></div>`;
 }
-function docUploadRow(kind, label, entry) {
-  return `<div class="doc-item ${entry ? '' : 'missing'}" data-doc-row="${kind}">
-    <div class="doc-info"><b>${label}</b><div class="doc-status">${entry ? esc(entry.fileName) : 'Noch nicht hochgeladen'}</div></div>
-    <label class="btn btn-secondary btn-sm" style="cursor:pointer">${ICON.upload()} ${entry ? 'Ersetzen' : 'Hochladen'}<input type="file" data-upload="${kind}" accept="image/*,application/pdf" style="display:none"></label>
-  </div>`;
+function declRow(id, label, checked) {
+  return `<label class="decl-row"><input type="checkbox" id="${id}" ${checked ? 'checked' : ''}><span>${label}</span></label>`;
 }
 function ratingWidget(offerId) {
   return `<div class="rating-widget" data-stars="0">

@@ -123,6 +123,13 @@ function rowToDriver(p) {
       license: p.doc_license_path ? { fileName: p.doc_license_name, path: p.doc_license_path } : null,
       transportPermit: p.doc_permit_path ? { fileName: p.doc_permit_name, path: p.doc_permit_path } : null,
     },
+    declarations: {
+      license: !!p.decl_license,
+      vehicle: !!p.decl_vehicle,
+      eu1_2005: !!p.decl_eu_1_2005,
+      trailerInsurance: !!p.decl_trailer_insurance,
+    },
+    declarationsAt: p.declarations_at || null,
     cancellationPolicy: {
       more48: p.cancel_more48 || 'free',
       h24_48: p.cancel_24_48 || 'free',
@@ -150,6 +157,7 @@ function rowToOffer(o) {
   return {
     id: o.id, requestId: o.request_id, driverId: o.driver_id,
     price: Number(o.price), pricePerKm: Number(o.price_per_km), basePrice: Number(o.base_price),
+    priceMode: o.price_mode || 'per_km', flatPrice: o.flat_price != null ? Number(o.flat_price) : null,
     routeKm: Number(o.route_km), status: o.status,
     acceptedAt: o.accepted_at ? new Date(o.accepted_at).getTime() : null,
     cancelWindowMs: o.cancel_window_ms,
@@ -263,6 +271,14 @@ const API = {
     }
     if (patch.providerType) row.provider_type = patch.providerType;
     if (patch.company) { row.company_name = patch.company.name; row.company_address = patch.company.address; row.company_register = patch.company.register; }
+    if (patch.declarations) {
+      const decl = patch.declarations;
+      row.decl_license = !!decl.license;
+      row.decl_vehicle = !!decl.vehicle;
+      row.decl_eu_1_2005 = !!decl.eu1_2005;
+      row.decl_trailer_insurance = !!decl.trailerInsurance;
+      row.declarations_at = new Date().toISOString();
+    }
     row.is_driver = true;
     const { data, error } = await sb.from('profiles').update(row).eq('id', id).select().single();
     if (error) throw new Error(error.message);
@@ -337,22 +353,25 @@ const API = {
   },
 
   /* ==== ANGEBOTE ==== */
-  async createOffer({ requestId, driverId }) {
+  async createOffer({ requestId, driverId, flatPrice = null }) {
     const driver = await this.getDriver(driverId);
     const reason = this.driverBlockReason(driver);
     if (reason) throw new Error(reason);
     const req = await this.getRequest(requestId);
     if (!req) throw new Error('Anfrage nicht gefunden');
-    const price = Math.round((driver.basePrice + req.routeKm * driver.pricePerKm) * 100) / 100;
+    const calcPrice = Math.round((driver.basePrice + req.routeKm * driver.pricePerKm) * 100) / 100;
+    const useFlat = flatPrice != null && Number(flatPrice) > 0;
+    const price = useFlat ? Math.round(Number(flatPrice) * 100) / 100 : calcPrice;
     const missing = [];
     if (!driver.vehicle.make || !driver.vehicle.model || !driver.vehicle.trailer || !driver.vehicle.plate || !(Number(driver.vehicle.capacity) > 0)) missing.push('Fahrzeug- und Anhängerdaten');
-    if (!driver.documents?.license) missing.push('Führerschein');
-    if (!driver.documents?.transportPermit) missing.push('Transport-Nachweis');
+    if (!driver.declarations?.license) missing.push('Bestätigung der Fahrerlaubnis');
+    if (!driver.declarations?.vehicle) missing.push('Bestätigung der Verkehrssicherheit');
     if (!driver.location?.lat) missing.push('Standort');
-    if (missing.length) throw new Error(`Dein Fahrerprofil ist noch nicht vollständig: ${missing.join(', ')}.`);
+    if (missing.length) throw new Error(`Dein Transporteur-Profil ist noch nicht vollständig: ${missing.join(', ')}.`);
     const row = {
       request_id: requestId, driver_id: driverId, price,
       price_per_km: driver.pricePerKm, base_price: driver.basePrice, route_km: req.routeKm,
+      price_mode: useFlat ? 'flat' : 'per_km', flat_price: useFlat ? price : null,
       cancellation_policy: driver.cancellationPolicy || null,
       status: 'pending', cancel_window_ms: 600000,
     };
@@ -372,6 +391,7 @@ const API = {
     for (const o of offers) {
       o.driver = await this.getDriver(o.driverId);
       o.reliability = await this.getReliability(o.driverId, 'driver');
+      o.adjustedRating = this.computeAdjustedRating(o.driver?.rating, o.reliability);
     }
     return offers;
   },
@@ -381,7 +401,11 @@ const API = {
     const offers = data.map(rowToOffer);
     for (const o of offers) {
       o.request = await this.getRequest(o.requestId);
-      if (o.request) o.reliability = await this.getReliability(o.request.riderId, 'rider');
+      if (o.request) {
+        o.rider = await this.getRider(o.request.riderId);
+        o.reliability = await this.getReliability(o.request.riderId, 'rider');
+        o.adjustedRating = this.computeAdjustedRating(o.rider?.rating, o.reliability);
+      }
     }
     return offers;
   },
@@ -497,6 +521,36 @@ const API = {
       else out.veryShort++;
     }
     return out;
+  },
+
+  /**
+   * Faire Zuverlässigkeits-Anpassung der Sterne-Bewertung.
+   * Absagen im 10-Minuten-Fenster oder einvernehmliche/nicht-erschienen-Fälle
+   * werden bereits in getReliability() gesondert behandelt bzw. ausgeschlossen.
+   * Je kurzfristiger eine Absage, desto stärker fließt sie ein — eine einzelne
+   * frühzeitige Absage wirkt sich kaum aus, wiederholtes kurzfristiges Absagen
+   * senkt die Bewertung spürbar. Der Abzug ist auf maximal 1,0 Stern gedeckelt,
+   * und ein Fahrer ohne Historie startet neutral (kein Abzug).
+   */
+  computeAdjustedRating(baseRating, rel) {
+    const base = Number(baseRating) || 0;
+    if (!rel) return base;
+    const denom = (rel.completed || 0) + (rel.early || 0) + (rel.cancelled || 0) + (rel.short || 0) + (rel.veryShort || 0) + (rel.noShow || 0);
+    if (!denom) return base; // keine Historie -> neutral, kein Abzug
+    const weighted =
+      (rel.early || 0) * 0.3 +      // > 48h vorher: kaum relevant
+      (rel.cancelled || 0) * 0.6 +  // 24-48h vorher
+      (rel.short || 0) * 1.2 +      // 6-24h vorher
+      (rel.veryShort || 0) * 2.0 +  // < 6h vorher
+      (rel.noShow || 0) * 2.5;      // nicht erschienen
+    const penalty = Math.min(1.0, (weighted / denom) * 0.9);
+    return Math.round(Math.max(1, base - penalty) * 10) / 10;
+  },
+  async getAdjustedRating(profileId, role = 'driver') {
+    const p = role === 'driver' ? await this.getDriver(profileId) : await this.getRider(profileId);
+    if (!p) return 0;
+    const rel = await this.getReliability(profileId, role);
+    return this.computeAdjustedRating(p.rating, rel);
   },
 
   async _recalcRating(profileId, role, newStars) {

@@ -76,11 +76,18 @@ create table if not exists public.profiles (
   pay_card boolean default false,
   pay_invoice boolean default false,
 
-  -- Fahrer: Dokumente (Pfade im Storage-Bucket, nicht die Dateien selbst)
+  -- Fahrer: Dokumente (Pfade im Storage-Bucket, nicht die Dateien selbst) — historisch, nicht mehr genutzt
   doc_license_path text,
   doc_license_name text,
   doc_permit_path text,
   doc_permit_name text,
+
+  -- Transporteur: Selbstauskunft-Häkchen (ersetzt den Dokument-Upload)
+  decl_license boolean not null default false,          -- gültige Fahrerlaubnis für das Gespann
+  decl_vehicle boolean not null default false,           -- Fahrzeug/Anhänger verkehrssicher
+  decl_eu_1_2005 boolean not null default false,         -- Nachweise EU-VO (EG) Nr. 1/2005 vorhanden
+  decl_trailer_insurance boolean not null default false, -- Anhänger-Haftpflicht vorhanden
+  declarations_at timestamptz,
 
   -- Reiter: Pferd
   horse_name text,
@@ -162,6 +169,8 @@ create table if not exists public.offers (
   price_per_km numeric(6,2) not null,
   base_price numeric(6,2) not null,
   route_km numeric(7,1) not null,
+  price_mode text not null default 'per_km',  -- 'per_km' (automatisch) oder 'flat' (manueller Gesamtpreis)
+  flat_price numeric(8,2),                    -- vom Transporteur eingegebener Gesamtpreis, nur bei price_mode='flat'
 
   -- pending -> accepted | on_hold | rejected
   status text not null default 'pending',
