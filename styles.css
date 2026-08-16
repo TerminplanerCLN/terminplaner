@@ -537,3 +537,109 @@ textarea { resize: vertical; min-height: 76px; line-height: 1.5; }
 .reliability-box{border:1px solid var(--line);background:var(--bg-2);border-radius:var(--radius);padding:14px}.reliability-main{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:8px 0 12px}.reliability-main span{color:var(--ink-2);font-size:13px}.reliability-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.reliability-grid>div{padding:10px 12px;background:#fff;border:1px solid var(--line);border-radius:10px}.reliability-grid b{display:block;font-size:16px}.reliability-grid span{display:block;color:var(--ink-3);font-size:11px;line-height:1.35;margin-top:2px}@media (max-width:700px){.reliability-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .field.required input:focus,.field.required select:focus,.field.required textarea:focus{border-color:var(--accent)}
+
+/* =====================================================================
+   ROLLEN-KENNUNG — visuelle Unterscheidung Reiter vs. Transporteur
+   ---------------------------------------------------------------------
+   Reiter (role-rider):   heller/weißer Hintergrund, Indigo-Akzent.
+                          Das ist die Standardansicht, hier nur dezent
+                          betont.
+   Transporteur (role-driver): ruhiger blaugetönter Hintergrund mit
+                          hellerer, kühlerer Schrift — passend zum
+                          Sky/Indigo des Designsystems.
+   Umgesetzt über die Design-Tokens, damit Karten, Buttons, Badges usw.
+   automatisch mitziehen, ohne jede Regel einzeln zu überschreiben.
+   ===================================================================== */
+
+/* Sanfter Übergang beim Rollenwechsel */
+body { transition: background-color .25s ease, color .25s ease; }
+
+/* ---- Kopfzeile: farbiger Hinweisstreifen je Rolle ---- */
+body.role-rider  .topbar { border-bottom-color: var(--accent-border); box-shadow: inset 0 -2px 0 var(--accent); }
+body.role-driver .topbar {
+  background: rgba(19, 42, 71, .82);
+  border-bottom-color: var(--sky-deep);
+  box-shadow: inset 0 -2px 0 var(--sky);
+}
+body.role-driver .topbar .brand,
+body.role-driver .topbar-user { color: #EAF4FC; }
+body.role-driver .role-switch { background: rgba(255,255,255,.12); }
+body.role-driver .role-switch button { color: #D3E7F6; }
+body.role-driver .role-switch button.active { background: #EAF4FC; color: var(--sky-deep); }
+body.role-driver .btn-reset { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.28); color: #EAF4FC; }
+body.role-driver .btn-reset:hover { border-color: #EAF4FC; }
+
+/* =====================  REITER  ===================== */
+body.role-rider { --bg: #FFFFFF; --bg-2: #F3F1FB; }
+body.role-rider .wrap { background: transparent; }
+/* Eyebrow bleibt Indigo (Standard); Überschrift klar in Indigo betonen */
+body.role-rider .page-head .eyebrow { color: var(--accent); }
+
+/* =====================  TRANSPORTEUR  ===================== */
+body.role-driver {
+  /* Grundflächen: ruhiges Blau statt Grau/Weiß */
+  --bg:        #0F2942;   /* Seitenhintergrund, tiefes Marineblau */
+  --bg-2:      #1B3B5C;   /* zweite Fläche / Felder-Hintergrund */
+  --paper:     #163758;   /* Karten */
+  /* Schrift heller / kühler */
+  --ink:       #EAF4FC;
+  --ink-2:     #C4DCEF;
+  --ink-3:     #93B6D4;
+  --ink-4:     #6E93B4;
+  /* Linien dezent aufgehellt */
+  --line:      #27506F;
+  --line-2:    #356089;
+  /* Akzent auf helleres Sky-Blau umstellen, damit er auf dunklem
+     Grund funktioniert */
+  --accent:        #4FB0F5;
+  --accent-dk:     #2AA8F2;
+  --accent-soft:   #1E466B;
+  --accent-border: #356089;
+  color-scheme: dark;
+}
+
+body.role-driver .page-head .eyebrow { color: var(--accent); }
+
+/* Karten/Items etwas abheben mit weichem Schatten auf dunklem Grund */
+body.role-driver .card,
+body.role-driver .item { box-shadow: 0 1px 2px rgba(0,0,0,.25), 0 6px 20px rgba(0,0,0,.18); }
+
+/* Eingabefelder: dunkler Grund, heller Text, Fokus im hellen Sky */
+body.role-driver input[type=text],
+body.role-driver input[type=number],
+body.role-driver input[type=tel],
+body.role-driver input[type=time],
+body.role-driver input[type=datetime-local],
+body.role-driver select,
+body.role-driver textarea { background: var(--bg-2); color: var(--ink); border-color: var(--line-2); }
+body.role-driver input::placeholder,
+body.role-driver textarea::placeholder { color: var(--ink-4); }
+body.role-driver input:focus,
+body.role-driver select:focus,
+body.role-driver textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,176,245,.22); }
+
+/* Primär-Button: heller Sky, dunkle Schrift (guter Kontrast) */
+body.role-driver .btn-primary { background: var(--accent); color: #0B2036; }
+body.role-driver .btn-primary:hover { background: var(--accent-dk); }
+body.role-driver .btn-secondary { background: var(--paper); color: var(--ink); border-color: var(--line-2); }
+body.role-driver .btn-secondary:hover { background: var(--bg-2); border-color: var(--ink-3); }
+
+/* Tabs-Unterkante an dunkle Linie anpassen */
+body.role-driver .tabs { border-bottom-color: var(--line); }
+body.role-driver .tabs button.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* Badges auf dunklem Grund lesbar halten */
+body.role-driver .badge-accent { background: rgba(79,176,245,.18); color: #9FD2F8; }
+body.role-driver .badge-gray { background: rgba(255,255,255,.08); color: var(--ink-3); }
+
+/* Hinweisboxen an dunkle Flächen angleichen */
+body.role-driver .hint,
+body.role-driver .notice-neutral { background: var(--bg-2); color: var(--ink-2); border-color: var(--line); }
+
+/* Avatar auf dunklem Grund */
+body.role-driver .avatar { background: rgba(79,176,245,.18); color: #9FD2F8; }
+
+/* Karten (Leaflet) behalten ihren eigenen hellen Grund — nichts zu tun,
+   nur der Rahmen wird an die dunkle Linie angepasst */
+body.role-driver .map,
+body.role-driver .map-sm { border-color: var(--line-2); }
